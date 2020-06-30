@@ -20,16 +20,6 @@ class Task:
         self.cpu_type = cpu_type
         self.exe_time = exe_time
 
-# define the plotting decision-boundary function
-# def plot_data_scatter(features, targets):
-#     fig = plt.figure()
-#     ax = fig.add_subplot(111, projection='3d')
-#     ax.scatter(features[:, 0], targets, c='r')
-#     ax.set_xlabel('$x$')
-#     ax.set_ylabel('$y$')
-#     ax.set_zlabel('$z$')
-#     return ax
-
 # define Linear Regression class
 class LinearRegression(torch.nn.Module):
     def __init__(self, n_features, n_hidden, n_output):
@@ -55,10 +45,8 @@ class LinearRegression(torch.nn.Module):
 
 # main function
 if __name__ == "__main__":
-    # read logfile
+    # read logfile & create type of dataset for training
     logfile = "./logfile.txt"
-
-    # create type of dataset for training
     tensor_data = torch.tensor(pd.read_csv(logfile, sep=",", header=None).values, dtype=torch.float)
     x_sizefreq_train = tensor_data[0:700,2:4].view(700,2)   # 2 features (size, cpu_frequency)
     y_train = tensor_data[0:700,4].view(700,1)
@@ -191,3 +179,6 @@ if __name__ == "__main__":
     #     exetime = norm_y_val[i].item() * (y_max - y_min) + y_min
     #     check_statement = "%d \t %.5f \t %.5f \t %.5f ( %.5f ) \t %.5f" % (i, size, freq, pred_exetime, norm_exetime, exetime)
     #     print(check_statement)
+
+    # save the model state
+    torch.save(net_model.state_dict(), 'task-exetime-pred.pth')
