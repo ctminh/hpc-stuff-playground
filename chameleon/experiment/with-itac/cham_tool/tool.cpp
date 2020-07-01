@@ -3,6 +3,9 @@
 #define TASK_TOOL_SAMPLE_DATA_SIZE 10
 #define THRESHOLD_OFFLOAD_TASKS 100
 
+//================================================================
+// Variables
+//================================================================
 static cham_t_set_callback_t cham_t_set_callback;
 static cham_t_get_callback_t cham_t_get_callback;
 static cham_t_get_rank_data_t cham_t_get_rank_data;
@@ -11,14 +14,10 @@ static cham_t_get_rank_info_t cham_t_get_rank_info;
 static cham_t_get_task_data_t cham_t_get_task_data;
 // static cham_t_get_unique_id_t cham_t_get_unique_id;
 
-//================================================================
-// Variables
-//================================================================
 
 //================================================================
 // Additional functions
 //================================================================
-
 int compare( const void *pa, const void *pb ){
     const int *a = (int *) pa;
     const int *b = (int *) pb;
@@ -87,6 +86,18 @@ on_cham_t_callback_task_schedule(
 {
     TYPE_TASK_ID task_id = chameleon_get_task_id(task);
     int rank = cham_t_get_rank_info()->comm_rank;
+
+    // call pytorch model
+    // std::shared_ptr<torch::jit::script::Module> module;
+    // try {
+    //     // deserialize the ScriptModule from a file using torch::jit::load().
+    //     module = torch::jit::load(argv[1]);
+    //     }
+    // catch (const c10::Error& e) {
+    //     std::cerr << "error loading the model\n";
+    //     return -1;
+    // }
+
 }
 
 static int32_t
@@ -282,9 +293,9 @@ on_cham_t_callback_task_end(
     
 }
 
-//================================================================
+//=======================================================================
 // Start Tool & Register Callbacks
-//================================================================
+//=======================================================================
 #define register_callback_t(name, type)                                         \
 do{                                                                             \
     type f_##name = &on_##name;                                                 \

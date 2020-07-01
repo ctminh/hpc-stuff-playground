@@ -10,14 +10,17 @@ CXX = /lrz/sys/intel/studio2019_u5/compilers_and_libraries_2019.5.281/linux/bin/
 VT_ROOT = /lrz/sys/intel/studio2019_u5/itac/2019.5.041
 
 # Compiler on CoolMUC
-MPICXX_CoolMUC = /dss/dsshome1/lrz/sys/spack/staging/20.1/opt/x86_64/intel-mpi/2019.6.166-gcc-f5wk3ki/compilers_and_libraries_2020.0.166/linux/mpi/intel64/bin/mpicxx
-MPIRUN_CoolMUC = /dss/dsshome1/lrz/sys/spack/staging/20.1/opt/x86_64/intel-mpi/2019.6.166-gcc-f5wk3ki/compilers_and_libraries_2020.0.166/linux/mpi/intel64/bin/mpirun
-CXX_CoolMUC = /dss/dsshome1/lrz/sys/spack/staging/20.1/opt/x86_64/intel/19.0.5-gcc-fcpqmql/compilers_and_libraries_2019.5.281/linux/bin/intel64/icpc
+# MPICXX_CoolMUC = /dss/dsshome1/lrz/sys/spack/staging/20.1/opt/x86_64/intel-mpi/2019.6.166-gcc-f5wk3ki/compilers_and_libraries_2020.0.166/linux/mpi/intel64/bin/mpicxx
+# MPIRUN_CoolMUC = /dss/dsshome1/lrz/sys/spack/staging/20.1/opt/x86_64/intel-mpi/2019.6.166-gcc-f5wk3ki/compilers_and_libraries_2020.0.166/linux/mpi/intel64/bin/mpirun
+# CXX_CoolMUC = /dss/dsshome1/lrz/sys/spack/staging/20.1/opt/x86_64/intel/19.0.5-gcc-fcpqmql/compilers_and_libraries_2019.5.281/linux/bin/intel64/icpc
+MPICXX_CoolMUC = /lrz/sys/tools/intel-mpi-wrappers/bin/mpicxx
+MPIRUN_CoolMUC = /dss/dsshome1/lrz/sys/spack/staging/20.1.1/opt/x86_64/intel-mpi/2019.7.217-gcc-vf2p2hg/compilers_and_libraries_2020.1.217/linux/mpi/intel64/bin/mpirun
+CXX_CoolMUC = /dss/dsshome1/lrz/sys/spack/staging/20.1.1/opt/x86_64/intel/19.0.5-gcc-fcpqmql/compilers_and_libraries_2019.5.281/linux/bin/intel64/icpc
 
 # Chameleon libs
 CH_HOME=/dss/dsshome1/0A/di49mew/chameleon_tool_dev/install/with_itac/cham_tool
 CH_LIB_TOOL=$(CH_HOME)/lib
-CH_HOME_CoolMUC = /dss/dsshome1/lxc0D/ra56kop/chameleon_tool_dev/install/with_itac/cham_tool
+CH_HOME_CoolMUC = /dss/dsshome1/lxc0D/ra56kop/task-based-models-survey/chameleon/install/cham_tool_itac
 CH_LIB_TOOL_CoolMUC = $(CH_HOME_CoolMUC)/lib
 
 # Parameters for running
