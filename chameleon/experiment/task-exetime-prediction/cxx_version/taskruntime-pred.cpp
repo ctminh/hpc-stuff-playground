@@ -7,7 +7,7 @@
 #include <fstream>
 
 // path to find the dataset
-const char *datafile = '../logfile.txt';
+const char *datafile = "../logfile.txt";
 
 // main function
 auto main() -> int
