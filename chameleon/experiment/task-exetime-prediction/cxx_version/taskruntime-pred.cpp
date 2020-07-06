@@ -4,9 +4,10 @@
 #include <cstdio>
 #include <string>
 #include <vector>
+#include <fstream>
 
 // path to find the dataset
-const char *dataset = '../logfile.txt'
+const char *datafile = '../logfile.txt';
 
 // main function
 auto main() -> int
@@ -24,5 +25,12 @@ auto main() -> int
         device_type = torch::kCPU;
     }
 
+    // read file
+    std::ifstream infile(datafile);
+    std::string line;
+    while (std::getline(infile, line))
+    {
+        std::cout << line << std::endl;
+    }
 
 }
