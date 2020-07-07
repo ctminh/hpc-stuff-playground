@@ -34,7 +34,7 @@ auto main() -> int
     // while (std::getline(infile, line))
     while ((infile >> idx >> c1 >> arg_num >> c2 >> size >> c3 >> freq >> c4 >> exetime))
     {
-        std::cout << idx << "|" << size << "|" << freq << "|" << exetime std::endl;
+        std::cout << idx << "|" << size << "|" << freq << "|" << exetime << std::endl;
     }
 
 }
