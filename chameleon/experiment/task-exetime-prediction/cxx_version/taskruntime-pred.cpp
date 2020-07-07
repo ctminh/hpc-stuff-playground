@@ -28,9 +28,13 @@ auto main() -> int
     // read file
     std::ifstream infile(datafile);
     std::string line;
-    while (std::getline(infile, line))
+    int idx, arg_num, size;
+    double freq, exetime;
+    char c1, c2, c3, c4;
+    // while (std::getline(infile, line))
+    while ((infile >> idx >> c1 >> arg_num >> c2 >> size >> c3 >> freq >> c4 >> exetime) && (c1 == c2 == c3 == c4 == ','))
     {
-        std::cout << line << std::endl;
+        std::cout << idx << std::endl;
     }
 
 }
