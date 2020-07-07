@@ -32,7 +32,7 @@ auto main() -> int
     double freq, exetime;
     char c1, c2, c3, c4;
     // while (std::getline(infile, line))
-    while ((infile >> idx >> c1 >> arg_num >> c2 >> size >> c3 >> freq >> c4 >> exetime) && (c1 == c2 == c3 == c4 == ','))
+    while ((infile >> idx >> c1 >> arg_num >> c2 >> size >> c3 >> freq >> c4 >> exetime))
     {
         std::cout << idx << std::endl;
     }
