@@ -57,6 +57,10 @@ auto main() -> int
                     << exetime.at(i) << std::endl;
     }
 
+    // transform vector to tensor data
+    torch::Tensor size_tensor = torch::from_blob(size.data(), {1000,1}, torch::kInt);
+    auto dataset_size = torch::data::datasets::TensorDataset(size_tensor);
+    auto data_loader_size = torch::data::make_data_loader(dataset_size, 1); // 1 is batch_size
 
 
 }
