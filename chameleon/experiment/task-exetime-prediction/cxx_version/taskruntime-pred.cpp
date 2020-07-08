@@ -9,6 +9,19 @@
 // path to find the dataset
 const char *datafile = "../logfile.txt";
 
+
+// struct for building the model
+struct RegressionNet:torch::nn::Module{
+    // declare the model
+    RegressionNet(int n_features, int n_hidden, int n_output){
+        hidden1 = register_module("hidden1", torch::nn::Linear(n_features, n_hidden));
+        hidden2 = register_module("hidden2", torch::nn::Linear(n_hidden, n_hidden));
+        predict = register_module("predict", torch::nn::Linear(n_hidden, n_output));
+    }
+
+    // implement the net algorithm
+};
+
 // main function
 auto main() -> int
 {
@@ -61,6 +74,7 @@ auto main() -> int
     torch::Tensor size_tensor = torch::from_blob(size.data(), {1000,1}, torch::kInt);
     auto dataset_size = torch::data::datasets::TensorDataset(size_tensor);
     auto data_loader_size = torch::data::make_data_loader(dataset_size, 1); // 1 is batch_size
+
 
 
 }
