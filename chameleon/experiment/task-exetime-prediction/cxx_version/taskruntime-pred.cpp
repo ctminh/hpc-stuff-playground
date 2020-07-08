@@ -20,6 +20,9 @@ struct RegressionNet:torch::nn::Module{
     }
 
     // implement the net algorithm
+
+    // ???
+    torch::nn::Linear hidden1{nullptr}, hidden2{nullptr}, predict{nullptr};
 };
 
 // main function
