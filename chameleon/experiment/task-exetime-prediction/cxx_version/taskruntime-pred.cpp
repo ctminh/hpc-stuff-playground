@@ -28,13 +28,35 @@ auto main() -> int
     // read file
     std::ifstream infile(datafile);
     std::string line;
-    int idx, arg_num, size;
-    double freq, exetime;
+    std::vector<int> idx;       // for index
+    std::vector<int> arg_num;   // for num of arguments
+    std::vector<int> size;      // for array of sizes
+    std::vector<double> freq;   // for array of freq
+    std::vector<double> exetime;    // for array of exectime
+    int idx_val, arg_val, size_val; // get value when reading file
+    double freq_val, exetime_val;   // get value when reading file
     char c1, c2, c3, c4;
-    // while (std::getline(infile, line))
-    while ((infile >> idx >> c1 >> arg_num >> c2 >> size >> c3 >> freq >> c4 >> exetime))
+    
+    while ((infile >> idx_val >> c1 >> arg_val >> c2 >> size_val >> c3 >> freq_val >> c4 >> exetime_val))
     {
-        std::cout << idx << "|" << size << "|" << freq << "|" << exetime << std::endl;
+        // checking file-data
+        // std::cout << idx_val << "|" << size_val << "|" << freq_val << "|" << exetime_val << std::endl;
+        idx.push_back(idx_val);
+        arg_num.push_back(arg_val);
+        size.push_back(size_val);
+        freq.push_back(freq_val);
+        exetime.push_back(exetime_val);
     }
+
+    // check the vector
+    for (int i = 0; i < idx.size(); i++){
+        std::cout << idx.at(i) << "\t|"
+                    << arg_num.at(i) << "\t|"
+                    << size.at(i) << "\t|"
+                    << freq.at(i) << "\t|"
+                    << exetime.at(i);
+    }
+
+    
 
 }
