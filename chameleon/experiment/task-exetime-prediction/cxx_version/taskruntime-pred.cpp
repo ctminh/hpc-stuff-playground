@@ -54,9 +54,9 @@ auto main() -> int
                     << arg_num.at(i) << "\t|"
                     << size.at(i) << "\t|"
                     << freq.at(i) << "\t|"
-                    << exetime.at(i);
+                    << exetime.at(i) << std::endl;
     }
 
-    
+
 
 }
