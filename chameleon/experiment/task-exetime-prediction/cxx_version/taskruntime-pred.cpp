@@ -17,6 +17,16 @@ struct RegressionNet:torch::nn::Module{
         hidden1 = register_module("hidden1", torch::nn::Linear(n_features, n_hidden));
         hidden2 = register_module("hidden2", torch::nn::Linear(n_hidden, n_hidden));
         predict = register_module("predict", torch::nn::Linear(n_hidden, n_output));
+
+        // torch.nn.init.xavier_uniform_(self.hidden.weight)
+        // torch.nn.init.zeros_(self.hidden.bias)
+        // torch.nn.init.xavier_uniform_(self.hidden1.weight)
+        // torch.nn.init.zeros_(self.hidden1.bias)
+        // torch.nn.init.xavier_uniform_(self.predict.weight)
+        // torch.nn.init.zeros_(self.predict.bias)
+
+        torch::nn::init::xavier_uniform_(hidden1->weight);
+        torch::nn::init::zeros_(hidden1->bias);
     }
 
     // implement the net algorithm
