@@ -18,18 +18,24 @@ struct RegressionNet:torch::nn::Module{
         hidden2 = register_module("hidden2", torch::nn::Linear(n_hidden, n_hidden));
         predict = register_module("predict", torch::nn::Linear(n_hidden, n_output));
 
-        // torch.nn.init.xavier_uniform_(self.hidden.weight)
-        // torch.nn.init.zeros_(self.hidden.bias)
-        // torch.nn.init.xavier_uniform_(self.hidden1.weight)
-        // torch.nn.init.zeros_(self.hidden1.bias)
-        // torch.nn.init.xavier_uniform_(self.predict.weight)
-        // torch.nn.init.zeros_(self.predict.bias)
-
         torch::nn::init::xavier_uniform_(hidden1->weight);
         torch::nn::init::zeros_(hidden1->bias);
+        torch::nn::init::xavier_uniform_(hidden2->weight);
+        torch::nn::init::zeros_(hidden2->bias);
+        torch::nn::init::xavier_uniform_(predict->weight);
+        torch::nn::init::zeros_(predict->bias);
     }
 
     // implement the net algorithm
+    torch::Tensor forward(torch::Tensor &input){
+        // x = torch.tanh(self.hidden(x))  # activation function for hidden layer
+        // x = torch.relu(self.hidden1(x))  # activation function for hidden layer
+        // x = self.predict(x)  # linear output
+        auto x = torch::tanh(hidden1(input));
+        x = torch::relu(hidden2(x));
+        x = predict(x);
+        return x;
+    }
 
     // ???
     torch::nn::Linear hidden1{nullptr}, hidden2{nullptr}, predict{nullptr};
@@ -59,6 +65,7 @@ auto main() -> int
     std::vector<int> size;      // for array of sizes
     std::vector<double> freq;   // for array of freq
     std::vector<double> exetime;    // for array of exectime
+    std::vector<int, double> size_freq; // for training 2d-array
     int idx_val, arg_val, size_val; // get value when reading file
     double freq_val, exetime_val;   // get value when reading file
     char c1, c2, c3, c4;
@@ -72,6 +79,7 @@ auto main() -> int
         size.push_back(size_val);
         freq.push_back(freq_val);
         exetime.push_back(exetime_val);
+        size_freq.push_back(size_val, freq_val);
     }
 
     // check the vector
