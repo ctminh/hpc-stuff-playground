@@ -87,7 +87,7 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
 	}
 
     for (int i = 0; i < label.size(); i++){
-        cout << label.at(i) << std::endl;
+        std::cout << label.at(i) << std::endl;
     }
 
 }
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 {
     // load/read the datafile
     std::ifstream file;
-    std::string path_to_file = "./BostonHousing.csv"
+    std::string path_to_file = "./BostonHousing.csv";
     file.open(path_to_file, std::ios_base::in);
 
     // store data into a struct - pair
