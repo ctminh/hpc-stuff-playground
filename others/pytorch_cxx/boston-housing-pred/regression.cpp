@@ -86,10 +86,24 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
 		label.push_back(row[row.size()-1]);
 	}
 
-    for (int i = 0; i < label.size(); i++){
-        std::cout << label.at(i) << std::endl;
-    }
+    // check the data after reading
+    // for (int i = 0; i < label.size(); i++){
+    //     std::cout << label.at(i) << std::endl;
+    // }
 
+    // Flatten features vectors to 1D
+	std::vector<float> inputs = features[0];
+	int64_t total = std::accumulate(std::begin(features) + 1, std::end(features), 0UL, 
+                    [](std::size_t s, std::vector<float> const& v){
+                            return s + v.size();
+                    });
+
+    inputs.reserve(total);
+	for (std::size_t i = 1; i < features.size(); i++) {
+		inputs.insert(inputs.end(), features[i].begin(), features[i].end());
+	}
+
+    return std::make_pair(inputs, label);
 }
 
 /*---------------- main function ---------------*/
