@@ -27,7 +27,7 @@ class CSVRow{
             std::stringstream   lineStream(line);
 		    std::string         cell;
 
-            m_data.clear()
+            m_data.clear();
 
             while (std::getline(lineStream, cell, ','))
             {
