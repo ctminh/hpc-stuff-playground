@@ -93,7 +93,7 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
 
     // Flatten features vectors to 1D
 	std::vector<float> inputs = features[0];
-    for (int i = 0; i < inputs.size(), i++){
+    for (int i = 0; i < inputs.size(); i++){
         printf("%f ", inputs[i]);
     }
     printf("\n");
