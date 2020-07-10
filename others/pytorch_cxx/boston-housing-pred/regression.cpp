@@ -45,10 +45,27 @@ class CSVRow{
         std::vector<std::string>    m_data;
 };
 
+/* ??? */
 std::istream &operator >> (std::istream& str, CSVRow& data)
 {
 	data.readNextRow(str);
 	return str;
+}
+
+/*---------------- normalize features ----------*/
+std::vector<float> normalize_feature(std::vector<float> feat){
+    using ConstIter = std::vector<float>::const_iterator;
+    ConstIter max_element;
+    ConstIter min_element;
+    std::tie(min_element, max_element) = std::minmax_element(std::begin(feat), std::end(feat));
+
+    float extra = *max_element == *min_element ? 1.0 : 0.0;
+    for (auto& val: feat){
+		// max_element - min_element + 1 to avoid divide by zero error
+		val = (val - *min_element) / (*max_element - *min_element + extra);
+	}
+
+	return feat;
 }
 
 /*---------------- process data ----------------*/
