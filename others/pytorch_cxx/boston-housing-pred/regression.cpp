@@ -97,6 +97,7 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
                     [](std::size_t s, std::vector<float> const& v){
                             return s + v.size();
                     });
+    printf("total: %d\n", total);
 
     inputs.reserve(total);
 	for (std::size_t i = 1; i < features.size(); i++) {
