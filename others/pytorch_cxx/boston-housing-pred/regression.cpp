@@ -77,9 +77,8 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
     file >> row;    // ignore the first row
     while (file >> row) {
 		features.emplace_back();
-        printf("row size: %d\n", row.size());
-		for (std::size_t loop = 0;loop < row.size(); ++loop) {
-			features.back().emplace_back(row[loop]);
+		for (std::size_t elem = 0; elem < row.size(); ++elem) {
+			features.back().emplace_back(row[elem]);        // each row has 14 elements
 		}
 		features.back() = normalize_feature(features.back());
 		
@@ -94,9 +93,14 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
 
     // Flatten features vectors to 1D
 	std::vector<float> inputs = features[0];
+    for (int i = 0; i < inputs.size(), i++){
+        printf("%f ", inputs[i]);
+    }
+    printf("\n");
+
 	int64_t total = std::accumulate(std::begin(features) + 1, std::end(features), 0UL, 
                     [](std::size_t s, std::vector<float> const& v){
-                            return s + v.size();
+                        return s + v.size();
                     });
     printf("total: %d\n", total);
 
