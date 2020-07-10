@@ -103,6 +103,12 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
 		inputs.insert(inputs.end(), features[i].begin(), features[i].end());
 	}
 
+    printf("Input size: %d\n", inputs.size());
+    for (int i = 0; i < inputs.size(); i++){
+        printf("%f ", inputs[i]);
+    }
+    printf("\n");
+
     return std::make_pair(inputs, label);
 }
 
