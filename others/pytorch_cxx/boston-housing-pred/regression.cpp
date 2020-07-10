@@ -77,6 +77,7 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
     file >> row;    // ignore the first row
     while (file >> row) {
 		features.emplace_back();
+        printf("row size: %d\n", row.size());
 		for (std::size_t loop = 0;loop < row.size(); ++loop) {
 			features.back().emplace_back(row[loop]);
 		}
@@ -104,11 +105,11 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
 		inputs.insert(inputs.end(), features[i].begin(), features[i].end());
 	}
 
-    printf("Input size: %d\n", inputs.size());
-    for (int i = 0; i < inputs.size(); i++){
-        printf("%f ", inputs[i]);
-    }
-    printf("\n");
+    printf("input size: %d\n", inputs.size());
+    // for (int i = 0; i < inputs.size(); i++){
+    //     printf("%f ", inputs[i]);
+    // }
+    // printf("\n");
 
     return std::make_pair(inputs, label);
 }
