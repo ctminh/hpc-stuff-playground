@@ -86,34 +86,18 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
 		label.push_back(row[row.size()-1]);
 	}
 
-    // check the data after reading
-    // for (int i = 0; i < label.size(); i++){
-    //     std::cout << label.at(i) << std::endl;
-    // }
-
     // Flatten features vectors to 1D
 	std::vector<float> inputs = features[0];
-    for (int i = 0; i < inputs.size(); i++){
-        printf("%f ", inputs[i]);
-    }
-    printf("\n");
 
 	int64_t total = std::accumulate(std::begin(features) + 1, std::end(features), 0UL, 
                     [](std::size_t s, std::vector<float> const& v){
                         return s + v.size();
                     });
-    printf("total: %d\n", total);
 
     inputs.reserve(total);
 	for (std::size_t i = 1; i < features.size(); i++) {
 		inputs.insert(inputs.end(), features[i].begin(), features[i].end());
 	}
-
-    printf("input size: %d\n", inputs.size());
-    // for (int i = 0; i < inputs.size(); i++){
-    //     printf("%f ", inputs[i]);
-    // }
-    // printf("\n");
 
     return std::make_pair(inputs, label);
 }
@@ -128,4 +112,11 @@ int main(int argc, char **argv)
 
     // store data into a struct - pair
     std::pair<std::vector<float>, std::vector<float>> dataset = process_data(file);
+    std::vector<float> train_inputs = dataset.first;
+    std::vector<float> train_outputs = dataset.second;
+
+    // Phase1: data transforming
+    auto train_inputs_tensor = torch::from_blob(train_inputs.data(), {int(train_outputs.size()), int(train_inputs.size()/train_outputs.size())});
+    auto train_outputs_tensor = torch::from_blob(train_outputs.data(), {int(train_outputs.size()), 1});
+
 }
