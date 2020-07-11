@@ -144,6 +144,6 @@ int main(int argc, char **argv)
 
     // Phase2: create the network
     auto net = std::make_shared<Net>(int(train_inputs_tensor.sizes()[1]), 1);
-    torch::optim::SGD optimizer(net->parameters(), 0,001);
+    torch::optim::SGD optimizer(net->parameters(), 0.001);
 
 }
