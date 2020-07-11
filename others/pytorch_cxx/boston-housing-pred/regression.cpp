@@ -104,7 +104,7 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
 
 
 /*---------------- regression model ------------*/
-struct Net:torch::nn::Module {
+struct Net : torch::nn::Module {
     Net(int in_dim, int out_dim){
         fc1 = register_module("fc1", torch::nn::Linear(in_dim, 500));
         fc2 = register_module("fc2", torch::nn::Linear(500, 500));
@@ -144,6 +144,6 @@ int main(int argc, char **argv)
 
     // Phase2: create the network
     auto net = std::make_shared<Net>(int(train_inputs_tensor.sizes()[1]), 1);
-    torch::optim::SGD optimizer(net->paramenters(), 0,001);
+    torch::optim::SGD optimizer(net->parameters(), 0,001);
 
 }
