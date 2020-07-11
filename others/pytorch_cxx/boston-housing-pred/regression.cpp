@@ -102,6 +102,29 @@ std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &fi
     return std::make_pair(inputs, label);
 }
 
+
+/*---------------- regression model ------------*/
+struct Net:torch::nn::Module {
+    Net(int in_dim, int out_dim){
+        fc1 = register_module("fc1", torch::nn::Linear(in_dim, 500));
+        fc2 = register_module("fc2", torch::nn::Linear(500, 500));
+        fc3 = register_module("fc3", torch::nn::Linear(500, 200));
+        fc4 = register_module("fc4", torch::nn::Linear(200, out_dim));
+    }
+
+    torch::Tensor forward(torch::Tensor x){
+        x = fc1->forward(x);
+        x = fc2->forward(x);
+        x = fc3->forward(x);
+        x = fc4->forward(x);
+        return x;
+    }
+
+    torch::nn::Linear fc1{nullptr}, fc2{nullptr}, fc3{nullptr}, fc4{nullptr};
+};
+
+
+
 /*---------------- main function ---------------*/
 int main(int argc, char **argv)
 {
@@ -118,5 +141,9 @@ int main(int argc, char **argv)
     // Phase1: data transforming
     auto train_inputs_tensor = torch::from_blob(train_inputs.data(), {int(train_outputs.size()), int(train_inputs.size()/train_outputs.size())});
     auto train_outputs_tensor = torch::from_blob(train_outputs.data(), {int(train_outputs.size()), 1});
+
+    // Phase2: create the network
+    auto net = std::make_shared<Net>(int(train_inputs_tensor.sizes()[1]), 1);
+    torch::optim::SGD optimizer(net->paramenters(), 0,001);
 
 }
