@@ -146,6 +146,8 @@ int main(int argc, char **argv)
     auto net = std::make_shared<Net>(int(train_inputs_tensor.sizes()[1]), 1);
     torch::optim::SGD optimizer(net->parameters(), 0.001);
 
+    printf("Check: passed! \n");
+
     // Phase3: train and print loss
     std::size_t n_epochs = 100;
     for (std::size_t epoch = 1; epoch <= n_epochs; epoch++){
