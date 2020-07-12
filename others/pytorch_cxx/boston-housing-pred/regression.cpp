@@ -85,11 +85,21 @@ std::vector<T> add_two_vectors(std::vector<T> const& a_vector, std::vector<T> co
 	assert(a_vector.size() == b_vector.size());
 
 	std::vector<T> c_vector;
-	std::transform(std::begin(a_vector), std::end(a_vector), std::begin(b_vector),
-					std::back_inserter(c_vector),
+	std::transform(std::begin(a_vector), std::end(a_vector),
+                    std::begin(b_vector), std::back_inserter(c_vector),
 					[](T const& a, T const& b){return a+b;});
 
 	return c_vector;
+}
+
+template<typename T>
+std::vector<T> random(int length, int multiplier) {
+	std::vector<T> vec;
+	for (int i = 0; i < length; i++) {
+		vec.push_back((rand() % 10) * 2.0);
+	}
+
+	return vec;
 }
 
 template<typename T>
