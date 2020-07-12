@@ -80,6 +80,19 @@ std::vector<T> linspace(int start, int end, int length) {
 }
 
 template<typename T>
+std::vector<T> add_two_vectors(std::vector<T> const& a_vector, std::vector<T> const& b_vector) {
+	// assert both are of same size
+	assert(a_vector.size() == b_vector.size());
+
+	std::vector<T> c_vector;
+	std::transform(std::begin(a_vector), std::end(a_vector), std::begin(b_vector),
+					std::back_inserter(c_vector),
+					[](T const& a, T const& b){return a+b;});
+
+	return c_vector;
+}
+
+template<typename T>
 std::pair<std::vector<T>, std::vector<T>> create_data()
 {
     int64_t m = 4;      // slope
