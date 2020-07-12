@@ -162,7 +162,7 @@ struct Net : torch::nn::Module {
 };
 
 struct SampleNet : torch::nn::Module{
-    Net(int in_dim, int out_dim){
+    SampleNet(int in_dim, int out_dim){
         fc1 = register_module("fc1", torch::nn::Linear(in_dim, out_dim));
     }
 
