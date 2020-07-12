@@ -143,7 +143,7 @@ int main(int argc, char **argv)
     auto train_inputs_tensor = torch::from_blob(train_inputs.data(), {int(train_outputs.size()), int(train_inputs.size()/train_outputs.size())});
 
     // Phase2: create the network
-    printf("Check: passed 1! \n");
+    printf("Check: passed 1! input_size = %d\n", int(train_inputs_tensor.sizes()[1]));
     auto net = std::make_shared<Net>(int(train_inputs_tensor.sizes()[1]), 1);
     printf("Check: passed 2! \n");
     torch::optim::SGD optimizer(net->parameters(), 0.001);
