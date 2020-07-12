@@ -139,8 +139,8 @@ int main(int argc, char **argv)
     std::vector<float> train_outputs = dataset.second;
 
     // Phase1: data transforming
-    auto train_inputs_tensor = torch::from_blob(train_inputs.data(), {int(train_outputs.size()), int(train_inputs.size()/train_outputs.size())});
     auto train_outputs_tensor = torch::from_blob(train_outputs.data(), {int(train_outputs.size()), 1});
+    auto train_inputs_tensor = torch::from_blob(train_inputs.data(), {int(train_outputs.size()), int(train_inputs.size()/train_outputs.size())});
 
     // Phase2: create the network
     printf("Check: passed 1! \n");
@@ -148,6 +148,9 @@ int main(int argc, char **argv)
     printf("Check: passed 2! \n");
     torch::optim::SGD optimizer(net->parameters(), 0.001);
     printf("Check: passed 3! \n");
+
+    // auto net = std::make_shared<Net>(int(input_tensors.sizes()[1]), 1);
+	// torch::optim::SGD optimizer(net->parameters(), 0.001);
 
     // Phase3: train and print loss
     std::size_t n_epochs = 100;
