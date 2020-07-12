@@ -143,10 +143,11 @@ int main(int argc, char **argv)
     auto train_outputs_tensor = torch::from_blob(train_outputs.data(), {int(train_outputs.size()), 1});
 
     // Phase2: create the network
+    printf("Check: passed 1! \n");
     auto net = std::make_shared<Net>(int(train_inputs_tensor.sizes()[1]), 1);
-    printf("Check: passed! \n");
+    printf("Check: passed 2! \n");
     torch::optim::SGD optimizer(net->parameters(), 0.001);
-    printf("Check: passed! \n");
+    printf("Check: passed 3! \n");
 
     // Phase3: train and print loss
     std::size_t n_epochs = 100;
