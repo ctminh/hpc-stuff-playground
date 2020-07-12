@@ -68,6 +68,44 @@ std::vector<float> normalize_feature(std::vector<float> feat){
 	return feat;
 }
 
+/*---------------- create data -----------------*/
+template<typename T>
+std::vector<T> linspace(int start, int end, int length) {
+	std::vector<T> vec;
+	T diff = (end - start) / T(length);
+	for (int i = 0; i < length; i++) {
+		vec.push_back(start + diff * i);
+	}
+	return vec;
+}
+
+template<typename T>
+std::pair<std::vector<T>, std::vector<T>> create_data()
+{
+    int64_t m = 4;      // slope
+	int64_t c = 6;      // intercept
+    int start = 0;
+    int end = 11;
+    int length = 91;
+    std::vector<T> y = linspace<T>(start, end, length);
+    std::vector<T> x = y;
+
+    // source: https://stackoverflow.com/a/3885136, y = y * m
+	// this multiplies the vector with a scalar 
+    std::transform(y.begin(), y.end(), y.begin(), [m](long long val){return val * m;});
+
+	// source: https://stackoverflow.com/a/4461466, y = y + c
+	std::transform(y.begin(), y.end(), y.begin(), [c](long long val){return val + c;});
+
+	// y = y + <random numbers>, there are total 91 numbers
+	// y = y + random(91, 2), calculate 91 random numbers and multiply each by 2
+	std::vector<T> random_vector = random<T>(91, 2);
+	std::vector<T> vec_sum_y = add_two_vectors<T>(y, random_vector);
+
+	return std::make_pair(x, vec_sum_y);
+}
+
+
 /*---------------- process data ----------------*/
 std::pair<std::vector<float>, std::vector<float>> process_data(std::ifstream &file){
     std::vector<std::vector<float>> features;
@@ -123,6 +161,19 @@ struct Net : torch::nn::Module {
     torch::nn::Linear fc1{nullptr}, fc2{nullptr}, fc3{nullptr}, fc4{nullptr};
 };
 
+struct SampleNet : torch::nn::Module{
+    Net(int in_dim, int out_dim){
+        fc1 = register_module("fc1", torch::nn::Linear(in_dim, out_dim));
+    }
+
+    torch::Tensor forward(torch::Tensor x){
+        x = fc1->forward(x);
+        return x;
+    }
+
+    torch::nn::Linear fc1{nullptr};
+};
+
 
 
 /*---------------- main function ---------------*/
@@ -137,28 +188,36 @@ int main(int argc, char **argv)
     std::pair<std::vector<float>, std::vector<float>> dataset = process_data(file);
     std::vector<float> train_inputs = dataset.first;
     std::vector<float> train_outputs = dataset.second;
+    // try with generated data
+    std::vector<float> inputs, outputs;
+    std::tie(inputs, outputs) = create_data<float>();
 
     // Phase1: data transforming
     auto train_outputs_tensor = torch::from_blob(train_outputs.data(), {int(train_outputs.size()), 1});
     auto train_inputs_tensor = torch::from_blob(train_inputs.data(), {int(train_outputs.size()), int(train_inputs.size()/train_outputs.size())});
+    // try with generated data
+    auto outputs_tensor = torch::from_blob(outputs.data(), { 91, 1});
+    auto inputs_tensor = torch::from_blob(inputs.data(), { 91, 1});
 
     // Phase2: create the network
-    printf("Check: passed 1! input_size = %d\n", int(train_inputs_tensor.sizes()[1])-1);
-    auto net = std::make_shared<Net>(int(train_inputs_tensor.sizes()[1] - 1), 1);
-    printf("Check: passed 2! \n");
-    torch::optim::SGD optimizer(net->parameters(), 0.001);
-    printf("Check: passed 3! \n");
+    // printf("Check: passed 1! input_size = %d\n", int(train_inputs_tensor.sizes()[1])-1);
+    // auto net = std::make_shared<Net>(int(train_inputs_tensor.sizes()[1] - 1), 1);
+    // printf("Check: passed 2! \n");
+    // torch::optim::SGD optimizer(net->parameters(), 0.001);
+    // printf("Check: passed 3! \n");
 
-    // auto net = std::make_shared<Net>(int(input_tensors.sizes()[1]), 1);
-	// torch::optim::SGD optimizer(net->parameters(), 0.001);
+    // try with generated data
+    auto net = std::make_shared<SampleNet>(1, 1);
+    torch::optim::SGD optimizer(net->parameters(), 0.012);
+
 
     // Phase3: train and print loss
     std::size_t n_epochs = 100;
     for (std::size_t epoch = 1; epoch <= n_epochs; epoch++){
-        auto out  = net->forward(train_inputs_tensor);
+        auto out  = net->forward(inputs_tensor);
         optimizer.zero_grad();
 
-        auto loss = torch::mse_loss(out, train_outputs_tensor);
+        auto loss = torch::mse_loss(out, outputs_tensor);
         float loss_val = loss.item<float>();
 
         loss.backward();
