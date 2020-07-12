@@ -146,4 +146,21 @@ int main(int argc, char **argv)
     auto net = std::make_shared<Net>(int(train_inputs_tensor.sizes()[1]), 1);
     torch::optim::SGD optimizer(net->parameters(), 0.001);
 
+    // Phase3: train and print loss
+    std::size_t n_epochs = 100;
+    for (std::size_t epoch = 1; epoch <= n_epochs; epoch++){
+        auto out  = net->forward(train_inputs_tensor);
+        optimizer.zero_grad();
+
+        auto loss = torch::mse_loss(out, train_outputs_tensor);
+        float loss_val = loss.item<float>();
+
+        loss.backward();
+        optimizer.step();
+
+        std::cout << "Loss: " << loss_val << std::endl;
+    }
+
+    return 0;
+
 }
