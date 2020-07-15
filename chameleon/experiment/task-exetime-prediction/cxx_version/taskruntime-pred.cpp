@@ -104,7 +104,7 @@ auto main() -> int
     std::tie(min_freq, max_freq) = std::minmax_element(std::begin(freq), std::end(freq));
     // check min max values
     std::cout << "|min_size|max_size| |min_freq|max_freq|" << std::endl;
-    std::cout << float(min_size) << "|" << float(max_size) << "\t" << float(min_freq) << "|" << float(max_freq) << std::endl;
+    std::cout << *min_size << "|" << *max_size << "\t" << *min_freq << "|" << *max_freq << std::endl;
     
 
     // check the vector
