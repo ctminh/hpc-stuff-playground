@@ -18,5 +18,12 @@ int main(int argc, const char* argv[]) {
     return -1;
   }
 
+  std::vector<torch::jit::IValue> inputs;
+  inputs.push_back(torch::ones({0.5, 0.5}));
+
+  // Execute the model and turn its output into a tensor.
+  at::Tensor output = module.forward(inputs).toTensor();
+  std::cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5) << '\n';
+
   std::cout << "ok\n";
 }
