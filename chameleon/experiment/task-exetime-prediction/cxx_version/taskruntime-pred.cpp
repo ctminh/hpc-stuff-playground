@@ -103,7 +103,7 @@ auto main() -> int
     auto max_freq = max_element(std::begin(freq), std::end(freq));
     // check min max values
     std::cout << "|min_size|max_size| |min_freq|max_freq|" << std::endl;
-    std::cout << min_size << "|" << max_size << "\t" << min_freq << "|" << max_freq << std::endl;
+    std::cout << min_size << std::endl; // << "|" << max_size << "\t" << min_freq << "|" << max_freq << std::endl;
     
 
     // check the vector
