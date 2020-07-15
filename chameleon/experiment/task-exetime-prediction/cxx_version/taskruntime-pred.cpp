@@ -79,17 +79,20 @@ auto main() -> int
         size.push_back(size_val);
         freq.push_back(freq_val);
         exetime.push_back(exetime_val);
-        size_freq.push_back(size_val, freq_val);
+
+        size_freq.emplace_back();
+        size_freq.back().emplace_back(size_val);
+        size_freq.back().emplace_back(freq_val);
     }
 
     // check the vector
-    for (int i = 0; i < idx.size(); i++){
-        std::cout << idx.at(i) << "\t|"
-                    << arg_num.at(i) << "\t|"
-                    << size.at(i) << "\t|"
-                    << freq.at(i) << "\t|"
-                    << exetime.at(i) << std::endl;
-    }
+    // for (int i = 0; i < idx.size(); i++){
+    //     std::cout << idx.at(i) << "\t|"
+    //                 << arg_num.at(i) << "\t|"
+    //                 << size.at(i) << "\t|"
+    //                 << freq.at(i) << "\t|"
+    //                 << exetime.at(i) << std::endl;
+    // }
 
     // transform vector to tensor data
     torch::Tensor size_tensor = torch::from_blob(size.data(), {1000,1}, torch::kInt);
