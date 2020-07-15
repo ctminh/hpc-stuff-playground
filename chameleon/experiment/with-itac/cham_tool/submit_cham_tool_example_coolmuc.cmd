@@ -4,8 +4,6 @@
 #SBATCH -e ./results/ch-mxm_tool_%J.err
 #SBATCH -D ./
 #SBATCH --get-user-env
-REM #SBATCH --clusters=cm2_tiny
-REM #SBATCH --partition=cm2_tiny
 #SBATCH --clusters=mpp3
 #SBATCH --partition=mpp3_batch
 #SBATCH --nodes=2
