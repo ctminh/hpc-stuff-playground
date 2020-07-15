@@ -87,11 +87,13 @@ auto main() -> int
 
     // check the vector
     for (int i = 0; i < idx.size(); i++){
-        std::cout << idx.at(i) << "\t|"
-                    << arg_num.at(i) << "\t|"
-                    << size.at(i) << "\t|"
-                    << freq.at(i) << "\t|"
-                    << exetime.at(i) << std::endl;
+        // std::cout << idx.at(i) << "\t|"
+        //             << arg_num.at(i) << "\t|"
+        //             << size.at(i) << "\t|"
+        //             << freq.at(i) << "\t|"
+        //             << exetime.at(i) << std::endl;
+        
+        std::cout << size_freq[i][0] << ", " << size_freq[i][1] << std::endl;
     }
 
     // transform vector to tensor data
