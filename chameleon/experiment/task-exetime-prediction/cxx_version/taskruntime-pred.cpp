@@ -9,7 +9,6 @@
 // path to find the dataset
 const char *datafile = "../logfile.txt";
 
-
 // struct for building the model
 struct RegressionNet:torch::nn::Module{
     // declare the model
@@ -40,6 +39,22 @@ struct RegressionNet:torch::nn::Module{
     // ???
     torch::nn::Linear hidden1{nullptr}, hidden2{nullptr}, predict{nullptr};
 };
+
+// normalize the vector
+std::vector<float> normalize_feature(std::vector<float> feat){
+    using ConstIter = std::vector<float>::const_iterator;
+    ConstIter max_element;
+    ConstIter min_element;
+    std::tie(min_element, max_element) = std::minmax_element(std::begin(feat), std::end(feat));
+
+    // float extra = *max_element == *min_element ? 1.0 : 0.0;
+    for (auto& val: feat){
+		// max_element - min_element + 1 to avoid divide by zero error
+		val = (val - *min_element) / (*max_element - *min_element) * 2 - 1;
+	}
+
+	return feat;
+}
 
 // main function
 auto main() -> int
@@ -79,11 +94,18 @@ auto main() -> int
         size.push_back(size_val);
         freq.push_back(freq_val);
         exetime.push_back(exetime_val);
-
-        size_freq.emplace_back();
-        size_freq.back().emplace_back(size_val);
-        size_freq.back().emplace_back(freq_val);
     }
+
+    // normalize vectors
+    using ConstIter = std::vector<float>::const_iterator;
+    ConstIter max_size, min_freq;
+    ConstIter min_size, max_freq;
+    std::tie(min_size, max_size) = std::minmax_element(std::begin(size), std::end(size));
+    std::tie(min_freq, max_freq) = std::minmax_element(std::begin(freq), std::end(freq));
+    // check min max values
+    std::cout << "|min_size|max_size| |min_freq|max_freq|" << std::endl;
+    std::cout << min_size << "|" << max_size << "   " << min_freq << "|" << max_freq << std::endl;
+    
 
     // check the vector
     for (int i = 0; i < idx.size(); i++){
