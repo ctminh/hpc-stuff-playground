@@ -97,14 +97,13 @@ auto main() -> int
     }
 
     // normalize vectors
-    using ConstIter = std::vector<float>::const_iterator;
-    ConstIter max_size, min_freq;
-    ConstIter min_size, max_freq;
-    std::tie(min_size, max_size) = std::minmax_element(std::begin(size), std::end(size));
-    std::tie(min_freq, max_freq) = std::minmax_element(std::begin(freq), std::end(freq));
+    auto min_size = min_element(std::begin(size), std::end(size));
+    auto max_size = max_element(std::begin(size), std::end(size));
+    auto min_freq = min_element(std::begin(freq), std::end(freq));
+    auto max_freq = max_element(std::begin(freq), std::end(freq));
     // check min max values
     std::cout << "|min_size|max_size| |min_freq|max_freq|" << std::endl;
-    std::cout << *min_size << "|" << *max_size << "\t" << *min_freq << "|" << *max_freq << std::endl;
+    std::cout << min_size << "|" << max_size << "\t" << min_freq << "|" << max_freq << std::endl;
     
 
     // check the vector
