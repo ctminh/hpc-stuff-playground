@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 // path to find the dataset
 const char *datafile = "../logfile.txt";
@@ -39,22 +40,6 @@ struct RegressionNet:torch::nn::Module{
     // ???
     torch::nn::Linear hidden1{nullptr}, hidden2{nullptr}, predict{nullptr};
 };
-
-// normalize the vector
-std::vector<float> normalize_feature(std::vector<float> feat){
-    using ConstIter = std::vector<float>::const_iterator;
-    ConstIter max_element;
-    ConstIter min_element;
-    std::tie(min_element, max_element) = std::minmax_element(std::begin(feat), std::end(feat));
-
-    // float extra = *max_element == *min_element ? 1.0 : 0.0;
-    for (auto& val: feat){
-		// max_element - min_element + 1 to avoid divide by zero error
-		val = (val - *min_element) / (*max_element - *min_element) * 2 - 1;
-	}
-
-	return feat;
-}
 
 // main function
 auto main() -> int
@@ -97,8 +82,8 @@ auto main() -> int
     }
 
     // normalize vectors
-    const auto [min_size, max_size] = std::minmax_element(std::begin(size), std::end(size));
-    const auto [min_freq, max_freq] = std::minmax_element(std::begin(freq), std::end(freq));
+    const auto [min_size, max_size] = std::minmax_element(begin(size), end(size));
+    const auto [min_freq, max_freq] = std::minmax_element(begin(freq), end(freq));
     // check min max values
     std::cout << "|min_size|max_size| |min_freq|max_freq|" << std::endl;
     std::cout << *min_size << std::endl; // << "|" << max_size << "\t" << min_freq << "|" << max_freq << std::endl;
