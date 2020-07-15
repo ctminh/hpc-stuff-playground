@@ -65,7 +65,7 @@ auto main() -> int
     std::vector<int> size;      // for array of sizes
     std::vector<double> freq;   // for array of freq
     std::vector<double> exetime;    // for array of exectime
-    std::vector<int, double> size_freq; // for training 2d-array
+    std::vector<std::vector<float>> size_freq; // for training 2d-array
     int idx_val, arg_val, size_val; // get value when reading file
     double freq_val, exetime_val;   // get value when reading file
     char c1, c2, c3, c4;
@@ -86,13 +86,13 @@ auto main() -> int
     }
 
     // check the vector
-    // for (int i = 0; i < idx.size(); i++){
-    //     std::cout << idx.at(i) << "\t|"
-    //                 << arg_num.at(i) << "\t|"
-    //                 << size.at(i) << "\t|"
-    //                 << freq.at(i) << "\t|"
-    //                 << exetime.at(i) << std::endl;
-    // }
+    for (int i = 0; i < idx.size(); i++){
+        std::cout << idx.at(i) << "\t|"
+                    << arg_num.at(i) << "\t|"
+                    << size.at(i) << "\t|"
+                    << freq.at(i) << "\t|"
+                    << exetime.at(i) << std::endl;
+    }
 
     // transform vector to tensor data
     torch::Tensor size_tensor = torch::from_blob(size.data(), {1000,1}, torch::kInt);
