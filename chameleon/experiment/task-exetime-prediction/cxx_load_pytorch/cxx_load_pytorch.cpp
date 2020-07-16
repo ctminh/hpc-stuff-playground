@@ -18,12 +18,12 @@ int main(int argc, const char* argv[]) {
     return -1;
   }
 
-  std::vector<torch::jit::IValue> inputs{torch::tensor(0.5, 0.5)};
+  std::vector<torch::jit::IValue> inputs{torch::tensor(0.5), torch::tensor(0.5)};
   // inputs.push_back(torch::tensor());
 
   // Execute the model and turn its output into a tensor.
   at::Tensor output = module.forward(inputs).toTensor();
-  // std::cout << output << '\n';
+  std::cout << output.item() << '\n';
 
   std::cout << "ok\n";
 }
