@@ -18,8 +18,8 @@ int main(int argc, const char* argv[]) {
     return -1;
   }
 
-  std::vector<float> inputs;
-  inputs.push_back(torch::rand(2));
+  std::vector<float> inputs(0.5, 0.5);
+  // inputs.push_back(torch::rand(2));
   std::cout << inputs[0] << ", " << inputs[1] << std::endl;
 
   // Execute the model and turn its output into a tensor.
