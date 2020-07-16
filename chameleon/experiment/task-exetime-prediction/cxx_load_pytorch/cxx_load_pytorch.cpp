@@ -18,13 +18,12 @@ int main(int argc, const char* argv[]) {
     return -1;
   }
 
-  std::vector<float> inputs{0.5, 0.5};
-  // inputs.push_back(torch::rand(2));
-  std::cout << inputs[0] << ", " << inputs[1] << std::endl;
+  std::vector<torch::jit::IValue> inputs;
+  inputs.push_back(torch::rand(2)));
 
   // Execute the model and turn its output into a tensor.
-  at::Tensor output = module.forward(inputs).toTensor();
-  std::cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5) << '\n';
+  // at::Tensor output = module.forward(inputs).toTensor();
+  // std::cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5) << '\n';
 
   std::cout << "ok\n";
 }
