@@ -22,8 +22,8 @@ int main(int argc, const char* argv[]) {
   inputs.push_back(torch::rand(2));
 
   // Execute the model and turn its output into a tensor.
-  // at::Tensor output = module.forward(inputs).toTensor();
-  // std::cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5) << '\n';
+  at::Tensor output = module.forward(inputs).toTensor();
+  std::cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5) << '\n';
 
   std::cout << "ok\n";
 }
