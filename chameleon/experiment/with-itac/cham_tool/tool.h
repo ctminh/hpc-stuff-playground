@@ -171,6 +171,12 @@ std::vector<size_t> sort_indexes(const std::vector<T> &v) {
 /* ///////////////////////////////////////////////////// */
 /* display at runtime ////////////////////////////////// */
 void chameleon_t_statistic(cham_t_task_list_t *tool_task_list, int mpi_rank){
+  // write logfile
+  std::ofstream outfile;
+  outfile.open("./logfile.txt");
+
+  int i = 1;
+  
   printf("------------------------- Chameleon Statistics R%d ---------------------\n", mpi_rank);
   printf("TID Task_ID  arg_num  dat_size \t codeptr_ra \t\t\t\t\t  q_time \t\t\t\t\t  m_time \t\t\t\t\t m_des    s_time \t\t\t\t\t\t\t w_time \t\t e_time \t\t\t\t\t runtime\n"); //q_time  m_time  m_des  s_time  w_time  e_time  runtime\n");
   for (std::list<cham_t_task_info_t*>::iterator it=tool_task_list->task_list.begin(); it!=tool_task_list->task_list.end(); ++it) {
@@ -189,7 +195,49 @@ void chameleon_t_statistic(cham_t_task_list_t *tool_task_list, int mpi_rank){
             w_time,
             (*it)->end_time,
             (*it)->exe_time);
+
+    // write file
+    std::string line = std::to_string((*it)->task_id) + ","
+                      + std::to_string((*it)->arg_num) + ","
+                      + std::to_string(arg_size_list[i]) + ","
+                      + std::to_string((*it)->processed_freq) + ","
+                      + std::to_string((*it)->exe_time) + "\n";
+    outfile << line;
+    i++;
   }
+
+  // close file
+  outfile.close();
 }
 
+/* ///////////////////////////////////////////////////// */
+/* get frequency of cpu cores ////////////////////////// */
+double get_core_freq(int core_id){
+  // read cpuinfo file
+  std::string line;
+  std::ifstream file ("/proc/cpuinfo");
+
+  double freq = 0.0;
+  int i = 0;
+
+  if (file.is_open()){
+    while (getline(file, line)){
+      if (line.substr(0,7) == "cpu MHz"){
+        if (i == core_id){
+          std::string::size_type sz;
+          freq = std::stod (line.substr(11,21), &sz);
+          return freq;
+        }
+        else  i++;
+      }
+    }
+
+    file.close();
+  }
+  else
+  {
+    printf("Unable to open file!\n");
+  }
+  return freq;
+}
 
