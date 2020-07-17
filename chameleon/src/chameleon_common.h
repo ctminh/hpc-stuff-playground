@@ -49,7 +49,7 @@
 
 // flag wether migration in general is enabled or disabled
 #ifndef ENABLE_TASK_MIGRATION
-#define ENABLE_TASK_MIGRATION 1
+#define ENABLE_TASK_MIGRATION 0
 #endif
 
 #if COMMUNICATION_MODE == 1

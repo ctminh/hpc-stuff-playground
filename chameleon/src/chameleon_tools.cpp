@@ -31,7 +31,7 @@ cham_t_start_tool_result_t * cham_t_start_tool(unsigned int cham_version) {
     // runtime library is linked before the tool. Since glibc 2.2 strong symbols
     // don't override weak symbols that have been found before unless the user
     // sets the environment variable LD_DYNAMIC_WEAK.
-    void *handle = dlopen("/dss/dsshome1/0A/di49mew/chameleon_tool_dev/experiment/with-itac/cham_tool/tool.so", RTLD_LAZY);
+    void *handle = dlopen("/home/chungmi/chameleon_on_mnm/experiment/cham_tool/tool.so", RTLD_LAZY);
     // void *handle = dlopen("/dss/dsshome1/lxc0D/ra56kop/chameleon_tool_dev/experiment/with-itac/cham_tool/tool_coolmuc.so", RTLD_LAZY);
     if (!handle){
         fprintf(stderr, "%s\n", dlerror());

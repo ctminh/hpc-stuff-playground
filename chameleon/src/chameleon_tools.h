@@ -192,7 +192,7 @@ typedef struct cham_t_start_tool_result_t {
 typedef struct cham_t_task_info_t {
     TYPE_TASK_ID task_id;
     int rank_belong;    // 0
-    size_t arg_size;   // 1
+    std::vector<int64_t> arg_sizes;   // 1
     double queue_time;  // 2
     double start_time;  // 3
     double end_time;    // 4
@@ -201,6 +201,8 @@ typedef struct cham_t_task_info_t {
     bool migrated;      // 7
     int32_t arg_num;    // 8
     intptr_t codeptr_ra;   // 9
+    double processed_freq;
+
 } cham_t_task_info_t;
 
 typedef struct cham_t_task_list_t {
@@ -253,6 +255,16 @@ typedef struct cham_t_task_list_t {
             if ((*it)->task_id == task_id){
                 (*it)->end_time = end_time;
                 (*it)->exe_time = end_time - (*it)->start_time;
+            }
+        }
+        this->m.unlock();
+    }
+
+    void set_processed_freq(TYPE_TASK_ID task_id, double freq){
+        this->m.lock();
+        for (std::list<cham_t_task_info_t *>::iterator it=this->task_list.begin(); it!=this->task_list.end(); ++it){
+            if ((*it)->task_id == task_id){
+                (*it)->processed_freq = freq;
             }
         }
         this->m.unlock();
