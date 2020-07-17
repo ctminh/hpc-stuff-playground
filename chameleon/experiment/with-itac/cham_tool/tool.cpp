@@ -3,9 +3,6 @@
 #define TASK_TOOL_SAMPLE_DATA_SIZE 10
 #define THRESHOLD_OFFLOAD_TASKS 100
 
-//================================================================
-// Variables
-//================================================================
 static cham_t_set_callback_t cham_t_set_callback;
 static cham_t_get_callback_t cham_t_get_callback;
 static cham_t_get_rank_data_t cham_t_get_rank_data;
@@ -14,10 +11,14 @@ static cham_t_get_rank_info_t cham_t_get_rank_info;
 static cham_t_get_task_data_t cham_t_get_task_data;
 // static cham_t_get_unique_id_t cham_t_get_unique_id;
 
+//================================================================
+// Variables
+//================================================================
 
 //================================================================
 // Additional functions
 //================================================================
+
 int compare( const void *pa, const void *pb ){
     const int *a = (int *) pa;
     const int *b = (int *) pb;
@@ -63,14 +64,16 @@ on_cham_t_callback_task_create(
     cur_task->queue_time        = q_time;
     cur_task->codeptr_ra        = codeptr_ra;
     cur_task->arg_num           = chameleon_get_arg_num(task);
-    int size_tmp = 0;
+
+    arg_size_list[internal_task_id] = arg_sizes[0];
+
     // printf("R%d: Task%d-", rank_info, internal_task_id);
     // for (int i = 0; i < cur_task->arg_num; i++){
-    //     printf("arg%d (size-%ld) ", i, arg_sizes[i]);
-    //     size_tmp += arg_sizes[i];
+    //     printf("arg%d(size-%ldKB) ", i, arg_sizes[i]);
     // }
     // printf("\n");
-    cur_task->arg_size          = size_tmp;
+
+    // add task to the queue
     tool_task_list.push_back(cur_task);
 }
 
@@ -86,18 +89,6 @@ on_cham_t_callback_task_schedule(
 {
     TYPE_TASK_ID task_id = chameleon_get_task_id(task);
     int rank = cham_t_get_rank_info()->comm_rank;
-
-    // call pytorch model
-    // std::shared_ptr<torch::jit::script::Module> module;
-    // try {
-    //     // deserialize the ScriptModule from a file using torch::jit::load().
-    //     module = torch::jit::load(argv[1]);
-    //     }
-    // catch (const c10::Error& e) {
-    //     std::cerr << "error loading the model\n";
-    //     return -1;
-    // }
-
 }
 
 static int32_t
@@ -280,6 +271,12 @@ on_cham_t_callback_task_processed(
     TYPE_TASK_ID task_id = chameleon_get_task_id(task);
     double start_time = omp_get_wtime();
     tool_task_list.set_start_time(task_id, start_time);
+
+    // get core info
+    int core_id = sched_getcpu();
+    double core_freq = get_core_freq(core_id);
+    printf("Task-%d: Core ID = %d, freq = %f\n", task_id, core_id, core_freq);
+    tool_task_list.set_processed_freq(task_id, core_freq);
 }
 
 static void
@@ -289,13 +286,12 @@ on_cham_t_callback_task_end(
     TYPE_TASK_ID task_id = chameleon_get_task_id(task);
     int rank = cham_t_get_rank_info()->comm_rank;
     double end_time = omp_get_wtime();
-    tool_task_list.set_end_time(task_id, end_time);
-    
+    tool_task_list.set_end_time(task_id, end_time); 
 }
 
-//=======================================================================
+//================================================================
 // Start Tool & Register Callbacks
-//=======================================================================
+//================================================================
 #define register_callback_t(name, type)                                         \
 do{                                                                             \
     type f_##name = &on_##name;                                                 \

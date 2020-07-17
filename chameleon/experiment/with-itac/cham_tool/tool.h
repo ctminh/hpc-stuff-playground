@@ -9,24 +9,19 @@
 #include <omp.h>
 #include <mpi.h>
 #include <vector>
-#include <numeric>
 #include <algorithm>
+#include <fstream>
+#include <string>
+#include <sstream> 
+#include <sched.h>
+#include <numeric>
 
-#ifndef TRACE
-#define TRACE 1
-
-/* include VTune */
 #ifdef TRACE
 #include "VT.h"
-  // static int event_tool_task_create = -1;
-  // static int event_tool_task_exec = -1;
+static int event_tool_task_create = -1;
+static int event_tool_task_exec = -1;
 #endif
 
-// class data for keeping profiling-data per process
-cham_t_task_list_t tool_task_list;
-
-/* ///////////////////////////////////////////////////// */
-/* define timestamp //////////////////////////////////// */
 #define TIMESTAMP(time_) 						\
   do {									\
       struct timespec ts;						\
@@ -34,8 +29,24 @@ cham_t_task_list_t tool_task_list;
       time_ = ((double)ts.tv_sec) + (1.0e-9)*((double)ts.tv_nsec);		\
   } while(0)
 
-/* ///////////////////////////////////////////////////// */
-/* function to pack profiling-data to send around ////// */
+void chameleon_t_print(char data[])
+{
+    struct timeval curTime;
+    gettimeofday(&curTime, NULL);
+    int milli = curTime.tv_usec / 1000;
+    int micro_sec = curTime.tv_usec % 1000;
+    char buffer [80];
+    strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", localtime(&curTime.tv_sec));
+    char currentTime[84] = "";
+    sprintf(currentTime, "%s.%03d.%03d", buffer, milli, micro_sec);
+    printf("[CHAM_T] Timestamp-%s: %s\n", currentTime, data);
+}
+
+// global vars
+cham_t_task_list_t tool_task_list;
+std::vector<int64_t> arg_size_list(1000);
+std::vector<double> cpu_freq_list(1000);
+
 void *pack_tool_data(int32_t num_tasks, cham_t_task_list_t *tool_task_list, int32_t *buffer_size)
 {
   // FORMAT:
@@ -90,7 +101,7 @@ void *pack_tool_data(int32_t num_tasks, cham_t_task_list_t *tool_task_list, int3
       cur_ptr += sizeof(int);
 
       // 3. size_data
-      ((size_t *) cur_ptr)[0] = (*it)->arg_size;
+      ((size_t *) cur_ptr)[0] = (*it)->arg_sizes[0];
       cur_ptr += sizeof(size_t);
 
       // 4. queue_time
@@ -134,8 +145,6 @@ void *pack_tool_data(int32_t num_tasks, cham_t_task_list_t *tool_task_list, int3
     return buff;
 }
 
-/* ///////////////////////////////////////////////////// */
-/* function to unpack profiling-data when sending around */
 void unpack_tool_data(void * buffer, int mpi_tag, int32_t *num_tasks, cham_t_task_list_t *tool_task_list){
   // current pointer position
   char *cur_ptr = (char*) buffer;
@@ -149,9 +158,6 @@ void unpack_tool_data(void * buffer, int mpi_tag, int32_t *num_tasks, cham_t_tas
   printf("MPI_tag = %d, num_tasks = %d\n", mpi_tag, n_tasks);
 }
 
-
-/* ///////////////////////////////////////////////////// */
-/* used for sorting something ///////////////////////// */
 #pragma region Local Helpers
 template <typename T>
 std::vector<size_t> sort_indexes(const std::vector<T> &v) {
@@ -161,15 +167,13 @@ std::vector<size_t> sort_indexes(const std::vector<T> &v) {
   std::iota(idx.begin(), idx.end(), 0);
 
   // sort indexes based on comparing values in v
-  std::sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
+  std::sort(idx.begin(), idx.end(),
+       [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
 
   return idx;
 }
 #pragma endregion Local Helpers
 
-
-/* ///////////////////////////////////////////////////// */
-/* display at runtime ////////////////////////////////// */
 void chameleon_t_statistic(cham_t_task_list_t *tool_task_list, int mpi_rank){
   // write logfile
   std::ofstream outfile;
@@ -210,8 +214,7 @@ void chameleon_t_statistic(cham_t_task_list_t *tool_task_list, int mpi_rank){
   outfile.close();
 }
 
-/* ///////////////////////////////////////////////////// */
-/* get frequency of cpu cores ////////////////////////// */
+
 double get_core_freq(int core_id){
   // read cpuinfo file
   std::string line;
@@ -238,6 +241,6 @@ double get_core_freq(int core_id){
   {
     printf("Unable to open file!\n");
   }
+  
   return freq;
 }
-
