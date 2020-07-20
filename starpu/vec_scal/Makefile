@@ -6,8 +6,8 @@ CC = gcc
 # NVCC = /usr/local/cuda/bin/nvcc
 
 # for the test program
-main: main.c
-	$(CC) $(CFLAGS) main.c -o main $(LDLIBS)
+vector: vector_scal.c
+	$(CC) $(CFLAGS) vector_scal.c -o vector $(LDLIBS)
 
 clean:
-	rm -fr *.o $() main
+	rm -fr *.o $() vector
