@@ -82,12 +82,12 @@ auto main() -> int
     }
 
     // normalize vectors
-    auto min_size, max_size, min_freq, max_freq;
-    [min_size, max_size] = std::minmax_element(begin(size), end(size));
-    [min_freq, max_freq] = std::minmax_element(begin(freq), end(freq));
-    // check min max values
-    std::cout << "|min_size|max_size| |min_freq|max_freq|" << std::endl;
-    std::cout << *min_size << std::endl; // << "|" << max_size << "\t" << min_freq << "|" << max_freq << std::endl;
+    // auto min_size, max_size, min_freq, max_freq;
+    // [min_size, max_size] = std::minmax_element(begin(size), end(size));
+    // [min_freq, max_freq] = std::minmax_element(begin(freq), end(freq));
+    // // check min max values
+    // std::cout << "|min_size|max_size| |min_freq|max_freq|" << std::endl;
+    // std::cout << *min_size << std::endl; // << "|" << max_size << "\t" << min_freq << "|" << max_freq << std::endl;
     
 
     // check the vector

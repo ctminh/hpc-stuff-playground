@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define NX 2048000
+#define NX 20480
 
 /* define task function */
 void scal_cpu_func(void *buffers[], void *cl_arg)
@@ -57,17 +57,20 @@ static struct starpu_codelet cl =
 int main(int argc, char *argv[])
 {
     /* We consider a vector of float that is initialized just as any of C data */
+    printf("1. Init the vector\n");
 	float vector[NX];   // init the vector
 	unsigned i;
 	for (i = 0; i < NX; i++)
         vector[i] = (i+1.0f);
 
     /* init StarPU */
+    printf("2. Init starPU\n");
     int ret = starpu_init(NULL);
     if (ret == -ENODEV)
 		goto enodev;
 
     /* create starpu tasks */
+    printf("3. Create starpu task\n");
     starpu_data_handle_t vector_handle;
     starpu_vector_data_register(&vector_handle, STARPU_MAIN_RAM, (uintptr_t)vector, NX, sizeof(vector[0]));
 
@@ -79,9 +82,11 @@ int main(int argc, char *argv[])
     task->cl_arg_size = sizeof(factor);
 
     // submit task
+    printf("4. Submit starpu task\n");
     ret = starpu_task_submit(task);
 
     // unregister data
+    printf("5. Unregister data and free memory - Finish the program\n");
     starpu_data_unregister(vector_handle);
 	starpu_memory_unpin(vector, sizeof(vector));
     starpu_shutdown();

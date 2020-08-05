@@ -181,10 +181,11 @@ if __name__ == "__main__":
     #     print(check_statement)
 
     # save the model state (can only load by Python)
-    torch.save(net_model.state_dict(), 'task-exetime-pred.pth')
+    my_model = net_model(0.5,0.5)
+    # torch.save(net_model.state_dict(), 'task-exetime-pred.pth')
 
     # save the model state for C++
     # run traced module
-    traced_script_module = torch.jit.trace(net_model, vis_sizefreq_val)
+    # traced_script_module = torch.jit.trace(net_model, vis_sizefreq_val)
     # save the converted model
-    traced_script_module.save("traced_task_exetime_pred.pt")
+    # traced_script_module.save("traced_task_exetime_pred.pt")
