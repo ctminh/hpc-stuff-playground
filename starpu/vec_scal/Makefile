@@ -1,7 +1,7 @@
 # Flags for compiling
 CFLAGS += $$(pkg-config --cflags starpu-1.2)
 # LDLIBS += $$(pkg-config --libs starpu-1.3) -lrt -lcudart -L/usr/local/cuda/lib64 -lOpenCL -lstdc++ -lm
-LDLIBS += $$(pkg-config --libs starpu-1.2) -lrt -lstdc++ -lm lcudart
+LDLIBS += $$(pkg-config --libs starpu-1.2) -lrt -lstdc++ -lm -lcudart
 CC = gcc
 NVCC = /usr/local/cuda/bin/nvcc
 
