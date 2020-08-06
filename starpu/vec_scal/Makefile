@@ -9,7 +9,7 @@ vector_scal: vector_scal.o scal_cpu.o scal_cuda.o
 
 # for the test program
 %.o: %.cu
-	$(NVCC) $(LDLIBS) $< -c $@
+	$(NVCC) $(CFLAGS) $(LDLIBS) $< -c $@
 
 clean:
 	rm -f vector_scal *.o
