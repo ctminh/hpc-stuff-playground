@@ -1,6 +1,5 @@
 #include <starpu.h>
 
-
 /* This kernel takes a buffer and scales it by a constant factor */
 void scal_cpu_func(void *buffers[], void *cl_arg)
 {

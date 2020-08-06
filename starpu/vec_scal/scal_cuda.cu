@@ -18,7 +18,7 @@ extern "C" void scal_cuda_func(void *buffers[], void *_args)
     float *val = (float *)STARPU_VECTOR_GET_PTR(buffers[0]);
     unsigned threads_per_block = 64;
     unsigned nblocks = (n + threads_per_block - 1) / threads_per_block;
-    vector_mult_cuda <<<nblocks, threads_per_block, 0, starpu_cuda_get_local_stream()>>> (n, val, *factor);
+    vector_mult_cuda<<<nblocks, threads_per_block, 0, starpu_cuda_get_local_stream()>>> (n, val, *factor);
     
     cudaStreamSynchronize(starpu_cuda_get_local_stream());
 }
