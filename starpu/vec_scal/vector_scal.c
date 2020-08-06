@@ -5,24 +5,9 @@
 
 #define NX 20480
 
-/* define task function */
-void scal_cpu_func(void *buffers[], void *cl_arg)
-{
-	unsigned i;
-	float *factor = cl_arg;
-
-	/* length of the vector */
-	unsigned n = STARPU_VECTOR_GET_NX(buffers[0]);
-
-	/* get a pointer to the local copy of the vector : note that we have to
-	 * cast it in (float *) since a vector could contain any type of
-	 * elements so that the .ptr field is actually a uintptr_t */
-	float *val = (float *)STARPU_VECTOR_GET_PTR(buffers[0]);
-
-	/* scale the vector */
-	for (i = 0; i < n; i++)
-		val[i] *= *factor;
-}
+// declare task functions
+extern void scal_cpu_func(void *buffers[], void *_args);
+extern void scal_cuda_func(void *buffers[], void *_args);
 
 /* don't know yet for what? */
 static struct starpu_perfmodel vector_scal_model =
@@ -41,9 +26,16 @@ static struct starpu_perfmodel vector_scal_energy_model =
 /* define a codelet */
 static struct starpu_codelet cl =
 {
+    // options to run the program
+    .where = STARPU_CPU | STARPU_CUDA,
     // CPU implementation
     .cpu_funcs = {scal_cpu_func},
     .cpu_funcs_name = {"scal_cpu_func"},
+    // CUDA implementation
+    #ifdef STARPU_USE_CUDA
+    .cuda_funcs = {scal_cuda_func},
+    #endif
+
 
     // data
     .nbuffers = 1,
@@ -61,7 +53,9 @@ int main(int argc, char *argv[])
 	float vector[NX];   // init the vector
 	unsigned i;
 	for (i = 0; i < NX; i++)
-        vector[i] = (i+1.0f);
+        vector[i] = (i + 1.0f);
+
+    fprintf(stderr, "BEFORE: First element was %fnn", vector[0]);
 
     /* init StarPU */
     printf("2. Init starPU\n");
@@ -90,6 +84,8 @@ int main(int argc, char *argv[])
     starpu_data_unregister(vector_handle);
 	starpu_memory_unpin(vector, sizeof(vector));
     starpu_shutdown();
+
+    fprintf(stderr, "AFTER First element is %fnn", vector[0]);
 
     return (ret ? EXIT_SUCCESS : EXIT_FAILURE);
 
