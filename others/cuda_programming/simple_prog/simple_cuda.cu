@@ -33,6 +33,11 @@ int main(void)
     // synchronization: wait for GPU finishes
     cudaDeviceSynchronize();
 
+    // check the first 10 elements
+    for (int i = 0; i < 10; i++)
+        std::cout << y[i] << ",";
+    std::cout << std::endl;
+
     // Check for errors (all values should be 3.0f)
     float maxError = 0.0f;
     for (int i = 0; i < N; i++)
