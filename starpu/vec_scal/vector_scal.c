@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define NX 20480
+#define NX 204800
 
 // declare task functions
 extern void scal_cpu_func(void *buffers[], void *_args);
