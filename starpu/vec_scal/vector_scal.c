@@ -55,7 +55,10 @@ int main(int argc, char *argv[])
 	for (i = 0; i < NX; i++)
         vector[i] = (i + 1.0f);
 
-    fprintf(stderr, "BEFORE: First element was %fnn\n", vector[0]);
+    fprintf(stderr, "BEFORE: First 10 elements was:\n");
+    for (int i = 0; i < 10; i++)
+        printf("%.2f ", vector[i]);
+    printf("------------------------------------------\n");
 
     /* init StarPU */
     printf("2. Init starPU\n");
@@ -85,7 +88,10 @@ int main(int argc, char *argv[])
 	starpu_memory_unpin(vector, sizeof(vector));
     starpu_shutdown();
 
-    fprintf(stderr, "AFTER First element is %fnn\n", vector[0]);
+    fprintf(stderr, "AFTER: First 10 elements was:\n");
+    for (int i = 0; i < 10; i++)
+        printf("%.2f ", vector[i]);
+    printf("------------------------------------------\n");
 
     return (ret ? EXIT_SUCCESS : EXIT_FAILURE);
 
