@@ -1,4 +1,5 @@
 #include <starpu.h>
+#include <stdio.h>
 
 /* This kernel takes a buffer and scales it by a constant factor */
 void scal_cpu_func(void *buffers[], void *cl_arg)
@@ -24,6 +25,7 @@ void scal_cpu_func(void *buffers[], void *cl_arg)
 	 * cast it in (float *) since a vector could contain any type of
 	 * elements so that the .ptr field is actually a uintptr_t */
 	float *val = (float *)STARPU_VECTOR_GET_PTR(buffers[0]);
+	printf("[scal_cpu_func] scale the vector with factor = %f\n", *factor);
 
     /* scale the vector */
 	for (i = 0; i < n; i++)
