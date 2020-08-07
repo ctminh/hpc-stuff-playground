@@ -1,4 +1,5 @@
 #include <starpu.h>
+#include <stdio.h>
 
 static __global__ void vector_mult_cuda(unsigned n, float *val, float factor)
 {
@@ -13,6 +14,7 @@ extern "C" void scal_cuda_func(void *buffers[], void *_args)
 
     /* length of the vector */
     unsigned n = STARPU_VECTOR_GET_NX(buffers[0]);
+    printf("[scal_cuda_func] scale the vector with factor = %f\n", *factor);
 
     /* load copy of the vector pointer */
     float *val = (float *)STARPU_VECTOR_GET_PTR(buffers[0]);
