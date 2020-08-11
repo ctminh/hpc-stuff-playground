@@ -14,10 +14,12 @@ void add(int n, float *x, float *y)
 int main(void)
 {
     int N = 1 << 20; // 1 milion elements
-    // allocate on GPU
-    float *x, *y;
-    cudaMallocManaged(&x, N*sizeof(float));
-    cudaMallocManaged(&y, N*sizeof(float));
+
+    // allocate arrays on CPU
+    float *x, *y, *out;
+    float *gpu_x, *gpu_y;
+    x = (float *)malloc(sizeof(float) * N);
+    y = (float *)malloc(sizeof(float) * N);
 
     // initialize x and y
     std::cout << "1. Init array x, y" << std::endl;
@@ -25,6 +27,14 @@ int main(void)
         x[i] = 1.0f;
         y[i] = 2.0f;
     }
+
+    // allocate mem on GPU
+    cudaMalloc((void **)&gpu_x, sizeof(float) * N);
+    cudaMalloc((void **)*gpu_y, sizeof(float) * N);
+    
+    // transfer data
+    cudaMemcpy(gpu_x, x, sizeof(float) * N, cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_y, y, sizeof(float) * N, cudaMemcpyHostToDevice);
 
     // run add kernel on GPU
     std::cout << "2. Run add kernel on GPU" << std::endl;
