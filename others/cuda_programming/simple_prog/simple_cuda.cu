@@ -16,7 +16,7 @@ int main(void)
     int N = 1 << 20; // 1 milion elements
 
     // allocate arrays on CPU
-    float *x, *y, *out;
+    float *x, *y;
     float *gpu_x, *gpu_y;
     x = (float *)malloc(sizeof(float) * N);
     y = (float *)malloc(sizeof(float) * N);
@@ -30,7 +30,7 @@ int main(void)
 
     // allocate mem on GPU
     cudaMalloc((void **)&gpu_x, sizeof(float) * N);
-    cudaMalloc((void **)*gpu_y, sizeof(float) * N);
+    cudaMalloc((void **)&gpu_y, sizeof(float) * N);
     
     // transfer data
     cudaMemcpy(gpu_x, x, sizeof(float) * N, cudaMemcpyHostToDevice);
