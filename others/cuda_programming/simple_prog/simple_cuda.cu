@@ -54,8 +54,9 @@ int main(void)
     err = cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
 
     // Launch the Vector Add CUDA Kernel
-    int threadsPerBlock = 16;
-    int blocksPerGrid =(numElements + threadsPerBlock - 1) / threadsPerBlock;
+    int threadsPerBlock = 1;
+    // int blocksPerGrid =(numElements + threadsPerBlock - 1) / threadsPerBlock;
+    int blocksPerGrid = 1;
     printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid, threadsPerBlock);
     vectorAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, numElements);
     err = cudaGetLastError();
