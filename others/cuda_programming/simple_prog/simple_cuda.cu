@@ -2,7 +2,7 @@
 #include <math.h>
 // For the CUDA runtime routines (prefixed with "cuda_")
 #include <cuda_runtime.h>
-#include <helper_cuda.h>
+// #include <helper_cuda.h>
 
 // function to add elements of 2 arrays
 // CUDA Kernel function to add the elements of two arrays on the GPU
@@ -54,7 +54,7 @@ int main(void)
     err = cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
 
     // Launch the Vector Add CUDA Kernel
-    int threadsPerBlock = 256;
+    int threadsPerBlock = 16;
     int blocksPerGrid =(numElements + threadsPerBlock - 1) / threadsPerBlock;
     printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid, threadsPerBlock);
     vectorAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, numElements);
