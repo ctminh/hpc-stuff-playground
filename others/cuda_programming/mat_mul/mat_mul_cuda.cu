@@ -19,6 +19,9 @@
 // CUDA runtime
 #include <cuda_runtime.h>
 
+// Helper functions and utilities to work with CUDA
+#include <helper_functions.h>
+#include <helper_cuda.h>
 
 /**
  * Program main
@@ -36,4 +39,6 @@
     // This will pick the best possible CUDA capable device, otherwise
     // override the device ID based on input provided at the command line
     int dev = findCudaDevice(argc, (const char **)argv);
+
+    return 0;
 }
