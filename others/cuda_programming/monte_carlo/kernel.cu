@@ -12,8 +12,8 @@ __global__ void mc_kernel(
     float dt,
     float * d_normals,
     unsigned N_STEPS,
-    unsigned N_PATHS)
-{
+    unsigned N_PATHS){
+        
     const unsigned tid = threadIdx.x;
     const unsigned bid = blockIdx.x;
     const unsigned bsz = blockDim.x;
