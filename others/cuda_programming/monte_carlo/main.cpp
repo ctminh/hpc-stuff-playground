@@ -56,11 +56,13 @@ int main(int argc, char *argv[])
         curandCreateGenerator(&curandGenerator, CURAND_RNG_PSEUDO_MTGP32);
         curandSetPseudoRandomGeneratorSeed(curandGenerator, 1234ULL) ;
         curandGenerateNormal(curandGenerator, d_normals.getData(), N_NORMALS, 0.0f, sqrdt);
-        double t2=double(clock())/CLOCKS_PER_SEC;
+        double t2 = double(clock())/CLOCKS_PER_SEC;
 
         // call the kernel
         mc_dao_call(d_s.getData(), T, K, B, S0, sigma, mu, r, dt, d_normals.getData(), N_STEPS, N_PATHS);
         cudaDeviceSynchronize();
+
+        double t3 = double(clock())/CLOCKS_PER_SEC;
 
         // copy results from device to host
         d_s.get(&s[0], N_PATHS);
@@ -71,7 +73,7 @@ int main(int argc, char *argv[])
             temp_sum +=s[i];
         }
         temp_sum/=N_PATHS;
-        double t4=double(clock())/CLOCKS_PER_SEC;
+        double t4 = double(clock())/CLOCKS_PER_SEC;
 
         // init variables for CPU Monte Carlo
         vector<float> normals(N_NORMALS);
@@ -98,7 +100,7 @@ int main(int argc, char *argv[])
         }
 
         sum/=N_PATHS;
-        double t5=double(clock())/CLOCKS_PER_SEC;
+        double t5 = double(clock())/CLOCKS_PER_SEC;
 
         cout<<"****************** INFO ******************\n";
         cout<<"Number of Paths: " << N_PATHS << "\n";
