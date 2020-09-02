@@ -23,6 +23,15 @@
 #include <helper_functions.h>
 #include <helper_cuda.h>
 
+/**
+ * initialize values for matrix
+ */
+void ConstantInit(float *data, int size, float val) {
+    for (int i = 0; i < size; ++i) {
+        data[i] = val;
+    }
+}
+
 
 /**
  * Run a simple test of matrix multiplication using CUDA
