@@ -93,19 +93,19 @@ int main(int argc, char **argv) {
     dim3 dimsB(5 * 4 * block_size, 5 * 2 * block_size, 1);
     // get width of Matrix A
     if (checkCmdLineFlag(argc, (const char **)argv, "wA")){
-        dimsA.x = getCmdLineArgumentInc(argc, (const char **)argv, "wA");
+        dimsA.x = getCmdLineArgumentInt(argc, (const char **)argv, "wA");
     }
     // get height of Matrix A
     if (checkCmdLineFlag(argc, (const char **)argv, "hA")){
-        dimsA.y = getCmdLineArgumentInc(argc, (const char **)argv, "hA");
+        dimsA.y = getCmdLineArgumentInt(argc, (const char **)argv, "hA");
     }
     // get height of Matrix B
     if (checkCmdLineFlag(argc, (const char **)argv, "wB")){
-        dimsB.x = getCmdLineArgumentInc(argc, (const char **)argv, "wB");
+        dimsB.x = getCmdLineArgumentInt(argc, (const char **)argv, "wB");
     }
     // get height of Matrix B
     if (checkCmdLineFlag(argc, (const char **)argv, "hB")){
-        dimsB.y = getCmdLineArgumentInc(argc, (const char **)argv, "hB");
+        dimsB.y = getCmdLineArgumentInt(argc, (const char **)argv, "hB");
     }
     // check the size of A & B
     if (dimsA.x != dimsB.y){
