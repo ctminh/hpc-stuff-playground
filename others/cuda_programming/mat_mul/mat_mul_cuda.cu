@@ -191,6 +191,7 @@ int main(int argc, char **argv) {
         printf("Usage -device=n (n >= 0 for deviceID)\n");
         printf("\t-wA=WidthA -hA=HeightA (Width x Height of Matrix A)\n");
         printf("\t-wB=WidthB -hB=HeightB (Width x Height of Matrix B)\n");
+        printf("\t-bs=BlockSize)\n");
         printf("Note: Outer matrix dimensions of A & B matrices must be equal.\n");
         exit(EXIT_SUCCESS);
     }
@@ -200,7 +201,7 @@ int main(int argc, char **argv) {
     int dev = findCudaDevice(argc, (const char **)argv);
 
     // declare the matrix
-    int block_size = 32;
+    int block_size = 4;
     dim3 dimsA(5 * 2 * block_size, 5 * 2 * block_size, 1);
     dim3 dimsB(5 * 4 * block_size, 5 * 2 * block_size, 1);
     // get width of Matrix A
@@ -218,6 +219,10 @@ int main(int argc, char **argv) {
     // get height of Matrix B
     if (checkCmdLineFlag(argc, (const char **)argv, "hB")){
         dimsB.y = getCmdLineArgumentInt(argc, (const char **)argv, "hB");
+    }
+    // get block size
+    if (checkCmdLineFlag(argc, (const char **)argv, "bs")){
+        block_size = getCmdLineArgumentInt(argc, (const char **)argv, "bs");
     }
     // check the size of A & B
     if (dimsA.x != dimsB.y){
