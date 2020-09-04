@@ -23,6 +23,57 @@
 #include <helper_functions.h>
 #include <helper_cuda.h>
 
+
+/**
+ * Matrix multiplication (CUDA Kernel) on the device: C = A * B
+ * wA is A's width and wB is B's width
+ */
+template <int BLOCK_SIZE> __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB){
+    // block index
+    int bx = blockIdx.x;
+    int by = blockIdx.y;
+
+    // thread index
+    int tx = threadIdx.x;
+    int ty = threadIdx.y;
+
+    // index of the first sub-matrix of A processed by the block
+    int aBegin = wA * BLOCK_SIZE * by;
+    prinf("aBegin = wA * BLOCK_SIZE * by = %d * %d * %d = %d\n", wA, BLOCK_SIZE, by, aBegin);
+    
+    // index of the last sub-matrix of A processed by the block
+    int aEnd = aBegin + wA - 1;
+
+    // step size used to iterate through the sub-matrices of A
+    int aStep = BLOCK_SIZE;
+
+    // index of the first sub-matrix of B processed by the block
+    int bBegin = BLOCK_SIZE * bx;
+
+    // step size used to iterate through the sub-matrices of B
+    int bStep = BLOCK_SIZE * wB;
+
+    // Csub is used to store the element of the block sub-matrix
+    // that is computed by the thread
+    float Csub = 0;
+
+    // loop over all the sub-matrices of A & B, required to compute the block sub-matrix
+    for (int a = aBegin, b = bBegin; a <= aEnd; a += aStep, b+= bStep){
+        // declaration of the shared memory array As used to store the sub-matrix of A
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+
+        // declaration of the shared memory array Bs used to store the sub-matrix of B
+        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
+
+        // load the matrices from device mem to shared mem, each thread loads 1 element of each matrix
+        As[ty][tx] = A[a + wA*ty + tx];
+        Bs[ty][tx] = B[b + wB*ty + tx];
+
+        // synchronize to make sure the matrices are loaded
+        __syncthreads();
+    }
+}
+
 /**
  * initialize values for matrix
  */
@@ -75,6 +126,57 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA, con
     // copy host mem to device
     checkCudaErrors(cudaMemcpyAsync(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice, stream));
     checkCudaErrors(cudaMemcpyAsync(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice, stream));
+
+    // setup execution parameters
+    dim3 threads(block_size, block_size);
+    dim3 grid(dimsB.x/threads.x, dimsA.y/threads.y);
+
+    // create and start timer
+    prinf("Computing result using CUDA kernel...\n");
+
+    // warm up operations
+    if (block_size == 16){
+        MatrixMulCuda<16> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+    }else{
+        MatrixMulCuda<32> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+    }
+    prinf("Done!\n");
+
+    // check cuda stream error
+    checkCudaErrors(cudaStreamSynchronize(stream));
+
+    // record the start event
+    checkCudaErrors(cudaEventRecord(start, stream));
+
+    // execute the kernel
+    int nIter = 300;
+    for (int j = 0; j < nIter; j++){
+        if (block_size == 16) {
+            MatrixMulCUDA<16> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+        } else {
+            MatrixMulCUDA<32> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+        }
+    }
+
+    // Record the stop event
+    checkCudaErrors(cudaEventRecord(stop, stream));
+
+    // Wait for the stop event to complete
+    checkCudaErrors(cudaEventSynchronize(stop));
+
+    float msecTotal = 0.0f;
+    checkCudaErrors(cudaEventElapsedTime(&msecTotal, start, stop));
+
+    // Compute and print the performance
+    float msecPerMatrixMul = msecTotal / nIter;
+    double flopsPerMatrixMul = 2.0 * static_cast<double>(dimsA.x) * static_cast<double>(dimsA.y) * static_cast<double>(dimsB.x);
+    double gigaFlops = (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
+
+    printf("Performance= %.2f GFlop/s, Time= %.3f msec, Size= %.0f Ops, WorkgroupSize= %u threads/block\n",
+            gigaFlops,
+            msecPerMatrixMul,
+            flopsPerMatrixMul,
+            threads.x * threads.y);
 
     return 0;
 }
