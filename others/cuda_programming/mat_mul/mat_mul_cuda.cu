@@ -138,7 +138,7 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA, con
     if (block_size == 16){
         MatrixMulCUDA<16> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
     }else{
-        MatrixMulCUDA<block_size> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+        MatrixMulCUDA<4> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
     }
     printf("Done!\n");
 
@@ -154,7 +154,7 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA, con
         if (block_size == 16) {
             MatrixMulCUDA<16> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
         } else {
-            MatrixMulCUDA<block_size> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+            MatrixMulCUDA<4> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
         }
     }
 
