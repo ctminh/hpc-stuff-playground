@@ -87,7 +87,7 @@ EXE=matrixmul
 
 #Target Rules
 $(EXE):$(OBJS)
-	$(CC) $(INCLUDES) $(OBJS) -L $(CUDA_LIB_PATH) -l$(CL_LIBS) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $(EXE)
+	$(CC) $(INCLUDES) $(OBJS) -L$(CUDA_LIB_PATH) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $(EXE)
 
 %.o:%.cpp
 	$(CC) -c $(CFLAGS) $(INCLUDES) $< -o $@
