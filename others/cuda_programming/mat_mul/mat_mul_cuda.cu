@@ -133,6 +133,8 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA, con
 
     // create and start timer
     printf("Computing result using CUDA kernel...\n");
+    printf("\t Threads: %d x %d\n", block_size, block_size);
+    printf("\t Grid: %d x %d\n", dimsB.x/threads.x, dimsA.y/threads.y);
 
     // warm up operations
     if (block_size == 16){
