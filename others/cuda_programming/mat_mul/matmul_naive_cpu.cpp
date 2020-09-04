@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // export C interface
 extern "C"
-void computeGold( float*, const float*, const float*, unsigned int, unsigned int, unsigned int);
+void matmul_naive_cpu( float*, const float*, const float*, unsigned int, unsigned int, unsigned int);
 ////////////////////////////////////////////////////////////////////////////////
 //! Compute reference data set
 //! C = A * B
