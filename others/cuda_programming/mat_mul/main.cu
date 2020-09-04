@@ -192,6 +192,8 @@ void runTest(int argc, char **argv)
     float* h_B = (float*) malloc(mem_size_B);
     float flop = 2 * (float)WC * (float)HC * (float)WA;
     // allocate host memory for the result
+    unsigned int size_C = WC * HC;
+    unsigned int mem_size_C = sizeof(float) * size_C;
     float* h_C = (float*) malloc(mem_size_C);
 
     // initialize host memory
