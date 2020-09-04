@@ -39,7 +39,7 @@ template <int BLOCK_SIZE> __global__ void MatrixMulCUDA(float *C, float *A, floa
 
     // index of the first sub-matrix of A processed by the block
     int aBegin = wA * BLOCK_SIZE * by;
-    prinf("aBegin = wA * BLOCK_SIZE * by = %d * %d * %d = %d\n", wA, BLOCK_SIZE, by, aBegin);
+    printf("aBegin = wA * BLOCK_SIZE * by = %d * %d * %d = %d\n", wA, BLOCK_SIZE, by, aBegin);
     
     // index of the last sub-matrix of A processed by the block
     int aEnd = aBegin + wA - 1;
@@ -132,15 +132,15 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA, con
     dim3 grid(dimsB.x/threads.x, dimsA.y/threads.y);
 
     // create and start timer
-    prinf("Computing result using CUDA kernel...\n");
+    printf("Computing result using CUDA kernel...\n");
 
     // warm up operations
     if (block_size == 16){
-        MatrixMulCuda<16> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+        MatrixMulCUDA<16> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
     }else{
-        MatrixMulCuda<32> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+        MatrixMulCUDA<32> <<< grid, threads, 0, stream >>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
     }
-    prinf("Done!\n");
+    printf("Done!\n");
 
     // check cuda stream error
     checkCudaErrors(cudaStreamSynchronize(stream));
