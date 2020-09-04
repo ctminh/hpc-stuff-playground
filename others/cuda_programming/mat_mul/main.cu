@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "matrixMul.h"
+#include "matmul.h"
 
 // includes, kernels
 // #include <matrixMul_kernel.cuh>
