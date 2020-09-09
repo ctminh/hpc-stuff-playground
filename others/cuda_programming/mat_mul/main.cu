@@ -218,10 +218,59 @@ void runTest(int argc, char **argv)
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&msecTotal, start, stop);
     printf("   Naive CPU (CPU-version Reference): matrix_size = %dx%d\n", HA, WA);
-    printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal/ 1e+6);
+    printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal / 1e+6);
+    printf("   //////////////////////////////////////////////////////\n\n");
 #endif
 
+    
+    /****************************************************/
+    /*  Allocate device memory for calling GPU kernels  */
+    /****************************************************/
+    printf("/*********************************************************/\n");
+    printf("Allocating mem for matrix A, B, C on GPU...\n");
+    float* d_A;
+    cudaMalloc((void**) &d_A, mem_size_A);
+    float* d_B;
+    cudaMalloc((void**) &d_B, mem_size_B);
+    // allocate device memory for result
+    unsigned int size_C = WC * HC;
+    unsigned int mem_size_C = sizeof(float) * size_C;
+    float* d_C;
+    cudaMalloc((void**) &d_C, mem_size_C);
+    printf("/*********************************************************/\n");
 
+
+    /****************************************************/
+    /*  CUDA SDK example                                */
+    /****************************************************/
+    printf("   3.2. Matmul_CUDA_SDK kernel...\n");
+    // create and start timer
+    cudaEventCreate(&start);
+    cudaEventRecord(start, NULL);
+    // copy host memory to device
+    printf("\tCopy host memory to devices\n");
+    cudaMemcpy(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice);
+    // setup execution parameters
+    printf("\tSetup execution parameters\n");
+    dim3 threads, grid;
+    threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
+    grid = dim3(WC/threads.x, HC/threads.y);
+    printf("\t\tthreads = %dx%d, grid = %dx%d\n", threads.x, threads.y, grid.x, grid.y);
+    // call the kernel
+    printf("\tCall the kernel - Matmu_CUDA_SDK\n");
+    matmul_cuda_sdk<<< grid, threads >>>(d_C, d_A, d_B, WA, WB);
+    // copy result from device to host
+    printf("\tCopy the result back to the host memory\n");
+    cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
+    // stop and destroy timer
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop, NULL);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&msecTotal, start, stop);
+    printf("   Matmul CUDA SDK example: matrix_size = %dx%d\n", HA, WA);
+    printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal / 1e+6);
+    printf("   //////////////////////////////////////////////////////\n\n");
 }
 
 // Allocates a matrix with random float entries.
