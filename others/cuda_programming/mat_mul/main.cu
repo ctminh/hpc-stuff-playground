@@ -200,10 +200,10 @@ void runTest(int argc, char **argv)
     randomInit(h_B, size_B);
 
     // check matrix A & B which are stored as 1D array
-    printf("\tMatrix A: \n");
-    printMat(h_A, WA);
-    printf("\tMatrix A: \n");
-    printMat(h_B, WB);
+    // printf("\tMatrix A: \n");
+    // printMat(h_A, WA);
+    // printf("\tMatrix A: \n");
+    // printMat(h_B, WB);
 
     /////////////////////////////////////////////////////////////////////
     printf("3. Call the computing kernel...\n");

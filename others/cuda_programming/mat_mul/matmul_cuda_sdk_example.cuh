@@ -32,9 +32,9 @@ matmul_cuda_sdk(float *C, float *A, float *B, int wA, int wB)
     // index of the first sub-matrix of A processed by the block
     int aBegin = wA * BLOCK_SIZE *by;
     int aEnd = aBegin + wA - 1;
-    printf("\tCheck index of the 1st and last sub-mat of A\n");
-    printf("\taBegin = wA * BLOCK_SIZE * by = %d * %d * %d = %d\n", wA, BLOCK_SIZE, by, aBegin);
-    printf("\taEnd = aBegin * wA - 1 = %d * %d - 1 = %d\n", aBegin, wA, aEnd);
+    // printf("\tCheck index of the 1st and last sub-mat of A\n");
+    // printf("\taBegin = wA * BLOCK_SIZE * by = %d * %d * %d = %d\n", wA, BLOCK_SIZE, by, aBegin);
+    // printf("\taEnd = aBegin * wA - 1 = %d * %d - 1 = %d\n", aBegin, wA, aEnd);
 }
 
 #endif // #ifndef _MATRIXMUL_CUDA_SDK_EXAMPLE_H_
