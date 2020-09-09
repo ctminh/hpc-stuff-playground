@@ -12,6 +12,9 @@
 #ifndef _MATRIXMUL_H_
 #define _MATRIXMUL_H_
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #define CHECK_RESULT 1
 #define ENABLE_NAIVE 1
 
@@ -29,5 +32,16 @@
 #define HB WA  // Matrix B height
 #define WC WB  // Matrix C width 
 #define HC HA  // Matrix C height
+
+void printMat(float *M, int mat_size)
+{
+    int i, j;
+    for (i = 0; i < mat_size; i++){
+        for (j = 0; j < mat_size; j++){
+            printf("%.2f ", M[i*mat_size + j]);
+        }
+        printf("\n");
+    }
+}
 
 #endif // _MATRIXMUL_H_

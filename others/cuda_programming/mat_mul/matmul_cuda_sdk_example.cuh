@@ -18,17 +18,6 @@
     #define BS(i, j) Bs[i][j]
 #endif
 
-void printMat(float *M, int mat_size)
-{
-    int i, j;
-    for (i = 0; i < mat_size; i++){
-        for (j = 0; j < mat_size; j++){
-            printf("%.2f ", M[i*mat_size + j]);
-        }
-        printf("\n");
-    }
-}
-
 __global__ void
 matmul_cuda_sdk(float *C, float *A, float *B, int wA, int wB)
 {
