@@ -201,9 +201,9 @@ void runTest(int argc, char **argv)
 
     // check matrix A & B which are stored as 1D array
     printf("\tMatrix A: \n");
-    printMat(&h_A, WA);
+    printMat(h_A, WA);
     printf("\tMatrix A: \n");
-    printMat(&h_B, WB);
+    printMat(h_B, WB);
 
     /////////////////////////////////////////////////////////////////////
     printf("3. Call the computing kernel...\n");
