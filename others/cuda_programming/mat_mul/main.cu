@@ -7,7 +7,7 @@
 #include "matmul.h"
 
 // includes, kernels
-#include <matmul_cuda_sdk_example.cuh>
+#include "matmul_cuda_sdk_example.cuh"
 // #include <matrixMul_naive.cuh>
 // #include <matrixMul_tiling.cuh>
 // #include <matrixMul_coalescing.cuh>
