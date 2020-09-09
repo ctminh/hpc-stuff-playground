@@ -23,7 +23,7 @@ void printMat(float *M, int mat_size)
     int i, j;
     for (i = 0; i < mat_size; i++){
         for (j = 0; j < mat_size; j++){
-            printf("%.2f ", A[i*mat_size + j]);
+            printf("%.2f ", M[i*mat_size + j]);
         }
         printf("\n");
     }
@@ -42,9 +42,9 @@ matmul_cuda_sdk(float *C, float *A, float *B, int wA, int wB)
 
     // check matrix A & B which are stored as 1D array
     printf("\tMatrix A: \n");
-    printMat(A);
+    printMat(A, wA);
     printf("\tMatrix A: \n");
-    printMat(B);
+    printMat(B, wB);
 
     // index of the first sub-matrix of A processed by the block
     int aBegin = wA * BLOCK_SIZE *by;
