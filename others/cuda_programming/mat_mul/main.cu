@@ -199,6 +199,12 @@ void runTest(int argc, char **argv)
     randomInit(h_A, size_A);
     randomInit(h_B, size_B);
 
+    // check matrix A & B which are stored as 1D array
+    printf("\tMatrix A: \n");
+    printMat(A, wA);
+    printf("\tMatrix A: \n");
+    printMat(B, wB);
+
     /////////////////////////////////////////////////////////////////////
     printf("3. Call the computing kernel...\n");
     /////////////////////////////////////////////////////////////////////
