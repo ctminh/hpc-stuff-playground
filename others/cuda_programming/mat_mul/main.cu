@@ -217,7 +217,7 @@ void runTest(int argc, char **argv)
     cudaEventRecord(stop, NULL);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&msecTotal, start, stop);
-    printf("   Naive CPU (CPU-version Reference)\n");
+    printf("   Naive CPU (CPU-version Reference): matrix_size = %dx%d\n", HA, WA);
     printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal/ 1e+6);
 #endif
 
