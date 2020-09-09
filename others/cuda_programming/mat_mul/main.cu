@@ -150,6 +150,7 @@ void runTest(int argc, char **argv)
     }
 
     // By default, we use device 0, otherwise we override the device ID based on what is provided at the command line
+    printf("1. Check device ID...\n");
     int devID = 0;
     if (checkCmdLineFlag(argc, (const char **)argv, "device")){
         devID = getCmdLineArgumentInt(argc, (const char **)argv, "device");
@@ -172,18 +173,17 @@ void runTest(int argc, char **argv)
         printf("cudaGetDeviceProperties returned error code %d, line(%d)\n", error, __LINE__);
     }
     else{
-        printf("GPU Device %d: \"%s\" with compute capability %d.%d\n\n", devID, deviceProp.name, deviceProp.major, deviceProp.minor);
+        printf("\tGPU Device %d: \"%s\" with compute capability %d.%d\n\n", devID, deviceProp.name, deviceProp.major, deviceProp.minor);
     }
 
     // utilities
-    cudaEvent_t start;
-    cudaEvent_t stop;
-    float msecTotal;
-
-    // set seed for rand()
-    srand(2006);
+    cudaEvent_t start;  // get start time
+    cudaEvent_t stop;   // get end time
+    float msecTotal;    // runtime
+    srand(2006);        // set seed for rand()
 
     // allocate host memory for matrices A and B
+    printf("2. Allocate memory for matrix A, B, C on host machine...\n");
     unsigned int size_A = WA * HA;
     unsigned int mem_size_A = sizeof(float) * size_A;
     float* h_A = (float*) malloc(mem_size_A);
@@ -197,10 +197,15 @@ void runTest(int argc, char **argv)
     float* h_C = (float*) malloc(mem_size_C);
 
     // initialize host memory
+    printf("\tInitialize matrix A, B...\n");
     randomInit(h_A, size_A);
     randomInit(h_B, size_B);
 
+    /////////////////////////////////////////////////////////////////////
+    printf("3. Call the computing kernel...\n");
+    /////////////////////////////////////////////////////////////////////
 #if CHECK_RESULT == 1
+    printf("   3.1. Matmul_Naive_CPU...\n");
     // create and start timer
     cudaEventCreate(&start);
     cudaEventRecord(start, NULL); 
@@ -212,8 +217,8 @@ void runTest(int argc, char **argv)
     cudaEventRecord(stop, NULL);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&msecTotal, start, stop);
-    printf("Naive CPU (CPU-version Reference)\n");
-    printf("Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal/ 1e+6);
+    printf("   Naive CPU (CPU-version Reference)\n");
+    printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal/ 1e+6);
 #endif
 
 
