@@ -230,8 +230,8 @@ void runTest(int argc, char **argv)
     /****************************************************/
     /*  Allocate device memory for calling GPU kernels  */
     /****************************************************/
-    printf("\t/*********************************************************/\n");
-    printf("\tAllocating mem for matrix A, B, C on GPU...\n");
+    printf("   /*********************************************************/\n");
+    printf("   Allocating mem for matrix A, B, C on GPU...\n");
     float* d_A;
     cudaMalloc((void**) &d_A, mem_size_A);
     float* d_B;
@@ -239,7 +239,7 @@ void runTest(int argc, char **argv)
     // allocate device memory for result
     float* d_C;
     cudaMalloc((void**) &d_C, mem_size_C);
-    printf("\t/*********************************************************/\n\n");
+    printf("   /*********************************************************/\n\n");
 
 
     /****************************************************/
