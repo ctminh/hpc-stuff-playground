@@ -53,3 +53,5 @@ matmul_cuda_sdk(float *C, float *A, float *B, int wA, int wB)
     printf("\taBegin = wA * BLOCK_SIZE * by = %d * %d * %d = %d\n", wA, BLOCK_SIZE, by, aBegin);
     printf("\taEnd = aBegin * wA - 1 = %d * %d - 1 = %d\n", aBegin, wA, aEnd);
 }
+
+#endif // #ifndef _MATRIXMUL_CUDA_SDK_EXAMPLE_H_
