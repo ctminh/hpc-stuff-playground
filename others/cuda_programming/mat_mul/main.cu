@@ -195,7 +195,7 @@ void runTest(int argc, char **argv)
     float* h_C = (float*) malloc(mem_size_C);
 
     // initialize host memory
-    printf("\tInitialize matrix A, B...\n");
+    printf("\tInitialize matrix A, B...\n\n");
     randomInit(h_A, size_A);
     randomInit(h_B, size_B);
 
@@ -230,8 +230,8 @@ void runTest(int argc, char **argv)
     /****************************************************/
     /*  Allocate device memory for calling GPU kernels  */
     /****************************************************/
-    printf("/*********************************************************/\n");
-    printf("Allocating mem for matrix A, B, C on GPU...\n");
+    printf("\t/*********************************************************/\n");
+    printf("\tAllocating mem for matrix A, B, C on GPU...\n");
     float* d_A;
     cudaMalloc((void**) &d_A, mem_size_A);
     float* d_B;
@@ -239,7 +239,7 @@ void runTest(int argc, char **argv)
     // allocate device memory for result
     float* d_C;
     cudaMalloc((void**) &d_C, mem_size_C);
-    printf("/*********************************************************/\n");
+    printf("\t/*********************************************************/\n\n");
 
 
     /****************************************************/
