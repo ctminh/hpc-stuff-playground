@@ -29,12 +29,6 @@ matmul_cuda_sdk(float *C, float *A, float *B, int wA, int wB)
     int tx = threadIdx.x;
     int ty = threadIdx.y;
 
-    // check matrix A & B which are stored as 1D array
-    printf("\tMatrix A: \n");
-    printMat(A, wA);
-    printf("\tMatrix A: \n");
-    printMat(B, wB);
-
     // index of the first sub-matrix of A processed by the block
     int aBegin = wA * BLOCK_SIZE *by;
     int aEnd = aBegin + wA - 1;
