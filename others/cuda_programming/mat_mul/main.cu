@@ -245,6 +245,8 @@ void runTest(int argc, char **argv)
     cudaMalloc((void**) &d_B, mem_size_B);
     float* d_C;
     cudaMalloc((void**) &d_C, mem_size_C);
+    // for setting up the cuda configuration
+    dim3 threads, grid;
     printf("   /*********************************************************/\n\n");
 
 
@@ -262,7 +264,6 @@ void runTest(int argc, char **argv)
     cudaMemcpy(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice);
     // setup execution parameters
     printf("\tSetup execution parameters\n");
-    dim3 threads, grid;
     threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
     grid = dim3(WC/threads.x, HC/threads.y);
     printf("\t\tthreads = %dx%d, grid = %dx%d\n", threads.x, threads.y, grid.x, grid.y);
