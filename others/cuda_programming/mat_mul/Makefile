@@ -53,7 +53,7 @@ GENCODE_SM50	:= -gencode arch=compute_50,code=sm_50 -gencode arch=compute_52,cod
 GENCODE_SM60	:= -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61
 GENCODE_SM70	:= -gencode arch=compute_70,code=sm_70 -gencode arch=compute_75,code=sm_75
 GENCODE_SM80	:= -gencode arch=compute_80,code=sm_80
-GENCODE_FLAGS   := $(GENCODE_SM70)
+GENCODE_FLAGS   := $(GENCODE_SM60)
 
 # OS-specific build flags
 ifneq ($(DARWIN),)
