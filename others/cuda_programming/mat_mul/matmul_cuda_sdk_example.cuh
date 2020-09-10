@@ -41,8 +41,6 @@ matmul_cuda_sdk(float *C, float *A, float *B, int wA, int wB)
     // index of the first sub-matrix of B processed by the block
     int bBegin = BLOCK_SIZE * bx;
     // Step size used to iterate through the sub-matrices of B
-    int aStep  = BLOCK_SIZE;
-
     int bStep = BLOCK_SIZE * wB;
 
     // Csub is used to store the element of the block sub-matrix that is computed by the thread
