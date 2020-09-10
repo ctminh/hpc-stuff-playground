@@ -236,7 +236,6 @@ void runTest(int argc, char **argv)
     cudaMalloc((void**) &d_A, mem_size_A);
     float* d_B;
     cudaMalloc((void**) &d_B, mem_size_B);
-    // allocate device memory for result
     float* d_C;
     cudaMalloc((void**) &d_C, mem_size_C);
     printf("   /*********************************************************/\n\n");

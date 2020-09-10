@@ -19,16 +19,16 @@
 #define ENABLE_NAIVE 1
 
 // Thread block size
-#define BLOCK_SIZE 4
+#define BLOCK_SIZE 2
 
 // outer product vetor size is VECTOR_SIZE * BLOCK_SIZE
-#define VECTOR_SIZE 4
+#define VECTOR_SIZE 2
 
 // Matrix dimensions
 // (chosen as multiples of the thread block size for simplicity)
-#define WA (32 * BLOCK_SIZE) // Matrix A width
-#define HA (32 * BLOCK_SIZE) // Matrix A height
-#define WB (32 * BLOCK_SIZE) // Matrix B width
+#define WA (2 * BLOCK_SIZE) // Matrix A width
+#define HA (2 * BLOCK_SIZE) // Matrix A height
+#define WB (2 * BLOCK_SIZE) // Matrix B width
 #define HB WA  // Matrix B height
 #define WC WB  // Matrix C width 
 #define HC HA  // Matrix C height
