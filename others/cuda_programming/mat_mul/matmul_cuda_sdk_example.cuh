@@ -29,6 +29,10 @@ matmul_cuda_sdk(float *C, float *A, float *B, int wA, int wB)
     int tx = threadIdx.x;
     int ty = threadIdx.y;
 
+    // Put "the declaration of the shared memory array" out of the loop
+    __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+    __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
+
     // index of the first sub-matrix of A processed by the block
     int aBegin = wA * BLOCK_SIZE *by;
     int aEnd = aBegin + wA - 1;
@@ -52,10 +56,10 @@ matmul_cuda_sdk(float *C, float *A, float *B, int wA, int wB)
             a += aStep, b += bStep)
     {
         // Declaration of the shared memory array As used to store the sub-matrix of A
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        // __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
 
         // Declaration of the shared memory array Bs used to store the sub-matrix of B
-        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
+        // __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
 
         // Load the matrices from device memory to shared memory; each thread loads one element of each matrix
         AS(ty, tx) = A[a + wA*ty + tx];
