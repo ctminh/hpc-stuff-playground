@@ -200,10 +200,10 @@ void runTest(int argc, char **argv)
     randomInit(h_B, size_B);
 
     // check matrix A & B which are stored as 1D array
-    // printf("\tMatrix A: \n");
-    // printMat(h_A, WA);
-    // printf("\tMatrix A: \n");
-    // printMat(h_B, WB);
+    printf("\tMatrix A: \n");
+    printMat(h_A, WA);
+    printf("\tMatrix A: \n");
+    printMat(h_B, WB);
 
     /////////////////////////////////////////////////////////////////////
     printf("3. Call the computing kernel...\n");
@@ -272,6 +272,10 @@ void runTest(int argc, char **argv)
     printf("   Matmul CUDA SDK example: matrix_size = %dx%d\n", HA, WA);
     printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal / 1e+6);
     printf("   //////////////////////////////////////////////////////\n\n");
+
+    // check matrix C
+    printf("The result - matrix C:\n");
+    printMat(h_C, WC);
 }
 
 // Allocates a matrix with random float entries.
