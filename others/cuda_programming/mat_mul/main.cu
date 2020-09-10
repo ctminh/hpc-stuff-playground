@@ -210,6 +210,7 @@ void runTest(int argc, char **argv)
     printMat(h_A, WA);
     printf("\tMatrix B: \n");
     printMat(h_B, WB);
+    printf("\n");
 
     /////////////////////////////////////////////////////////////////////
     printf("3. Call the computing kernel...\n");
