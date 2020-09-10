@@ -6,13 +6,19 @@
 
 // includes, kernels
 #include "matmul_cuda_sdk_example.cuh"
-// #include <matrixMul_naive.cuh>
+#include "matmul_naive_gpu.cuh"
+
 // #include <matrixMul_tiling.cuh>
 // #include <matrixMul_coalescing.cuh>
 // #include <matrixMul_noBankConflict.cuh>
 // #include <matrixMul_compOpt.cuh>
 // #include <matrixMul_unroll.cuh>
 // #include <matrixMul_prefetch.cuh>
+
+
+#define ENABLE_MATMUL_CUDA_SDK 1
+#define ENABLE_MATMUL_NAIVE_GPU 1
+#define ENABLE_MATMUL_TILING_GPU 0
 
 ////////////////////////////////////////////////////////////////////////////////
 // declaration, forward
@@ -244,6 +250,7 @@ void runTest(int argc, char **argv)
     /****************************************************/
     /*  CUDA SDK example                                */
     /****************************************************/
+#if ENABLE_MATMUL_CUDA_SDK == 1
     printf("   3.2. Matmul_CUDA_SDK kernel...\n");
     // create and start timer
     cudaEventCreate(&start);
@@ -272,10 +279,42 @@ void runTest(int argc, char **argv)
     printf("   Matmul CUDA SDK example: matrix_size = %dx%d\n", HA, WA);
     printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal / 1e+6);
     printf("   //////////////////////////////////////////////////////\n\n");
+#endif
+
+#if ENABLE_MATMUL_NAIVE_GPU == 1
+    printf("   3.3. Matmul_Naive_GPU kernel...\n");
+    // create and start timer
+    cudaEventCreate(&start);
+    cudaEventRecord(start, NULL);
+    // copy host memory to device
+    printf("\tCopy host memory to devices\n");
+    cudaMemcpy(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice);
+    // setup execution parameters
+    printf("\tSetup execution parameters\n");
+    dim3 threads, grid;
+    threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
+    grid = dim3(WC/threads.x, HC/threads.y);
+    printf("\t\tthreads = %dx%d, grid = %dx%d\n", threads.x, threads.y, grid.x, grid.y);
+    // call the kernel
+    printf("\tCall the kernel - Matmul_CUDA_SDK\n");
+    matmul_naive_gpu<<< grid, threads >>>(d_C, d_A, d_B, WA, WB);
+    // copy result from device to host
+    printf("\tCopy the result back to the host memory\n");
+    cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
+    // stop and destroy timer
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop, NULL);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&msecTotal, start, stop);
+    printf("   Matmul Naive GPU: matrix_size = %dx%d\n", HA, WA);
+    printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal / 1e+6);
+    printf("   //////////////////////////////////////////////////////\n\n");
+#endif
 
     // check matrix C
-    printf("The result - matrix C:\n");
-    printMat(h_C, WC);
+    // printf("The result - matrix C:\n");
+    // printMat(h_C, WC);
 }
 
 // Allocates a matrix with random float entries.
