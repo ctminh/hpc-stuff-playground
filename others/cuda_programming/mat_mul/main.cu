@@ -260,7 +260,7 @@ void runTest(int argc, char **argv)
     grid = dim3(WC/threads.x, HC/threads.y);
     printf("\t\tthreads = %dx%d, grid = %dx%d\n", threads.x, threads.y, grid.x, grid.y);
     // call the kernel
-    printf("\tCall the kernel - Matmu_CUDA_SDK\n");
+    printf("\tCall the kernel - Matmul_CUDA_SDK\n");
     matmul_cuda_sdk<<< grid, threads >>>(d_C, d_A, d_B, WA, WB);
     // copy result from device to host
     printf("\tCopy the result back to the host memory\n");
