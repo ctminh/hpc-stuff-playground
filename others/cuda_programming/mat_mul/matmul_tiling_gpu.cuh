@@ -23,7 +23,7 @@
 //! wA is A's width and wB is B's width
 ////////////////////////////////////////////////////////////////////////////////
 __global__ void
-matrixMul_tiling( float* C, float* A, float* B, int wA, int wB)
+matmul_tiling_gpu( float* C, float* A, float* B, int wA, int wB)
 {
     // Block index
     int bx = blockIdx.x;
