@@ -7,8 +7,8 @@
 // includes, kernels
 #include "matmul_cuda_sdk_example.cuh"
 #include "matmul_naive_gpu.cuh"
+#include "matmul_tiling_gpu.cuh"
 
-// #include <matrixMul_tiling.cuh>
 // #include <matrixMul_coalescing.cuh>
 // #include <matrixMul_noBankConflict.cuh>
 // #include <matrixMul_compOpt.cuh>
@@ -18,7 +18,7 @@
 
 #define ENABLE_MATMUL_CUDA_SDK 1
 #define ENABLE_MATMUL_NAIVE_GPU 1
-#define ENABLE_MATMUL_TILING_GPU 0
+#define ENABLE_MATMUL_TILING_GPU 1
 
 ////////////////////////////////////////////////////////////////////////////////
 // declaration, forward
@@ -282,6 +282,9 @@ void runTest(int argc, char **argv)
     printf("   //////////////////////////////////////////////////////\n\n");
 #endif
 
+    /****************************************************/
+    /*  Matmul Naive GPU                                */
+    /****************************************************/
 #if ENABLE_MATMUL_NAIVE_GPU == 1
     printf("   3.3. Matmul_Naive_GPU kernel...\n");
     // create and start timer
@@ -297,7 +300,7 @@ void runTest(int argc, char **argv)
     grid = dim3(WC/threads.x, HC/threads.y);
     printf("\t\tthreads = %dx%d, grid = %dx%d\n", threads.x, threads.y, grid.x, grid.y);
     // call the kernel
-    printf("\tCall the kernel - Matmul_CUDA_SDK\n");
+    printf("\tCall the kernel - Matmul_Naive_GPU\n");
     matmul_naive_gpu<<< grid, threads >>>(d_C, d_A, d_B, WA, WB);
     // copy result from device to host
     printf("\tCopy the result back to the host memory\n");
@@ -308,6 +311,39 @@ void runTest(int argc, char **argv)
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&msecTotal, start, stop);
     printf("   Matmul Naive GPU: matrix_size = %dx%d\n", HA, WA);
+    printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal / 1e+6);
+    printf("   //////////////////////////////////////////////////////\n\n");
+#endif
+
+    /****************************************************/
+    /*  Matmul Tiling GPU                               */
+    /****************************************************/
+#if ENABLE_MATMUL_TILING_GPU == 1
+    printf("   3.4. Matmul_Naive_GPU kernel...\n");
+    // create and start timer
+    cudaEventCreate(&start);
+    cudaEventRecord(start, NULL);
+    // copy host memory to device
+    printf("\tCopy host memory to devices\n");
+    cudaMemcpy(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice);
+    // setup execution parameters
+    printf("\tSetup execution parameters\n");
+    threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
+    grid = dim3(WC/threads.x, HC/threads.y);
+    printf("\t\tthreads = %dx%d, grid = %dx%d\n", threads.x, threads.y, grid.x, grid.y);
+    // call the kernel
+    printf("\tCall the kernel - Matmul_Tiling_GPU\n");
+    matmul_tiling_gpu<<< grid, threads >>>(d_C, d_A, d_B, WA, WB);
+    // copy result from device to host
+    printf("\tCopy the result back to the host memory\n");
+    cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
+    // stop and destroy timer
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop, NULL);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&msecTotal, start, stop);
+    printf("   Matmul Tiling GPU: matrix_size = %dx%d\n", HA, WA);
     printf("   Processing time: %f (ms), GFLOPS: %f \n", msecTotal, flop / msecTotal / 1e+6);
     printf("   //////////////////////////////////////////////////////\n\n");
 #endif
