@@ -320,7 +320,7 @@ void runTest(int argc, char **argv)
     /*  Matmul Tiling GPU                               */
     /****************************************************/
 #if ENABLE_MATMUL_TILING_GPU == 1
-    printf("   3.4. Matmul_Naive_GPU kernel...\n");
+    printf("   3.4. Matmul_Tiling_GPU kernel...\n");
     // create and start timer
     cudaEventCreate(&start);
     cudaEventRecord(start, NULL);

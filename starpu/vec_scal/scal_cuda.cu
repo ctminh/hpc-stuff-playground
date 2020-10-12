@@ -21,7 +21,6 @@ extern "C" void scal_cuda_func(void *buffers[], void *_args)
     unsigned threads_per_block = 64;
     unsigned nblocks = (n + threads_per_block - 1) / threads_per_block;
     vector_mult_cuda<<<nblocks, threads_per_block, 0, starpu_cuda_get_local_stream()>>> (n, val, *factor);
-    printf("[scal_cuda_func] check the result: %0.2f\n", val[2]);
     
     cudaStreamSynchronize(starpu_cuda_get_local_stream());
 }
