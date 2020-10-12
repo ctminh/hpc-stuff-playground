@@ -1,7 +1,7 @@
 # export dependencies for GPU-PC at MNM-Chair
 OPENCL_INC=/usr/local/cuda/include
 OPENCL_LIB=/usr/local/cuda/lib64
-HWLOC_HOME=home/ctminh/Projects/loc-libs/hwloc/hwloc-2.2.0/build
+HWLOC_HOME=/home/ctminh/Projects/loc-libs/hwloc/hwloc-2.2.0/build
 export PKG_CONFIG_PATH=$HWLOC_HOME/lib/pkgconfig:$PKG_CONFIG_PATH
 export LD_LIBRARY_PATH=$OPENCL_LIB:$HWLOC_HOME/lib:$LD_LIBRARY_PATH
 export INCLUDE=$OPENCL_INC:$HWLOC_HOME/include:$INCLUDE
