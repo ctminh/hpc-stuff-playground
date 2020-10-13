@@ -66,6 +66,6 @@ struct block_description
 
 	/* Shortcut pointer to the neighbours */
 	struct block_description *boundary_blocks[NDIRS];
-}
+};
 
 #endif /* __STENCIL_H__ */
