@@ -1,4 +1,4 @@
-#include "stencil.h"
+#include <stencil.h>
 
 
 #ifdef STARPU_QUICK_CHECK
@@ -6,7 +6,7 @@ static unsigned niter = 4;
 #define SIZE 16
 #define NBZ 8
 #else
-unsigned niter = 32;
+static unsigned niter = 32;
 #define SIZE 128
 #define NBZ 64
 #endif
