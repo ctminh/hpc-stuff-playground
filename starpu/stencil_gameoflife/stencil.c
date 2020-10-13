@@ -4,6 +4,10 @@
 #include <valgrind/valgrind.h>
 #endif
 
+#ifdef STARPU_USE_MPI
+#define STARPU_USE_MPI 0
+#endif
+
 /* Main application */
 
 /* default parameter values */
@@ -65,7 +69,7 @@ int main(int argc, char **argv)
     }
 
     // init starpu
-    printf("1. init StarPU ...")
+    printf("1. init StarPU ...");
     ret = starpu_init(NULL);
 	if (ret == -ENODEV) return 77;
 	STARPU_CHECK_RETURN_VALUE(ret, "starpu_init");
