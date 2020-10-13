@@ -5,6 +5,11 @@
 // #define NBZ 8
 // #else
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <starpu.h>
+#include <unistd.h>
+
 #define STARPU_USE_MPI 0
 #define FPRINTF(ofile, fmt, ...) do { if (!getenv("STARPU_SSILENT")) {fprintf(ofile, fmt, ## __VA_ARGS__); }} while(0)
 
