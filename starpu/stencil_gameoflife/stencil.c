@@ -1,4 +1,5 @@
 #include "stencil.h"
+#include <stdio.h>
 
 // #ifdef STARPU_HAVE_VALGRIND_H
 // #include <valgrind/valgrind.h>
