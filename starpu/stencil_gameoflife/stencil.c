@@ -6,11 +6,6 @@
 
 /* Main application */
 
-/* default parameter values */
-static unsigned bind_tasks = 0;
-
-static unsigned ticks = 1000;
-
 #ifdef STARPU_QUICK_CHECK
 static unsigned niter = 4;
 #define SIZE 16
@@ -20,6 +15,10 @@ static unsigned niter = 32;
 #define SIZE 128
 #define NBZ 64
 #endif
+
+/* default parameter values */
+static unsigned bind_tasks = 0;
+static unsigned ticks = 1000;
 
 /* Problem size */
 static unsigned sizex = SIZE;
