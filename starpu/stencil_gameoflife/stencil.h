@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <starpu.h>
+#include <unistd.h>
 
 #ifndef STARPU_USE_MPI
 #define STARPU_USE_MPI 0
@@ -11,7 +12,7 @@
 
 // if define CUDA
 #ifndef __CUDACC__
-#if defined(STARPU_USE_MPI) && !defined(STARPU_USE_MPI_MASTER_SLAVE)
+#if STARPU_USE_MPI && !defined(STARPU_USE_MPI_MASTER_SLAVE)
 #include <mpi.h>
 #include <starpu_mpi.h>
 #endif
