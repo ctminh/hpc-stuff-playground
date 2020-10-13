@@ -1,5 +1,5 @@
-#ifndef __STENCIL_H__
-#define __STENCIL_H__
+// #ifndef __STENCIL_H__
+// #define __STENCIL_H__
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -68,4 +68,4 @@ struct block_description
 	struct block_description *boundary_blocks[NDIRS];
 }
 
-#endif /* __STENCIL_H__ */
+// #endif /* __STENCIL_H__ */
