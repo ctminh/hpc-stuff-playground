@@ -10,7 +10,7 @@ stencil: stencil.o
 
 # for compiling
 %.o: %.cu
-	$(CC) $(CUDA_FLAGS) $(CFLAGS) $(LDLIBS) $< -c $@
+	$(NVCC) $(CUDA_FLAGS) $(CFLAGS) $(LDLIBS) $< -c $@
 
 clean:
 	rm -f stencil *.o
