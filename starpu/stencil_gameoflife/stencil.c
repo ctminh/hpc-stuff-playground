@@ -7,7 +7,7 @@
 /* Main application */
 
 /* default parameter values */
-static unsigned bind_tasks = 0;
+static unsigned  bind_tasks = 0;
 
 static unsigned ticks = 1000;
 
