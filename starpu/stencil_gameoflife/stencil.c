@@ -7,7 +7,7 @@
 /* Main application */
 
 /* default parameter values */
-static unsigned  bind_tasks = 0;
+static unsigned bind_tasks = 0;
 
 static unsigned ticks = 1000;
 
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 
     // STARPU USE MPI
     printf("[CHECK] STARPU_USE_MPI=%d\n", STARPU_USE_MPI);
-    #if define(STARPU_USE_MPI)
+    #if STARPU_USE_MPI
         int thread_support;
         if (MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &thread_support)){
             FPRINTF(stderr, "MPI_Init_thread failed\n");
