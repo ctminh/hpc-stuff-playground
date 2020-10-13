@@ -6,6 +6,7 @@
 // #else
 
 #define STARPU_USE_MPI 0
+#define FPRINTF(ofile, fmt, ...) do { if (!getenv("STARPU_SSILENT")) {fprintf(ofile, fmt, ## __VA_ARGS__); }} while(0)
 
 static unsigned niter = 32;
 #define SIZE 128
