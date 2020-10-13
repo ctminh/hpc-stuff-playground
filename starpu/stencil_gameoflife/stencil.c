@@ -4,14 +4,10 @@
 #include <valgrind/valgrind.h>
 #endif
 
-#ifdef STARPU_USE_MPI
-#define STARPU_USE_MPI 0
-#endif
-
 /* Main application */
 
 /* default parameter values */
-static unsigned  bind_tasks = 0;
+static unsigned bind_tasks = 0;
 
 static unsigned ticks = 1000;
 

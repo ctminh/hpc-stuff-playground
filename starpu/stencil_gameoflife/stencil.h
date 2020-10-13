@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <starpu.h>
 
+#ifndef STARPU_USE_MPI
+#define STARPU_USE_MPI 0
+#endif
+
 // if define CUDA
 #ifndef __CUDACC__
 #if defined(STARPU_USE_MPI) && !defined(STARPU_USE_MPI_MASTER_SLAVE)
@@ -62,3 +66,5 @@ struct block_description
 	/* Shortcut pointer to the neighbours */
 	struct block_description *boundary_blocks[NDIRS];
 }
+
+#endif /* __STENCIL_H__ */
