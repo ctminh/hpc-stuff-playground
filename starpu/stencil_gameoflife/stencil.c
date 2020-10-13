@@ -1,7 +1,6 @@
 #include "stencil.h"
 
 
-
 /* default parameter values */
 #ifdef STARPU_QUICK_CHECK
 static unsigned niter = 4;
