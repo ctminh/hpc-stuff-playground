@@ -47,8 +47,8 @@ struct block_description
 {
     /* which MPI node should process that block? */
     int mpi_node;
-    unsigned int perferred_worker;
-    unsigned int bz;
+    unsigned perferred_worker;
+    unsigned bz;
 
     /* For each of the following buffers, there are two (0/1) buffers to
 	* make new/old switch costless. */

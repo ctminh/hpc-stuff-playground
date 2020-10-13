@@ -4,21 +4,19 @@
 // #include <valgrind/valgrind.h>
 // #endif
 
-/* Main application */
-
-#ifdef STARPU_QUICK_CHECK
-static unsigned int niter = 4;
-#define SIZE 16
-#define NBZ 8
-#else
-static unsigned int niter = 32;
+// #ifdef STARPU_QUICK_CHECK
+// static unsigned niter = 4;
+// #define SIZE 16
+// #define NBZ 8
+// #else
+static unsigned niter = 32;
 #define SIZE 128
 #define NBZ 64
-#endif
+// #endif
 
 /* default parameter values */
-static unsigned int bind_tasks = 0;
-static unsigned int ticks = 1000;
+static unsigned bind_tasks = 0;
+static unsigned ticks = 1000;
 
 /* Problem size */
 static unsigned sizex = SIZE;
