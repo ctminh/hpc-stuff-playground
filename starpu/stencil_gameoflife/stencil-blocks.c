@@ -7,6 +7,14 @@ static unsigned sizex, sizey, sizez;
 static unsigned nbz;
 static unsigned *block_sizes_z;
 
+/* Get block description */
+struct block_description *get_block_description(int z)
+{
+    z = (z + nbz) % nbz;
+    STARPU_ASSERT(&blocks[z]);
+    return &blocks[z];
+}
+
 /* Create blocks-arrays */
 void create_blocks_array(unsigned _sizex, unsigned _sizey, unsigned _sizez, unsigned _nbz)
 {
