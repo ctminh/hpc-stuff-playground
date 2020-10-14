@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #ifndef STARPU_USE_MPI
-#define STARPU_USE_MPI 0
+#define STARPU_USE_MPI 1
 #endif
 
 // if define CUDA
