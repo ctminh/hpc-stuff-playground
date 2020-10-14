@@ -7,6 +7,26 @@ static unsigned sizex, sizey, sizez;
 static unsigned nbz;
 static unsigned *block_sizes_z;
 
+/* Compute the size of the different blocks */
+static void compute_block_sizes(void)
+{
+	block_sizes_z = (unsigned *) malloc(nbz*sizeof(unsigned));
+	STARPU_ASSERT(block_sizes_z);
+
+	/* Perhaps the last chunk is smaller */
+	unsigned default_block_size = (sizez + nbz - 1) / nbz;
+	unsigned remaining = sizez;
+
+	unsigned b;
+	for (b = 0; b < nbz; b++)
+	{
+		block_sizes_z[b] = MIN(default_block_size, remaining);
+		remaining -= block_sizes_z[b];
+	}
+
+	STARPU_ASSERT(remaining == 0);
+}
+
 /* Get block description */
 struct block_description *get_block_description(int z)
 {
