@@ -78,8 +78,8 @@ static void init_problem(int argc, char **argv, int rank, int world_size)
     parse_args(argc, argv);
 
     printf("\t[init_problem] creating block_arrays\n");
-    create_blocks_array(sizex, sizey, sizez);
-    
+    create_blocks_array(sizex, sizey, sizez, nbz);
+
 }
 
 

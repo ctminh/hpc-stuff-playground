@@ -8,6 +8,8 @@ export LD_LIBRARY_PATH=$OPENCL_LIB:$HWLOC_HOME/lib:$LD_LIBRARY_PATH
 export INCLUDE=$OPENCL_INC:$HWLOC_HOME/include:$INTEL_MPI/include:$INCLUDE
 export CPATH=$OPENCL_INC:$HWLOC_HOME/include:$INTEL_MPI/include:$CPATH
 
+echo "export ENV_VARs with EXPORT_MNM_GPU_PC = ${EXPORT_MNM_GPU_PC}"
+
 if [ "${EXPORT_MNM_GPU_PC}" = "1" ]
 then
 export STARTPU_HOME=/home/ctminh/Projects/starpu/starpu-1.3.5/install
@@ -16,4 +18,5 @@ export LD_LIBRARY_PATH=$STARTPU_HOME/lib:$LD_LIBRARY_PATH
 export PATH=$PATH:$STARTPU_HOME/bin
 export INCLUDE=$STARTPU_HOME/include/starpu/1.3:$INCLUDE
 export CPATH=$STARTPU_HOME/include/starpu/1.3:$CPATH
+echo "sucessfully export STARPU_ENVS"
 fi
