@@ -23,7 +23,64 @@ static unsigned sizez = NBZ*SIZE;
 /* Number of blocks (scattered over the different MPI processes) */
 unsigned nbz = NBZ;
 
+/* Parsing the arguments */
+static void parse_args(int argc, char **argv)
+{
+	int i;
+	for (i = 1; i < argc; i++)
+	{
+		if (strcmp(argv[i], "-b") == 0){
+			bind_tasks = 1;
+		}
+
+		if (strcmp(argv[i], "-nbz") == 0){
+			nbz = atoi(argv[++i]);
+		}
+
+		if (strcmp(argv[i], "-sizex") == 0){
+			sizex = atoi(argv[++i]);
+		}
+
+		if (strcmp(argv[i], "-sizey") == 0){
+			sizey = atoi(argv[++i]);
+		}
+
+		if (strcmp(argv[i], "-sizez") == 0){
+			sizez = atoi(argv[++i]);
+		}
+
+		if (strcmp(argv[i], "-niter") == 0){
+			niter = atoi(argv[++i]);
+		}
+
+		if (strcmp(argv[i], "-ticks") == 0){
+			ticks = atoi(argv[++i]);
+		}
+
+		if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0){
+			 fprintf(stderr, "Usage : %s [options...]\n", argv[0]);
+			 fprintf(stderr, "\n");
+			 fprintf(stderr, "Options:\n");
+			 fprintf(stderr, "-b    bind tasks on CPUs/GPUs\n");
+			 fprintf(stderr, "-nbz <n>  Number of blocks on Z axis (%u by default)\n", nbz);
+			 fprintf(stderr, "-size[xyz] <size>	Domain size on x/y/z axis (%ux%ux%u by default)\n", sizex, sizey, sizez);
+			 fprintf(stderr, "-niter <n>    Number of iterations (%u by default)\n", niter);
+			 fprintf(stderr, "-ticks <t>	How often to put ticks in the output (ms, %u by default)\n", ticks);
+			 exit(0);
+		}
+	}
+}
+
 /* Initialization */
+static void init_problem(int argc, char **argv, int rank, int world_size)
+{
+    printf("\t[init_problem] parsing arguments\n");
+    parse_args(argc, argv);
+
+    printf("\t[init_problem] creating block_arrays\n");
+    create_blocks_array(sizex, sizey, sizez);
+    
+}
 
 
 int main(int argc, char **argv)
@@ -59,10 +116,20 @@ int main(int argc, char **argv)
     }
 
     // init starpu
-    printf("1. init StarPU ...");
+    printf("1. init StarPU ...\n");
     ret = starpu_init(NULL);
 	if (ret == -ENODEV) return 77;
 	STARPU_CHECK_RETURN_VALUE(ret, "starpu_init");
+
+    // init starpu_mpi if we use mpi
+    #if STARPU_USE_MPI
+    ret = starpu_mpi_init(NULL, NULL, 0);
+    STARPU_CHECK_RETURN_VALUE(ret, "starpu_mpi_init");
+    #endif
+
+    // init the problem
+    printf("2. init the problem ...\n");
+    init_problem(argc, argv, rank, world_size);
 
     return 0;
 }

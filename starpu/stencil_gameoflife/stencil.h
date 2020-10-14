@@ -68,4 +68,17 @@ struct block_description
 	struct block_description *boundary_blocks[NDIRS];
 };
 
+/* define MPI and StarPU tags */
+#define TAG_INIT_TASK	((starpu_tag_t)1)
+starpu_tag_t TAG_FINISH(int z);
+starpu_tag_t TAG_START(int z, int dir);
+int MPI_TAG0(int z, int iter, int dir);
+int MPI_TAG1(int z, int iter, int dir);
+
+/* define min function */
+#define MIN(a,b)	((a)<(b)?(a):(b))
+
+/* define some util functions */
+void create_blocks_array(unsigned sizex, unsigned sizey, unsigned sizez, unsigned nbz);
+
 #endif /* __STENCIL_H__ */
