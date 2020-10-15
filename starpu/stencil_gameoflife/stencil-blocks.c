@@ -199,5 +199,5 @@ void allocate_memory_on_node(int rank)
 /* Display memory usage */
 void display_memory_consumption(int rank)
 {
-	FPRINTF(stderr, "%lu B of memory were allocated on node %d\n", (unsigned long) allocated, rank);
+	FPRINTF(stderr, "%lu bytes of memory were allocated on Rank %d\n", (unsigned long) allocated, rank);
 }
