@@ -78,6 +78,16 @@ int MPI_TAG1(int z, int iter, int dir);
 #define MIN(a,b)	((a)<(b)?(a):(b))
 
 /* global information and main function | stencil.c */
+extern double start;
+extern int who_runs_what_len;
+extern int *who_runs_what;
+extern int *who_runs_what_index;
+extern double *last_tick;
+
+#ifndef _externC
+#define _externC
+#endif
+
 unsigned get_bind_tasks(void);
 unsigned get_nbz(void);
 unsigned get_niter(void);
@@ -93,11 +103,6 @@ void display_memory_consumption(int rank);
 
 
 /* computation kernels or tasks | stencil-tasks.c */
-extern double start;
-extern int who_runs_what_len;
-extern int *who_runs_what;
-extern int *who_runs_what_index;
-extern double *last_tick;
 
 extern struct starpu_codelet cl_update;
 extern struct starpu_codelet save_cl_bottom;
