@@ -81,5 +81,7 @@ int MPI_TAG1(int z, int iter, int dir);
 void create_blocks_array(unsigned sizex, unsigned sizey, unsigned sizez, unsigned nbz);
 struct block_description *get_block_description(int z);
 void assign_blocks_to_mpi_nodes(int world_size);
+void allocate_memory_on_node(int rank);
+void assign_blocks_to_workers(int rank);
 
 #endif /* __STENCIL_H__ */
