@@ -89,6 +89,11 @@ static void init_problem(int argc, char **argv, int rank, int world_size)
 }
 
 
+/* Main body */
+double start;
+double begin, end;
+double timing; 
+
 int main(int argc, char **argv)
 {
     int rank;
@@ -138,9 +143,10 @@ int main(int argc, char **argv)
     init_problem(argc, argv, rank, world_size);
 
 	// check the assignment of blocks to mpi_nodes
-	unsigned i;
-	for (i = 0; i < nbz; i++){
-		printf("\t[main] block %d -> mpi_node_%d\n", blocks[i]->bz, blocks[i]->mpi_node);
+	unsigned b_idx;
+	for (b_idx = 0; b_idx < nbz; b_idx++){
+		struct block_description *block = get_block_description(b_idx);
+		printf("\t[main] block %d -> mpi_node_%d\n", block->bz, block->mpi_node);
 	}
 
     return 0;
