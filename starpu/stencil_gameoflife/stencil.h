@@ -107,4 +107,6 @@ extern unsigned update_per_worker[STARPU_NMAXWORKERS];
 extern unsigned top_per_worker[STARPU_NMAXWORKERS];
 extern unsigned bottom_per_worker[STARPU_NMAXWORKERS];
 
+void create_tasks(int rank);
+
 #endif /* __STENCIL_H__ */
