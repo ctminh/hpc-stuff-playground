@@ -11,7 +11,10 @@ export INCLUDE=$OPENCL_INC:$HWLOC_HOME/include:$INTEL_MPI/include:$INCLUDE
 export CPATH=$OPENCL_INC:$HWLOC_HOME/include:$INTEL_MPI/include:$CPATH
 
 echo "exporting intel mpi envs"
-source /home/ctminh/intel/bin/compilervars.sh intel64
+source /home/ctminh/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+
+echo "export itac envs"
+source /home/ctminh/intel/itac/2020.2.031/bin/itacvars.sh intel64
 
 echo "export ENV_VARs with EXPORT_MNM_GPU_PC = ${EXPORT_MNM_GPU_PC}"
 
