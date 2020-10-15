@@ -86,12 +86,6 @@ static void init_problem(int argc, char **argv, int rank, int world_size)
 	// assign blocks to MPI nodes
 	assign_blocks_to_mpi_nodes(world_size);
 
-	// check the assignment of blocks to mpi_nodes
-	unsigned i;
-	for (i = 0; i < nbz; i++){
-		printf("\t[init_problem] block %d -> mpi_node_%d\n", blocks[i]->bz, blocks[i]->mpi_node);
-	}
-
 }
 
 
@@ -142,6 +136,12 @@ int main(int argc, char **argv)
     // init the problem
     printf("2. init the problem ...\n");
     init_problem(argc, argv, rank, world_size);
+
+	// check the assignment of blocks to mpi_nodes
+	unsigned i;
+	for (i = 0; i < nbz; i++){
+		printf("\t[main] block %d -> mpi_node_%d\n", blocks[i]->bz, blocks[i]->mpi_node);
+	}
 
     return 0;
 }
