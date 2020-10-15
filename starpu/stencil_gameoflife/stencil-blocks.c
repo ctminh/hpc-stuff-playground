@@ -77,7 +77,7 @@ void assign_blocks_to_mpi_nodes(int world_size)
 }
 
 /* Assign blocks to workers */
-void assassign_blocks_to_workers(int rank)
+void assign_blocks_to_workers(int rank)
 {
     unsigned bz;
 
