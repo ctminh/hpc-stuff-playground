@@ -89,6 +89,10 @@ static void init_problem(int argc, char **argv, int rank, int world_size)
 	// assign blocks to workers
 	assign_blocks_to_workers(rank);
 
+	// allocate the different mem blocks, if used by the MPI process
+	allocate_memory_on_node(rank);
+	
+
 }
 
 

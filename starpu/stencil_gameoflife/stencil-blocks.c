@@ -6,6 +6,7 @@ static struct block_description *blocks;    // an array of blocks
 static unsigned sizex, sizey, sizez;
 static unsigned nbz;
 static unsigned *block_sizes_z;
+static size_t allocated = 0;
 
 /* Compute the size of the different blocks */
 static void compute_block_sizes(void)
@@ -125,6 +126,47 @@ void assign_blocks_to_workers(int rank)
             // it means = attributed / nblocks_per_worker;
             block->perferred_worker = worker_id;
             attributed++;
+        }
+    }
+}
+
+/* Allocate blocks on node */
+void allocate_block_on_node(starpu_data_handle_t *handleptr, unsigned bz, TYPE **ptr, unsigned nx, unsigned ny, unsigned nz)
+{
+    int ret;
+    size_t block_size = nx * ny * nz * sizeof(TYPE);
+
+    /* allocate memory */
+    #if 1
+        ret = starpu_malloc_flags((void **)ptr, block_size, STARPU_MALLOC_PINNED|STARPU_MALLOC_SIMULATION_FOLDED);
+        STARPU_ASSERT(ret == 0);
+    #else
+        *ptr = malloc(block_size);
+        STARPU_ASSERT(*ptr);
+    #endif
+
+    allocated += block_size;
+
+    /* register it to StarPU */
+    starpu_block_data_register(handleptr, STARPU_MAIN_RAM, (uintptr_t) *ptr, nx, nx*ny, nx, ny, nz, sizeof(TYPE));
+    starpu_data_set_coordinates(*handleptr, 1, bz);
+}
+
+/* Allocate the different mem blocks on node */
+void allocate_memory_on_node(int rank)
+{
+    unsigned bz;
+    for (bz = 0; bz < nbz; bz++){
+        struct block_description *block = get_block_description(bz);
+        int node = block->mpi_node;
+
+        // main blocks
+        if (node == rank){
+            unsigned size_bz = block_sizes_z[bz];
+            allocate_block_on_node(&block->layers_handle[0], bz, &block->layers[0],
+                                        (sizex + 2*K),
+                                        (sizey + 2*K),
+                                        (size_bz + 2*K));
         }
     }
 }
