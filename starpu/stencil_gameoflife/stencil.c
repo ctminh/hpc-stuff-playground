@@ -91,7 +91,10 @@ static void init_problem(int argc, char **argv, int rank, int world_size)
 
 	// allocate the different mem blocks, if used by the MPI process
 	allocate_memory_on_node(rank);
-	
+
+	// display mem usage
+	display_memory_consumption(rank);
+
 
 }
 

@@ -167,6 +167,37 @@ void allocate_memory_on_node(int rank)
                                         (sizex + 2*K),
                                         (sizey + 2*K),
                                         (size_bz + 2*K));
+
+            allocate_block_on_node(&block->layers_handle[1], bz, &block->layers[1],
+                                        (sizex + 2*K),
+                                        (sizey + 2*K),
+                                        (size_bz + 2*K));
+        }
+
+        // boundary blocks: top
+        int top_node = block->boundary_blocks[T]->mpi_node;
+        if ((node == rank) || (top_node == rank))
+        {
+            allocate_block_on_node(&block->boundaries_handle[T][0], bz, &block->boundaries[T][0],
+                                        (sizex + 2*K), (sizey + 2*K), K);
+            allocate_block_on_node(&block->boundaries_handle[T][1], bz, &block->boundaries[T][1],
+                                        (sizex + 2*K), (sizey + 2*K), K);
+        }
+
+        // boundary blocks: bottom
+        int bottom_node = block->boundary_blocks[B]->mpi_node;
+        if ((node == rank) || (bottom_node == rank))
+        {
+            allocate_block_on_node(&block->boundaries_handle[B][0], bz, &block->boundaries[B][0],
+                                        (sizex + 2*K), (sizey + 2*K), K);
+            allocate_block_on_node(&block->boundaries_handle[B][1], bz, &block->boundaries[B][1],
+                                        (sizex + 2*K), (sizey + 2*K), K);
         }
     }
+}
+
+/* Display memory usage */
+void display_memory_consumption(int rank)
+{
+	FPRINTF(stderr, "%lu B of memory were allocated on node %d\n", (unsigned long) allocated, rank);
 }
