@@ -74,12 +74,23 @@ static void parse_args(int argc, char **argv)
 /* Initialization */
 static void init_problem(int argc, char **argv, int rank, int world_size)
 {
+	// parse the arguments if yes
     printf("\t[init_problem] parsing arguments\n");
     parse_args(argc, argv);
 
+	// create block_arrays
     printf("\t[init_problem] creating block_arrays\n");
 	printf("\t size_x=%d, size_y=%d, size_z=%d, num_blocks=%d\n", sizex, sizey, sizez, nbz);
     create_blocks_array(sizex, sizey, sizez, nbz);
+
+	// assign blocks to MPI nodes
+	assign_blocks_to_mpi_nodes(world_size);
+
+	// check the assignment of blocks to mpi_nodes
+	unsigned i;
+	for (i = 0; i < nbz; i++){
+		printf("\t[init_problem] block %d -> mpi_node_%d\n", blocks[i]->bz, blocks[i]->mpi_node);
+	}
 
 }
 
