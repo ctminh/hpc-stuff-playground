@@ -77,12 +77,34 @@ int MPI_TAG1(int z, int iter, int dir);
 /* define min function */
 #define MIN(a,b)	((a)<(b)?(a):(b))
 
-/* define some util functions */
+/* global information and main function | stencil.c */
+unsigned get_bind_tasks(void);
+unsigned get_nbz(void);
+unsigned get_niter(void);
+unsigned get_ticks(void);
+
+/* define some util functions | stencil-blocks.c */
 void create_blocks_array(unsigned sizex, unsigned sizey, unsigned sizez, unsigned nbz);
 struct block_description *get_block_description(int z);
 void assign_blocks_to_mpi_nodes(int world_size);
 void allocate_memory_on_node(int rank);
 void assign_blocks_to_workers(int rank);
 void display_memory_consumption(int rank);
+
+
+/* computation kernels or tasks | stencil-tasks.c */
+extern double start;
+extern int who_runs_what_len;
+extern int *who_runs_what;
+extern int *who_runs_what_index;
+extern double *last_tick;
+
+extern struct starpu_codelet cl_update;
+extern struct starpu_codelet save_cl_bottom;
+extern struct starpu_codelet save_cl_top;
+
+extern unsigned update_per_worker[STARPU_NMAXWORKERS];
+extern unsigned top_per_worker[STARPU_NMAXWORKERS];
+extern unsigned bottom_per_worker[STARPU_NMAXWORKERS];
 
 #endif /* __STENCIL_H__ */

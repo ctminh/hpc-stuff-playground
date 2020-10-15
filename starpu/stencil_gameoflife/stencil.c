@@ -23,6 +23,23 @@ static unsigned sizez = NBZ*SIZE;
 /* Number of blocks (scattered over the different MPI processes) */
 unsigned nbz = NBZ;
 
+/* Get global information */
+unsigned get_bind_tasks(void){
+	return bind_tasks;
+}
+
+unsigned get_nbz(void){
+	return nbz;
+}
+
+unsigned get_niter(void){
+	return niter;
+}
+
+unsigned get_ticks(void){
+	return ticks;
+}
+
 /* Parsing the arguments */
 static void parse_args(int argc, char **argv)
 {
@@ -95,7 +112,11 @@ static void init_problem(int argc, char **argv, int rank, int world_size)
 	// display mem usage
 	display_memory_consumption(rank);
 
-
+	// check sth here???
+	who_runs_what_len = 2 * niter;
+	who_runs_what = (int *) calloc(nbz * who_runs_what_len, sizeof(*who_runs_what));
+	who_runs_what_index = (int *) calloc(nbz, sizeof(*who_runs_what_index));
+	last_tick = (double *) calloc(nbz, sizeof(* last_tick));
 }
 
 
@@ -156,8 +177,11 @@ int main(int argc, char **argv)
 	unsigned b_idx;
 	for (b_idx = 0; b_idx < nbz; b_idx++){
 		struct block_description *block = get_block_description(b_idx);
-		printf("\t[main] block %d -> mpi_rank_%d, preferred_worker_%d\n", block->bz, block->mpi_node, block->perferred_worker);
+		// printf("\t[main] block %d -> mpi_rank_%d, preferred_worker_%d\n", block->bz, block->mpi_node, block->perferred_worker);
 	}
+
+	// create tasks
+	create_tasks(rank);
 
     return 0;
 }
