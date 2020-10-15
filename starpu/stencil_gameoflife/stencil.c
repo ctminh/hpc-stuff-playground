@@ -86,6 +86,9 @@ static void init_problem(int argc, char **argv, int rank, int world_size)
 	// assign blocks to MPI nodes
 	assign_blocks_to_mpi_nodes(world_size);
 
+	// assign blocks to workers
+	assign_blocks_to_workers(rank);
+
 }
 
 
@@ -146,7 +149,7 @@ int main(int argc, char **argv)
 	unsigned b_idx;
 	for (b_idx = 0; b_idx < nbz; b_idx++){
 		struct block_description *block = get_block_description(b_idx);
-		printf("\t[main] block %d -> mpi_node_%d\n", block->bz, block->mpi_node);
+		printf("\t[main] block %d -> mpi_rank_%d, preferred_worker_%d\n", block->bz, block->mpi_node, block->perferred_worker);
 	}
 
     return 0;

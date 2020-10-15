@@ -75,3 +75,56 @@ void assign_blocks_to_mpi_nodes(int world_size)
         block->mpi_node = bz / nzblocks_per_process;
     }
 }
+
+/* Assign blocks to workers */
+void assassign_blocks_to_workers(int rank)
+{
+    unsigned bz;
+
+    /* NB: perhaps we could count a GPU as multiple workers */
+	/*     how many workers are there? */
+	/*     unsigned nworkers = starpu_worker_get_count(); */
+	/*     how many blocks are on that MPI node? */
+        //	unsigned nblocks = 0;
+        //	for (bz = 0; bz < nbz; bz++)
+        //	{
+        //		struct block_description *block =
+        //				get_block_description(bz);
+        //
+        //		if (block->mpi_node == rank)
+        //			nblocks++;
+        //	}
+	/*      how many blocks per worker? */
+	/*      unsigned nblocks_per_worker = (nblocks + nworkers - 1)/nworkers; */
+
+    /* we now attribute up to nblocks_per_worker blocks per workers */
+    unsigned attributed = 0;
+    for (bz = 0; bz < nbz; bz++){
+        struct block_description *block = get_block_description(bz);
+        if (block->mpi_node == rank){
+            unsigned worker_id;
+            // manage initial block distribution between CPU and GPU
+            #if 0   // GPUs then CPUs
+                #if 1
+                    if (attributed < 3*18)
+                        worker_id = attributed / 18;
+                    else
+                        worker_id = 3 + (attributed - 3*18) / 2;
+                #else
+                    if ((attributed % 20) <= 1)
+                        workerid = 3 + attributed / 20;
+                    else if (attributed < 60)
+                        workerid = attributed / 20;
+                    else
+                        workerid = (attributed - 60) / 2 + 6;
+                #endif
+            #else   // only GPUs
+                worker_id = (attributed / 21) % 3;
+            #endif
+
+            // it means = attributed / nblocks_per_worker;
+            block->perferred_worker = worker_id;
+            attributed++;
+        }
+    }
+}
