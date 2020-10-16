@@ -7,4 +7,4 @@ main: main.c
 
 # clean object files and old-itac-traced files
 clean:
-	rm -fr *.o main main.prot main.stf.*
+	rm -fr *.o main main.prot main.stf main.stf.*

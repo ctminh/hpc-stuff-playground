@@ -13,6 +13,7 @@ void test_itac(int call_id)
     int event_testitac = -1;
     char event_name[12] = "test_itac";
     int itac_err = VT_funcdef(event_name, VT_NOCLASS, &event_testitac);
+    VT_BEGIN_CONSTRAINED(event_testitac);
 }
 
 int main(int argc, char *argv[])
