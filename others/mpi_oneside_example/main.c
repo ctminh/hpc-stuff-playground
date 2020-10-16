@@ -5,15 +5,36 @@
 
 #define NUM_ELEMENT 4
 
+#ifndef VT_BEGIN_CONSTRAINED
+#define VT_BEGIN_CONSTRAINED(event_id) if (_tracing_enabled) VT_begin(event_id);
+#endif
+
+#ifndef VT_END_W_CONSTRAINED
+#define VT_END_W_CONSTRAINED(event_id) if (_tracing_enabled) VT_end(event_id);
+#endif
+
 void test_itac(int call_id)
 {
-    printf("Call_ID = %d\n", call_id);
-
-    // call VT
+    // ------------------------ begin VT -----------------------------
     int event_testitac = -1;
     char event_name[12] = "test_itac";
     int itac_err = VT_funcdef(event_name, VT_NOCLASS, &event_testitac);
     VT_BEGIN_CONSTRAINED(event_testitac);
+    // ---------------------------------------------------------------
+
+    printf("Call_ID = %d\n", call_id);
+    int i;
+    int N = 10000;
+    double result = 0.0;
+    double pi = 3.14;
+    for (i = 0; i < N; i++)
+    {
+        result += i * pi;
+    }
+
+    // ------------------------ end VT -------------------------------
+    VT_END_W_CONSTRAINED(event_testitac);
+    // ---------------------------------------------------------------
 }
 
 int main(int argc, char *argv[])
