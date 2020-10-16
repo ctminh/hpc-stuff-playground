@@ -4,6 +4,7 @@
 #include <VT.h>
 
 #define NUM_ELEMENT 4
+#define _tracing_enabled 1
 
 #ifndef VT_BEGIN_CONSTRAINED
 #define VT_BEGIN_CONSTRAINED(event_id) if (_tracing_enabled) VT_begin(event_id);
