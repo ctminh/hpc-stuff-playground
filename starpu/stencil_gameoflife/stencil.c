@@ -12,6 +12,10 @@ static unsigned niter = 32;
 #define NBZ 64
 #endif
 
+int who_runs_what_len;
+int *who_runs_what;
+int *who_runs_what_index;
+double *last_tick;
 static unsigned bind_tasks = 0;
 static unsigned ticks = 1000;
 
