@@ -1,5 +1,5 @@
-MPICC = /opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/bin/mpicc
-CFLAGS = 
+MPICC = /home/ctminh/intel/compilers_and_libraries_2020.2.254/linux/mpi/intel64/bin/mpicc
+CFLAGS = -DTRACE -I$(VT_ROOT)/include -trace
 LDLIBS = 
 
 main: main.c
