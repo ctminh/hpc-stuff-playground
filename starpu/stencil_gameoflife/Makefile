@@ -14,13 +14,13 @@ stencil: $(OBJECTS)
 
 # for compiling
 stencil.o: stencil.c stencil.h
-	$(MPICC) $(CFLAGS) $(LDLIBS) -c -o $@ $<
+	$(MPICC) $(CFLAGS) $(LDLIBS) -c $<
 
 stencil-blocks.o: stencil-blocks.c stencil.h
-	$(MPICC) $(CFLAGS) $(LDLIBS) -c -o $@ $<
+	$(MPICC) $(CFLAGS) $(LDLIBS) -c $<
 
 stencil-tasks.o: stencil-tasks.c stencil.h
-	$(MPICC) $(CFLAGS) $(LDLIBS) -c -o $@ $<
+	$(MPICC) $(CFLAGS) $(LDLIBS) -c $<
 
 clean:
 	rm -f stencil *.o stencil.prot stencil.stf stencil.stf.*
