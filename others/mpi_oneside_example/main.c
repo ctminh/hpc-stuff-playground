@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <mpi.h>
 #include <string.h>
+#include <VT.h>
 
 #define NUM_ELEMENT 4
 
