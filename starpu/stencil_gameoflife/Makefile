@@ -8,7 +8,7 @@ MPICC = /home/ctminh/intel/compilers_and_libraries_2020.2.254/linux/mpi/intel64/
 NVCC = /usr/local/cuda/bin/nvcc
 
 # declare object files
-OBJECTS: stencil.o stencil-blocks.o stencil-tasks.o
+stencil: stencil.o stencil-blocks.o stencil-tasks.o
 
 # for compiling
 %.o: %.cu
