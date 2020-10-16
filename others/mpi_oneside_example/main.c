@@ -27,6 +27,9 @@ int main(int argc, char *argv[])
     MPI_Get_processor_name(name, &len);
 
     printf("Rank %d running on %s\n", id, name);
+    for (i = 0; i < 10; i++){
+        test_itac(i);
+    }
 
     MPI_Win_create(sharedbuffer, NUM_ELEMENT, sizeof(int), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
 
