@@ -1,7 +1,18 @@
 #include <stdio.h>
 #include <mpi.h>
+#include <string.h>
 
 #define NUM_ELEMENT 4
+
+void test_itac(int call_id)
+{
+    printf("Call_ID = %d\n", call_id);
+
+    // call VT
+    int event_testitac = -1;
+    char event_name[12] = "test_itac";
+    int itac_err = VT_funcdef(event_name, VT_NOCLASS, &event_testitac);
+}
 
 int main(int argc, char *argv[])
 {
