@@ -11,19 +11,8 @@ NVCC = /usr/local/cuda/bin/nvcc
 OBJECTS: stencil.o stencil-blocks.o stencil-tasks.o
 
 # for compiling
-stencil: stencil.o stencil-blocks.o stencil-tasks.o
-	$(MPICC) $(CFLAGS) $(LDLIBS) *.o -o stencil
-	
-stencil.o: stencil.c
-	$(MPICC) $(CFLAGS) -c stencil.c
-
-stencil-blocks.o: stencil-blocks.c
-	$(MPICC) $(CFLAGS) -c stencil-blocks.c
-
-stencil-tasks.o: stencil-tasks.c
-	$(MPICC) $(CFLAGS) -c stencil-tasks.c
-
-
+%.o: %.cu
+	$(NVCC) $(CUDA_FLAGS) $(CFLAGS) $(LDLIBS) $< -c $@
 
 clean:
 	rm -f stencil *.o stencil.prot stencil.stf stencil.stf.*
