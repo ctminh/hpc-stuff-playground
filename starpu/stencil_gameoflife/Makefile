@@ -22,4 +22,4 @@ stencil-tasks.o: stencil-tasks.c
 	$(MPICC) $(CFLAGS) $(LDLIBS) -c -o $@ $<
 
 clean:
-	rm -f stencil *.o
+	rm -f stencil *.o stencil.prot stencil.stf stencil.stf.*
