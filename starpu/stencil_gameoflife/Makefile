@@ -12,7 +12,7 @@ OBJECTS: stencil.o stencil-blocks.o stencil-tasks.o
 
 # for compiling
 stencil: $(OBJECTS)
-	$(MPICC) $(CFLAGS) $(LDLIBS) -o stencil $(OBJECTS)
+	$(MPICC) $(CFLAGS) $(LDLIBS) -o stencil stencil.o stencil-blocks.o stencil-tasks.o
 	
 stencil.o: stencil.c stencil.h
 	$(MPICC) $(CFLAGS) $(LDLIBS) -c stencil.c
