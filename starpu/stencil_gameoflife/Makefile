@@ -9,7 +9,7 @@ NVCC = /usr/local/cuda/bin/nvcc
 
 # declare object files
 stencil: stencil.o stencil-blocks.o stencil-tasks.o
-	$(NVCC) $(CUDA_FLAGS) $(CFLAGS) $(LDLIBS) -o $@ $<
+	$(MPICC) $(CFLAGS) $(LDLIBS) -o $@ $<
 
 # for compiling
 stencil.o: stencil.c stencil.h
