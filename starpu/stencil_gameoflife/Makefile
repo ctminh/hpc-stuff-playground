@@ -15,10 +15,10 @@ stencil: stencil.o stencil-blocks.o stencil-tasks.o
 stencil.o: stencil.c stencil.h
 	$(MPICC) $(CFLAGS) $(LDLIBS) -c -o $@ $<
 
-stencil-blocks.o: stencil-blocks.c
+stencil-blocks.o: stencil-blocks.c stencil.h
 	$(MPICC) $(CFLAGS) $(LDLIBS) -c -o $@ $<
 
-stencil-tasks.o: stencil-tasks.c
+stencil-tasks.o: stencil-tasks.c stencil.h
 	$(MPICC) $(CFLAGS) $(LDLIBS) -c -o $@ $<
 
 clean:
