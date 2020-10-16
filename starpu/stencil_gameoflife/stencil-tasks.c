@@ -21,6 +21,12 @@
  */
 void create_tasks(int rank)
 {
+    #ifdef TRACE
+    int event_taskcreate = -1;
+    char event_createtask[12] = "create_task";
+    int itac_err = VT_funcdef(event_createtask, VT_NOCLASS, &event_taskcreate);
+    #endif
+
     int iter;
     int bz;
     int niter = get_niter();

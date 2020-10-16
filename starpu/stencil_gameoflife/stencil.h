@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <starpu.h>
+#include <string.h>
+
+// for tracing the events
+#ifdef TRACE
+#include "VT.h"
+#endif
 
 #ifndef STARPU_USE_MPI
 #define STARPU_USE_MPI 1
