@@ -8,7 +8,17 @@
 
 // for tracing the events
 #ifdef TRACE
-#include "VT.h"
+#include <VT.h>
+#endif
+
+#define _tracing_enabled 1
+
+#ifndef VT_BEGIN_CONSTRAINED
+#define VT_BEGIN_CONSTRAINED(event_id) if (_tracing_enabled) VT_begin(event_id);
+#endif
+
+#ifndef VT_END_W_CONSTRAINED
+#define VT_END_W_CONSTRAINED(event_id) if (_tracing_enabled) VT_end(event_id);
 #endif
 
 #ifndef STARPU_USE_MPI
