@@ -5,5 +5,6 @@ LDLIBS =
 main: main.c
 	$(MPICC) $(CFLAGS) main.c -o main $(LDLIBS)
 
+# clean object files and old-itac-traced files
 clean:
-	rm -fr *.o main
+	rm -fr *.o main main.prot main.stf.*
