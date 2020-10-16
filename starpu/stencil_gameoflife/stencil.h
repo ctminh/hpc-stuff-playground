@@ -7,9 +7,9 @@
 #include <string.h>
 
 // for tracing the events
-#ifdef TRACE
+// #ifdef TRACE
 #include <VT.h>
-#endif
+// #endif
 
 #define _tracing_enabled 1
 

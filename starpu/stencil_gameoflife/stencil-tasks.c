@@ -22,12 +22,12 @@
 void create_tasks(int rank)
 {
     // ------------------------ begin VT -----------------------------
-    #ifdef TRACE
+    // #ifdef TRACE
     int event_taskcreate = -1;
     char event_createtask[12] = "create_task";
     int itac_err = VT_funcdef(event_createtask, VT_NOCLASS, &event_taskcreate);
     VT_BEGIN_CONSTRAINED(event_taskcreate);
-    #endif
+    // #endif
     // ---------------------------------------------------------------
 
     int iter;
@@ -36,8 +36,8 @@ void create_tasks(int rank)
     int nbz = get_nbz();
 
     // ------------------------ end VT -------------------------------
-    #ifdef TRACE
+    // #ifdef TRACE
     VT_END_W_CONSTRAINED(event_taskcreate);
-    #endif
+    // #endif
     // ---------------------------------------------------------------
 }
