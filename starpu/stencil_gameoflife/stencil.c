@@ -202,7 +202,6 @@ int main(int argc, char **argv)
 	starpu_tag_notify_from_apps(TAG_INIT_TASK);
 
 
-
 	// end MPI
 	#if STARPU_USE_MPI
 	MPI_Finalize();

@@ -7,9 +7,8 @@
 #include <string.h>
 
 // for tracing the events
-// #ifdef TRACE
+#ifdef TRACE
 #include <VT.h>
-// #endif
 
 #define _tracing_enabled 1
 
@@ -19,6 +18,8 @@
 
 #ifndef VT_END_W_CONSTRAINED
 #define VT_END_W_CONSTRAINED(event_id) if (_tracing_enabled) VT_end(event_id);
+#endif
+
 #endif
 
 #ifndef STARPU_USE_MPI
@@ -109,6 +110,7 @@ unsigned get_nbz(void);
 unsigned get_niter(void);
 unsigned get_ticks(void);
 
+
 /* define some util functions | stencil-blocks.c */
 void create_blocks_array(unsigned sizex, unsigned sizey, unsigned sizez, unsigned nbz);
 struct block_description *get_block_description(int z);
@@ -116,10 +118,10 @@ void assign_blocks_to_mpi_nodes(int world_size);
 void allocate_memory_on_node(int rank);
 void assign_blocks_to_workers(int rank);
 void display_memory_consumption(int rank);
+int get_block_mpi_node(int z);
 
 
 /* computation kernels or tasks | stencil-tasks.c */
-
 extern struct starpu_codelet cl_update;
 extern struct starpu_codelet save_cl_bottom;
 extern struct starpu_codelet save_cl_top;

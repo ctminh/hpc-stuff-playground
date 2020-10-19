@@ -201,3 +201,11 @@ void display_memory_consumption(int rank)
 {
 	FPRINTF(stderr, "%lu bytes of memory were allocated on Rank %d\n", (unsigned long) allocated, rank);
 }
+
+
+/* Get block from MPI node/rank */
+int get_block_mpi_node(int z)
+{
+    z = (z + nbz) % nbz;
+    return blocks[z].mpi_node;
+}
