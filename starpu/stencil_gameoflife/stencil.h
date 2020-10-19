@@ -63,7 +63,7 @@ struct block_description
 {
     /* which MPI node should process that block? */
     int mpi_node;
-    unsigned perferred_worker;
+    unsigned preferred_worker;
     unsigned bz;
 
     /* For each of the following buffers, there are two (0/1) buffers to

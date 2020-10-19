@@ -1,13 +1,11 @@
 #include "stencil.h"
 
 /*
- * Schedule tasks for updates and saves
- */
-
-/*
  * NB: iter = 0: initialization phase, TAG_U(z, 0) = TAG_INIT
  * dir is -1 or +1.
  */
+
+#define BIND_LAST 1
 
 #if 0
     #define DEBUG(fmt, ...) fprintf(stderr,fmt,##__VA_ARGS__)

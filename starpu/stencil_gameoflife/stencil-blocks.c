@@ -155,7 +155,7 @@ void assign_blocks_to_workers(int rank)
             #endif
 
             // it means = attributed / nblocks_per_worker;
-            block->perferred_worker = worker_id;
+            block->preferred_worker = worker_id;
             attributed++;
         }
     }
