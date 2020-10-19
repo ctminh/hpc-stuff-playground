@@ -34,6 +34,7 @@ void create_tasks(int rank)
     int bz;
     int niter = get_niter();
     int nbz = get_nbz();
+    starpu_sleep(5);
 
     // ------------------------ end VT -------------------------------
     // #ifdef TRACE
