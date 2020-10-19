@@ -47,6 +47,101 @@ static struct starpu_codelet null =
 };
 
 
+/* SAVE: create task_save local??? */
+/* R(z) = R(z+d) = local, just call the save kernel */
+static void create_task_save_local(unsigned iter, unsigned z, int dir)
+{
+    struct starpu_task *save_task =  starpu_task_create();
+    struct block_description *descr = get_block_description(z);
+
+    save_task->cl = (dir == -1) ? &save_cl_bottom : &save_cl_top;
+    save_task->cl_arg = descr;
+
+    // saving the borders
+	save_task->handles[0] = descr->layers_handle[0];
+	save_task->handles[1] = descr->layers_handle[1];
+
+    // ... to the neighbor's copy
+    struct block_description *neighbour = descr->boundary_blocks[(1+dir)/2];
+    save_task->handles[0] = neighbour->boundaries_handle[(1-dir)/2][0];
+    save_task->handles[1] = neighbour->boundaries_handle[(1-dir)/2][1];
+
+    // binding ...
+    if (iter <= BIND_LAST)
+        save_task->execute_on_a_specific_worker = get_bind_tasks();
+    save_task->workerid = descr->preferred_worker;
+
+    int ret = starpu_task_create(save_task);
+    if (ret){
+        FPRINTF(stderr, "Couldn't submit task_save: %d\n", ret);
+        if (ret == -ENODEV)
+            exit(77);
+        STARPU_ABORT();
+    }
+}
+
+
+/* R(z) = local & R(z+d) != local */
+/* We need to send our save over MPI */
+
+static void send_done(void *arg)
+{
+	uintptr_t z = (uintptr_t) arg;
+	(void) z;
+	DEBUG("DO SEND %d\n", (int)z);
+}
+
+/* Post MPI send */
+#if STARPU_USE_MPI
+static void create_task_save_mpi_send(unsigned iter, unsigned z, int dir, int local_rank)
+{
+	struct block_description *descr = get_block_description(z);
+	STARPU_ASSERT(descr->mpi_node == local_rank);
+
+	struct block_description *neighbour = descr->boundary_blocks[(1+dir)/2];
+	int dest = neighbour->mpi_node;
+	STARPU_ASSERT(neighbour->mpi_node != local_rank);
+
+	/* Send neighbour's border copy to the neighbour */
+	starpu_data_handle_t handle0 = neighbour->boundaries_handle[(1-dir)/2][0];
+	starpu_data_handle_t handle1 = neighbour->boundaries_handle[(1-dir)/2][1];
+
+	starpu_mpi_isend_detached(handle0, dest, MPI_TAG0(z, iter, dir), MPI_COMM_WORLD, send_done, (void*)(uintptr_t)z);
+	starpu_mpi_isend_detached(handle1, dest, MPI_TAG1(z, iter, dir), MPI_COMM_WORLD, send_done, (void*)(uintptr_t)z);
+}
+#endif /* STARPU_USE_MPI */
+
+
+/* R(z) != local & R(z+d) = local */
+/* We need to receive over MPI */
+static void recv_done(void *arg)
+{
+	uintptr_t z = (uintptr_t) arg;
+	(void) z;
+	DEBUG("DO RECV %d\n", (int)z);
+}
+
+/* Post MPI recv */
+#if STARPU_USE_MPI
+static void create_task_save_mpi_recv(unsigned iter, unsigned z, int dir, int local_rank)
+{
+	struct block_description *descr = get_block_description(z);
+	STARPU_ASSERT(descr->mpi_node != local_rank);
+
+	struct block_description *neighbour = descr->boundary_blocks[(1+dir)/2];
+	int source = descr->mpi_node;
+	STARPU_ASSERT(neighbour->mpi_node == local_rank);
+
+	/* Receive our neighbour's border in our neighbour copy */
+	starpu_data_handle_t handle0 = neighbour->boundaries_handle[(1-dir)/2][0];
+	starpu_data_handle_t handle1 = neighbour->boundaries_handle[(1-dir)/2][1];
+
+	starpu_mpi_irecv_detached(handle0, source, MPI_TAG0(z, iter, dir), MPI_COMM_WORLD, recv_done, (void*)(uintptr_t)z);
+	starpu_mpi_irecv_detached(handle1, source, MPI_TAG1(z, iter, dir), MPI_COMM_WORLD, recv_done, (void*)(uintptr_t)z);
+}
+#endif /* STARPU_USE_MPI */
+
+
 /* Create start tasks??? */
 void create_start_task(int z, int dir)
 {
@@ -156,7 +251,6 @@ void create_task_save(unsigned iter, unsigned z, int dir, int local_rank)
 			/* R(z) = local & R(z+d) != local, We have to send the data */
 			create_task_save_mpi_send(iter, z, dir, local_rank);
 		}
-
 	}
 	else
 	{
