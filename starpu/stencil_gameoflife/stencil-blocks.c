@@ -8,6 +8,16 @@ static unsigned nbz;
 static unsigned *block_sizes_z;
 static size_t allocated = 0;
 
+
+/* Completion of the save codelet for MPI send/recv */
+starpu_tag_t TAG_START(int z, int dir)
+{
+	z = (z + nbz)%nbz;
+
+	starpu_tag_t tag = tag_common(z, dir, 2);
+	return tag;
+}
+
 /* Compute the size of the different blocks */
 static void compute_block_sizes(void)
 {

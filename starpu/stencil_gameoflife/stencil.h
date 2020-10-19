@@ -84,13 +84,6 @@ struct block_description
 	struct block_description *boundary_blocks[NDIRS];
 };
 
-/* define MPI and StarPU tags */
-#define TAG_INIT_TASK	((starpu_tag_t)1)
-starpu_tag_t TAG_FINISH(int z);
-starpu_tag_t TAG_START(int z, int dir);
-int MPI_TAG0(int z, int iter, int dir);
-int MPI_TAG1(int z, int iter, int dir);
-
 /* define min function */
 #define MIN(a,b)	((a)<(b)?(a):(b))
 
@@ -112,6 +105,13 @@ unsigned get_ticks(void);
 
 
 /* define some util functions | stencil-blocks.c */
+/* define MPI and StarPU tags */
+#define TAG_INIT_TASK	((starpu_tag_t)1)
+starpu_tag_t TAG_FINISH(int z);
+starpu_tag_t TAG_START(int z, int dir);
+int MPI_TAG0(int z, int iter, int dir);
+int MPI_TAG1(int z, int iter, int dir);
+
 void create_blocks_array(unsigned sizex, unsigned sizey, unsigned sizez, unsigned nbz);
 struct block_description *get_block_description(int z);
 void assign_blocks_to_mpi_nodes(int world_size);
