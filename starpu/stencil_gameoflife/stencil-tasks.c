@@ -15,10 +15,43 @@
     #define DEBUG(fmt, ...)
 #endif
 
+/* Define starpu codelet */
+void null_func(void *descr[], void *arg)
+{
+    (void) descr;
+    (void) arg;
+}
+
+static double null_cost_function(struct starpu_task *task, unsigned nimpl)
+{
+	(void) task;
+	(void) nimpl;
+	return 0.000001;
+}
+
+static struct starpu_perfmodel null_model =
+{
+	.type = STARPU_COMMON,
+	.cost_function = null_cost_function,
+	.symbol = "null"
+};
+
+static struct starpu_codelet null = 
+{
+    .modes = {STARPU_W, STARPU_W},
+    .cpu_funcs = {null_func},
+    .cpu_funcs_name = {"null_func"},
+    .cuda_funcs = {null_func},
+    .opencl_funcs = {null_func},
+    .nbuffers = 2,
+    .model = &null_model,
+    .name = "start"
+};
+
+
 /* Create start tasks??? */
 void create_start_task(int z, int dir)
 {
-
     // ------------------------ begin VT -----------------------------
     #ifdef TRACE
     int event_c_starttask = -1;
@@ -31,7 +64,7 @@ void create_start_task(int z, int dir)
     /* Dumb task depending on the init task and simulating writing the
 	   neighbour buffers, to avoid communications and computation running
 	   before we start measuring time */
-    struct starpu_task *wait_init = starpu_tasks_create();
+    struct starpu_task *wait_init = starpu_task_create();
     struct block_description *descr = get_block_description(z);
     starpu_tag_t tag_init = TAG_INIT_TASK;
     wait_init->cl = &null;
