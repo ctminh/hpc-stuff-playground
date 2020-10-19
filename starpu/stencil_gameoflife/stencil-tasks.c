@@ -94,6 +94,95 @@ void create_start_task(int z, int dir)
 
 
 /*
+ * Schedule update computation in computation buffer
+ */
+void create_task_update(unsigned iter, unsigned z, int local_rank)
+{
+	(void)local_rank; // unneeded parameter, we keep it to have a similar function prototype to the implicit case
+	STARPU_ASSERT(iter != 0);
+
+	struct starpu_task *task = starpu_task_create();
+
+	unsigned niter = get_niter();
+
+	/* We are going to synchronize with the last tasks */
+	if (iter == niter)
+	{
+		task->use_tag = 1;
+		task->tag_id = TAG_FINISH(z);
+	}
+
+	unsigned old_layer = (K*(iter-1)) % 2;
+	unsigned new_layer = (old_layer + 1) % 2;
+
+	struct block_description *descr = get_block_description(z);
+	task->handles[0] = descr->layers_handle[new_layer];
+	task->handles[1] = descr->layers_handle[old_layer];
+
+	task->handles[2] = descr->boundaries_handle[T][new_layer];
+	task->handles[3] = descr->boundaries_handle[T][old_layer];
+
+	task->handles[4] = descr->boundaries_handle[B][new_layer];
+	task->handles[5] = descr->boundaries_handle[B][old_layer];
+
+	task->cl = &cl_update;
+	task->cl_arg = descr;
+
+	if (iter <= BIND_LAST)
+		task->execute_on_a_specific_worker = get_bind_tasks();
+	task->workerid = descr->preferred_worker;
+
+	int ret = starpu_task_submit(task);
+	if (ret)
+	{
+		FPRINTF(stderr, "Could not submit task update block: %d\n", ret);
+		if (ret == -ENODEV)
+			exit(77);
+		STARPU_ABORT();
+	}
+}
+
+/*
+ * Schedule saving boundaries of blocks to communication buffers
+ */
+void create_task_save(unsigned iter, unsigned z, int dir, int local_rank)
+{
+	int node_z = get_block_mpi_node(z);
+	int node_z_and_d = get_block_mpi_node(z+dir);
+
+#if STARPU_USE_MPI
+	if (node_z == local_rank){
+		/* Save data from update */
+		create_task_save_local(iter, z, dir);
+		if (node_z_and_d != local_rank){
+			/* R(z) = local & R(z+d) != local, We have to send the data */
+			create_task_save_mpi_send(iter, z, dir, local_rank);
+		}
+
+	}
+	else
+	{
+		/* node_z != local_rank, this MPI node doesn't have the saved data */
+		if (node_z_and_d == local_rank)
+		{
+			create_task_save_mpi_recv(iter, z, dir, local_rank);
+		}
+		else
+		{
+			/* R(z) != local & R(z+d) != local We don't have
+			   the saved data and don't need it, we shouldn't
+			   even have been called! */
+			STARPU_ABORT();
+		}
+	}
+#else /* !STARPU_USE_MPI */
+	STARPU_ASSERT((node_z == local_rank) && (node_z_and_d == local_rank));
+	create_task_save_local(iter, z, dir);
+#endif /* STARPU_USE_MPI */
+}
+
+
+/*
  * Create all the tasks
  */
 void create_tasks(int rank)
@@ -111,12 +200,37 @@ void create_tasks(int rank)
     int bz;
     int niter = get_niter();
     int nbz = get_nbz();
+    printf("[create_tasks] from bz %d to %d: create_start_task()\n", 0, (nbz-1));
     for (bz = 0; bz < nbz; bz++)
     {
         if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz+1) == rank))
             create_start_task(bz, +1);
         if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz-1) == rank))
             create_start_task(bz, -1);
+    }
+
+    printf("[create_tasks] from iter %d to %d: create_task_update() & create_task_save()\n", 0, niter);
+    for (iter = 0; iter <= niter; iter++)
+    {
+        starpu_iteration_push(iter);
+        for (bz = 0; bz < nbz; bz++){
+		    if ((iter > 0) && (get_block_mpi_node(bz) == rank)){
+                printf("\tbz %d: create_task_update()\n", bz);
+                create_task_update(iter, bz, rank);
+            }
+	    }
+
+        for (bz = 0; bz < nbz; bz++){
+            if (iter != niter){
+                if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz+1) == rank))
+                    create_task_save(iter, bz, +1, rank);
+
+                if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz-1) == rank))
+                    create_task_save(iter, bz, -1, rank);
+            }
+        }
+
+        starpu_iteration_pop();
     }
 
     // ------------------------ end VT -------------------------------
