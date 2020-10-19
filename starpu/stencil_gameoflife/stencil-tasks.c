@@ -71,7 +71,7 @@ static void create_task_save_local(unsigned iter, unsigned z, int dir)
         save_task->execute_on_a_specific_worker = get_bind_tasks();
     save_task->workerid = descr->preferred_worker;
 
-    int ret = starpu_task_create(save_task);
+    int ret = starpu_task_submit(save_task);
     if (ret){
         FPRINTF(stderr, "Couldn't submit task_save: %d\n", ret);
         if (ret == -ENODEV)
