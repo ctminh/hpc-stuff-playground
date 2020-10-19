@@ -187,5 +187,27 @@ int main(int argc, char **argv)
 	// create tasks
 	create_tasks(rank);
 
+	// make a barrier here
+	#if STARPU_USE_MPI
+	int barrier_ret = MPI_Barrier(MPI_COMM_WORLD);
+	STARPU_ASSERT(barrier_ret == MPI_SUCCESS);
+	#endif
+
+	// measuring time here
+	if (rank == 0)
+		FPRINTF(stderr, "Go!\n");
+	start = starpu_timing_now();
+	begin = starpu_timing_now();
+
+	starpu_tag_notify_from_apps(TAG_INIT_TASK);
+
+
+
+	// end MPI
+	#if STARPU_USE_MPI
+	MPI_Finalize();
+	#endif
+
+
     return 0;
 }
