@@ -39,6 +39,32 @@ starpu_tag_t TAG_START(int z, int dir)
 	return tag;
 }
 
+/*
+ * common MPI tag format:
+ * iter is actually not needed for coherency, but it makes debugging easier
+ */
+static int mpi_tag_common(int z, int iter, int dir, int buffer)
+{
+	return (((((iter << 12)|z)<<4) | ((1+dir)/2))<<4)|buffer;
+}
+
+int MPI_TAG0(int z, int iter, int dir)
+{
+	z = (z + nbz)%nbz;
+	int tag = mpi_tag_common(z, iter, dir, 0);
+
+	return tag;
+}
+
+int MPI_TAG1(int z, int iter, int dir)
+{
+	z = (z + nbz)%nbz;
+	int tag = mpi_tag_common(z, iter, dir, 1);
+
+	return tag;
+}
+
+
 /* Compute the size of the different blocks */
 static void compute_block_sizes(void)
 {

@@ -121,7 +121,7 @@ void display_memory_consumption(int rank);
 int get_block_mpi_node(int z);
 
 
-/* computation kernels or tasks | stencil-tasks.c */
+/* util about tasks | stencil-tasks.c */
 extern struct starpu_codelet cl_update;
 extern struct starpu_codelet save_cl_bottom;
 extern struct starpu_codelet save_cl_top;
@@ -132,5 +132,13 @@ extern unsigned bottom_per_worker[STARPU_NMAXWORKERS];
 
 void create_tasks(int rank);
 void create_start_task(int z, int dir);
+void create_task_save_local(unsigned iter, unsigned z, int dir);
+void create_task_update(unsigned iter, unsigned z, int local_rank);
+void create_task_save(unsigned iter, unsigned z, int dir, int local_rank);
+
+/* computation kernels | stencil-kernels.c */
+extern struct starpu_codelet cl_update;
+extern struct starpu_codelet save_cl_bottom;
+extern struct starpu_codelet save_cl_top;
 
 #endif /* __STENCIL_H__ */
