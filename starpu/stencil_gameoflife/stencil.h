@@ -132,7 +132,6 @@ extern unsigned bottom_per_worker[STARPU_NMAXWORKERS];
 
 void create_tasks(int rank);
 void create_start_task(int z, int dir);
-void create_task_save_local(unsigned iter, unsigned z, int dir);
 void create_task_update(unsigned iter, unsigned z, int local_rank);
 void create_task_save(unsigned iter, unsigned z, int dir, int local_rank);
 
