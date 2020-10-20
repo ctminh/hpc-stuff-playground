@@ -280,16 +280,16 @@ static struct starpu_perfmodel cl_update_model =
 struct starpu_codelet cl_update = 
 {
     .cpu_funcs = {update_func_cpu},
-    // if we use cuda
-    #ifdef STARPU_USE_CUDA
-    .cuda_funcs = {update_func_cuda},
-    .cuda_flags = {STARPU_CUDA_ASYNC},
-    #endif
-    // if we use opencl
-    #ifdef STARPU_USE_OPENCL
-    .opencl_funcs = {update_func_opencl},
-    .opencl_flags = {STARPU_OPENCL_ASYNC},
-    #endif
+    // // if we use cuda
+    // #ifdef STARPU_USE_CUDA
+    // .cuda_funcs = {update_func_cuda},
+    // .cuda_flags = {STARPU_CUDA_ASYNC},
+    // #endif
+    // // if we use opencl
+    // #ifdef STARPU_USE_OPENCL
+    // .opencl_funcs = {update_func_opencl},
+    // .opencl_flags = {STARPU_OPENCL_ASYNC},
+    // #endif
     .model = &cl_update_model,
     .nbuffers = 6,
     .modes = {STARPU_RW, STARPU_RW, STARPU_R, STARPU_R, STARPU_R, STARPU_R}
@@ -305,14 +305,14 @@ static struct starpu_perfmodel save_cl_bottom_model =
 struct starpu_codelet save_cl_bottom =
 {
 	.cpu_funcs = {dummy_func_bottom_cpu},
-	#ifdef STARPU_USE_CUDA
-	.cuda_funcs = {dummy_func_bottom_cuda},
-	.cuda_flags = {STARPU_CUDA_ASYNC},
-	#endif
-	#ifdef STARPU_USE_OPENCL
-	.opencl_funcs = {dummy_func_bottom_opencl},
-	.opencl_flags = {STARPU_OPENCL_ASYNC},
-	#endif
+	// #ifdef STARPU_USE_CUDA
+	// .cuda_funcs = {dummy_func_bottom_cuda},
+	// .cuda_flags = {STARPU_CUDA_ASYNC},
+	// #endif
+	// #ifdef STARPU_USE_OPENCL
+	// .opencl_funcs = {dummy_func_bottom_opencl},
+	// .opencl_flags = {STARPU_OPENCL_ASYNC},
+	// #endif
 	.model = &save_cl_bottom_model,
 	.nbuffers = 4,
 	.modes = {STARPU_R, STARPU_R, STARPU_W, STARPU_W}
@@ -327,14 +327,14 @@ struct starpu_perfmodel save_cl_top_model =
 struct starpu_codelet save_cl_top = 
 {
 	.cpu_funcs = {dummy_func_top_cpu},
-	#ifdef STARPU_USE_CUDA
-	.cuda_funcs = {dummy_func_top_cuda},
-	.cuda_flags = {STARPU_CUDA_ASYNC},
-	#endif
-	#ifdef STARPU_USE_OPENCL
-	.opencl_funcs = {dummy_func_top_opencl},
-	.opencl_flags = {STARPU_OPENCL_ASYNC},
-	#endif
+	// #ifdef STARPU_USE_CUDA
+	// .cuda_funcs = {dummy_func_top_cuda},
+	// .cuda_flags = {STARPU_CUDA_ASYNC},
+	// #endif
+	// #ifdef STARPU_USE_OPENCL
+	// .opencl_funcs = {dummy_func_top_opencl},
+	// .opencl_flags = {STARPU_OPENCL_ASYNC},
+	// #endif
 	.model = &save_cl_top_model,
 	.nbuffers = 4,
 	.modes = {STARPU_R, STARPU_R, STARPU_W, STARPU_W}
