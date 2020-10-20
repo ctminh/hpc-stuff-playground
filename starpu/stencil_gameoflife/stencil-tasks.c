@@ -314,6 +314,7 @@ void create_tasks(int rank)
 
         for (bz = 0; bz < nbz; bz++){
             if (iter != niter){
+                printf("\tbz %d: create_task_save()\n", bz);
                 if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz+1) == rank))
                     create_task_save(iter, bz, +1, rank);
 
