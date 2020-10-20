@@ -314,12 +314,19 @@ void create_tasks(int rank)
 
         for (bz = 0; bz < nbz; bz++){
             if (iter != niter){
-                printf("\tbz %d: create_task_save()\n", bz);
-                if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz+1) == rank))
+                printf("\tRank %d: bz %d -> create_task_save()\n", bz);
+                int bz_mpi_node = get_block_mpi_node(bz);
+                int bz_pos1_mpi_node = get_block_mpi_node(bz+1);
+                int bz_neg1_mpi_node = get_block_mpi_node(bz-1);
+                if ((bz_mpi_node == rank) || (bz_pos1_mpi_node == rank)){
+                    printf("\t\t create_tasksave bz+1, block_mpi_node = %d\n", bz_pos1_mpi_node);
                     create_task_save(iter, bz, +1, rank);
+                }
 
-                if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz-1) == rank))
+                if ((bz_mpi_node == rank) || (bz_neg1_mpi_node == rank)){
+                    printf("\t\t create_tasksave bz-1, block_mpi_node = %d\n", bz_neg1_mpi_node);
                     create_task_save(iter, bz, -1, rank);
+                }
             }
         }
 
