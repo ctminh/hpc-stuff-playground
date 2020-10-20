@@ -266,3 +266,9 @@ int get_block_mpi_node(int z)
     z = (z + nbz) % nbz;
     return blocks[z].mpi_node;
 }
+
+/* Get block size */
+unsigned get_block_size(int bz)
+{
+	return block_sizes_z[bz];
+}

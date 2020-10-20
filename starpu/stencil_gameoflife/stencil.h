@@ -104,6 +104,9 @@ unsigned get_niter(void);
 unsigned get_ticks(void);
 unsigned global_workerid(unsigned local_workerid);
 
+/* ///////////////////////////////////////////// */
+
+
 
 /* define some util functions | stencil-blocks.c */
 /* define MPI and StarPU tags */
@@ -120,6 +123,9 @@ void allocate_memory_on_node(int rank);
 void assign_blocks_to_workers(int rank);
 void display_memory_consumption(int rank);
 int get_block_mpi_node(int z);
+unsigned get_block_size(int bz);
+
+/* ///////////////////////////////////////////// */
 
 
 /* util about tasks | stencil-tasks.c */
