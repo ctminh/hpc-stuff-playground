@@ -175,7 +175,7 @@ static void load_subblock_into_buffer_cpu(void *_block, void *_boundary, unsigne
 	unsigned offset = firstz * block->ldz;
 	TYPE *block_data = (TYPE *) block->ptr;
 	TYPE *boundary_data = (TYPE *) boundary->ptr;
-	memccpy(boundary_data, &block_data[offset], boundary_size);
+	memcpy(boundary_data, &block_data[offset], boundary_size);
 }
 
 
