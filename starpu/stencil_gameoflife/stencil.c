@@ -44,6 +44,19 @@ unsigned get_ticks(void){
 	return ticks;
 }
 
+/* Get info workder_id global */
+unsigned global_workerid(unsigned local_workerid)
+{
+#if STARPU_USE_MPI
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	unsigned workers_per_node = starpu_worker_get_count();
+	return (local_workerid + rank*workers_per_node);
+#else
+	return local_workerid;
+#endif
+}
+
 /* Parsing the arguments */
 static void parse_args(int argc, char **argv)
 {

@@ -102,6 +102,7 @@ unsigned get_bind_tasks(void);
 unsigned get_nbz(void);
 unsigned get_niter(void);
 unsigned get_ticks(void);
+unsigned global_workerid(unsigned local_workerid);
 
 
 /* define some util functions | stencil-blocks.c */
