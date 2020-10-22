@@ -95,6 +95,8 @@ static void send_done(void *arg)
 #if STARPU_USE_MPI
 static void create_task_save_mpi_send(unsigned iter, unsigned z, int dir, int local_rank)
 {
+    printf("[create_task_save_mpi_send] ...\n");
+
 	struct block_description *descr = get_block_description(z);
 	STARPU_ASSERT(descr->mpi_node == local_rank);
 
@@ -125,6 +127,8 @@ static void recv_done(void *arg)
 #if STARPU_USE_MPI
 static void create_task_save_mpi_recv(unsigned iter, unsigned z, int dir, int local_rank)
 {
+    printf("[create_task_save_mpi_recv] ...\n");
+
 	struct block_description *descr = get_block_description(z);
 	STARPU_ASSERT(descr->mpi_node != local_rank);
 
