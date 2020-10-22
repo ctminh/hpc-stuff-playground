@@ -92,7 +92,7 @@ static void send_done(void *arg)
 }
 
 /* Post MPI send */
-#if STARPU_USE_MPI
+// #if STARPU_USE_MPI
 static void create_task_save_mpi_send(unsigned iter, unsigned z, int dir, int local_rank)
 {
 	struct block_description *descr = get_block_description(z);
@@ -108,8 +108,9 @@ static void create_task_save_mpi_send(unsigned iter, unsigned z, int dir, int lo
 
 	starpu_mpi_isend_detached(handle0, dest, MPI_TAG0(z, iter, dir), MPI_COMM_WORLD, send_done, (void*)(uintptr_t)z);
 	starpu_mpi_isend_detached(handle1, dest, MPI_TAG1(z, iter, dir), MPI_COMM_WORLD, send_done, (void*)(uintptr_t)z);
+    printf("sent...\n");
 }
-#endif /* STARPU_USE_MPI */
+// #endif /* STARPU_USE_MPI */
 
 
 /* R(z) != local & R(z+d) = local */
@@ -122,7 +123,7 @@ static void recv_done(void *arg)
 }
 
 /* Post MPI recv */
-#if STARPU_USE_MPI
+// #if STARPU_USE_MPI
 static void create_task_save_mpi_recv(unsigned iter, unsigned z, int dir, int local_rank)
 {
 	struct block_description *descr = get_block_description(z);
@@ -138,8 +139,10 @@ static void create_task_save_mpi_recv(unsigned iter, unsigned z, int dir, int lo
 
 	starpu_mpi_irecv_detached(handle0, source, MPI_TAG0(z, iter, dir), MPI_COMM_WORLD, recv_done, (void*)(uintptr_t)z);
 	starpu_mpi_irecv_detached(handle1, source, MPI_TAG1(z, iter, dir), MPI_COMM_WORLD, recv_done, (void*)(uintptr_t)z);
+
+    printf("received...\n");
 }
-#endif /* STARPU_USE_MPI */
+// #endif /* STARPU_USE_MPI */
 
 
 /* Create start tasks??? */
