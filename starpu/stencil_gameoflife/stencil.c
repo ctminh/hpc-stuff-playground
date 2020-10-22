@@ -191,14 +191,14 @@ int main(int argc, char **argv)
     init_problem(argc, argv, rank, world_size);
 
 	// check the assignment of blocks to mpi_nodes
-	unsigned b_idx;
-	for (b_idx = 0; b_idx < nbz; b_idx++){
-		struct block_description *block = get_block_description(b_idx);
+	// unsigned b_idx;
+	// for (b_idx = 0; b_idx < nbz; b_idx++){
+		// struct block_description *block = get_block_description(b_idx);
 		// printf("\t[main] block %d -> mpi_rank_%d, preferred_worker_%d\n", block->bz, block->mpi_node, block->perferred_worker);
-	}
+	// }
 
 	// create tasks
-	create_tasks(rank);
+	// create_tasks(rank);
 
 	// make a barrier here
 	#if STARPU_USE_MPI
