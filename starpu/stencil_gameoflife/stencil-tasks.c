@@ -95,8 +95,6 @@ static void send_done(void *arg)
 #if STARPU_USE_MPI
 static void create_task_save_mpi_send(unsigned iter, unsigned z, int dir, int local_rank)
 {
-    printf("[create_task_save_mpi_send] ...\n");
-
 	struct block_description *descr = get_block_description(z);
 	STARPU_ASSERT(descr->mpi_node == local_rank);
 
@@ -127,8 +125,6 @@ static void recv_done(void *arg)
 #if STARPU_USE_MPI
 static void create_task_save_mpi_recv(unsigned iter, unsigned z, int dir, int local_rank)
 {
-    printf("[create_task_save_mpi_recv] ...\n");
-
 	struct block_description *descr = get_block_description(z);
 	STARPU_ASSERT(descr->mpi_node != local_rank);
 
@@ -255,6 +251,7 @@ void create_task_save(unsigned iter, unsigned z, int dir, int local_rank)
 		if (node_z_and_d != local_rank){
 			/* R(z) = local & R(z+d) != local, We have to send the data */
 			create_task_save_mpi_send(iter, z, dir, local_rank);
+            printf("[bz %d (r%d), bz_d %d (r%d)] sent saved_data to r%d\n", z, node_z, (z+dir), node_z_and_d, local_rank);
 		}
 	}
 	else
@@ -263,6 +260,7 @@ void create_task_save(unsigned iter, unsigned z, int dir, int local_rank)
 		if (node_z_and_d == local_rank)
 		{
 			create_task_save_mpi_recv(iter, z, dir, local_rank);
+            printf("[bz %d (r%d), bz_d %d (r%d)] received saved_data from ...\n", z, node_z, (z+dir), node_z_and_d);
 		}
 		else
 		{
