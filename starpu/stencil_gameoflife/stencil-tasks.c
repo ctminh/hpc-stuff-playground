@@ -106,6 +106,7 @@ static void create_task_save_mpi_send(unsigned iter, unsigned z, int dir, int lo
 	starpu_data_handle_t handle0 = neighbour->boundaries_handle[(1-dir)/2][0];
 	starpu_data_handle_t handle1 = neighbour->boundaries_handle[(1-dir)/2][1];
 
+    printf("calling starpu_mpi_isend_detached ...\n");
 	starpu_mpi_isend_detached(handle0, dest, MPI_TAG0(z, iter, dir), MPI_COMM_WORLD, send_done, (void*)(uintptr_t)z);
 	starpu_mpi_isend_detached(handle1, dest, MPI_TAG1(z, iter, dir), MPI_COMM_WORLD, send_done, (void*)(uintptr_t)z);
     printf("sent...\n");
