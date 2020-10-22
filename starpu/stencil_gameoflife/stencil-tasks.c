@@ -297,39 +297,40 @@ void create_tasks(int rank)
     int bz;
     int niter = get_niter();
     int nbz = get_nbz();
-    printf("[create_tasks] from bz %d to %d: create_start_task()\n", 0, (nbz-1));
     for (bz = 0; bz < nbz; bz++)
     {
-        if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz+1) == rank))
+        if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz+1) == rank)){
+            printf("[check] block %d: create start_task (-1) on rank %d\n", bz, rank);
             create_start_task(bz, +1);
-        if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz-1) == rank))
+        }
+        if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz-1) == rank)){
+            printf("[check] block %d: create start_task (-1) on rank %d\n", bz, rank);
             create_start_task(bz, -1);
+        }   
     }
 
-    printf("[create_tasks] from iter %d to %d: create_task_update() & create_task_save()\n", 0, niter);
     for (iter = 0; iter <= niter; iter++)
     {
         starpu_iteration_push(iter);
         for (bz = 0; bz < nbz; bz++){
 		    if ((iter > 0) && (get_block_mpi_node(bz) == rank)){
-                printf("\tbz %d: create_task_update()\n", bz);
+                printf("[check] iter %d - block %d: create task_update on rank %d\n", iter, bz, rank);
                 create_task_update(iter, bz, rank);
             }
 	    }
 
         for (bz = 0; bz < nbz; bz++){
             if (iter != niter){
-                printf("\tRank %d: bz %d -> creating ...\n", rank, bz);
                 int bz_mpi_node = get_block_mpi_node(bz);
                 int bz_pos1_mpi_node = get_block_mpi_node(bz+1);
                 int bz_neg1_mpi_node = get_block_mpi_node(bz-1);
                 if ((bz_mpi_node == rank) || (bz_pos1_mpi_node == rank)){
-                    printf("\t\t create_tasksave bz+1, block_mpi_node = %d\n", bz_pos1_mpi_node);
+                    printf("[check] iter %d - block %d: create task_save (=1) on rank %d \n", iter, bz, rank);
                     create_task_save(iter, bz, +1, rank);
                 }
 
                 if ((bz_mpi_node == rank) || (bz_neg1_mpi_node == rank)){
-                    printf("\t\t create_tasksave bz-1, block_mpi_node = %d\n", bz_neg1_mpi_node);
+                    printf("[check] iter %d - block %d: create task_save (-1) on rank %d \n", iter, bz, rank);
                     create_task_save(iter, bz, -1, rank);
                 }
             }
