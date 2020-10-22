@@ -246,6 +246,7 @@ void create_task_save(unsigned iter, unsigned z, int dir, int local_rank)
 {
 	int node_z = get_block_mpi_node(z);
 	int node_z_and_d = get_block_mpi_node(z+dir);
+    printf("[create_task_save] block %d (rank %d), block_d %d (rank %d)\n", z, node_z, (z+dir), node_z_and_d);
 
 #if STARPU_USE_MPI
 	if (node_z == local_rank){
