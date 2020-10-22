@@ -63,8 +63,8 @@ static void create_task_save_local(unsigned iter, unsigned z, int dir)
 
     // ... to the neighbor's copy
     struct block_description *neighbour = descr->boundary_blocks[(1+dir)/2];
-    save_task->handles[0] = neighbour->boundaries_handle[(1-dir)/2][0];
-    save_task->handles[1] = neighbour->boundaries_handle[(1-dir)/2][1];
+    save_task->handles[2] = neighbour->boundaries_handle[(1-dir)/2][0];
+    save_task->handles[3] = neighbour->boundaries_handle[(1-dir)/2][1];
 
     // binding ...
     if (iter <= BIND_LAST)
