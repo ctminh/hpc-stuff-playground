@@ -216,7 +216,7 @@ int main(int argc, char **argv)
 
 	wait_end_tasks(rank);
 
-	end = starpu_timeing_now();
+	end = starpu_timing_now();
 
 	// make a barrier here
 	#if STARPU_USE_MPI
