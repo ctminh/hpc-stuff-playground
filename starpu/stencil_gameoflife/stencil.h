@@ -141,6 +141,7 @@ void create_tasks(int rank);
 void create_start_task(int z, int dir);
 void create_task_update(unsigned iter, unsigned z, int local_rank);
 void create_task_save(unsigned iter, unsigned z, int dir, int local_rank);
+void wait_end_tasks(int rank);
 
 /* computation kernels | stencil-kernels.c */
 extern struct starpu_codelet cl_update;

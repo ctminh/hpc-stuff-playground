@@ -343,3 +343,32 @@ void create_tasks(int rank)
     #endif
     // ---------------------------------------------------------------
 }
+
+
+/* Wait for termination */
+void wait_end_tasks(int rank)
+{
+    int bz;
+    int nbz = get_nbz();
+
+    for (bz = 0; bz < nbz; bz++)
+    {
+        if (get_block_mpi_node(bz) == rank)
+        {
+            /* Wait for the task producing block "bz" */
+			starpu_tag_wait(TAG_FINISH(bz));
+
+			/* Get the result back to memory */
+			struct block_description *block = get_block_description(bz);
+			starpu_data_acquire(block->layers_handle[0], STARPU_R);
+			starpu_data_acquire(block->layers_handle[1], STARPU_R);
+			/* the data_acquire here is done to make sure
+			 * the data is sent back to the ram memory, we
+			 * can safely do a data_release, to avoid the
+			 * data_unregister to block later on
+			 */
+			starpu_data_release(block->layers_handle[0]);
+			starpu_data_release(block->layers_handle[1]);
+        }
+    }
+}

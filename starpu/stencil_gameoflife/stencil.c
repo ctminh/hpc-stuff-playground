@@ -214,6 +214,22 @@ int main(int argc, char **argv)
 
 	starpu_tag_notify_from_apps(TAG_INIT_TASK);
 
+	wait_end_tasks(rank);
+
+	end = starpu_timeing_now();
+
+	// make a barrier here
+	#if STARPU_USE_MPI
+	barrier_ret = MPI_Barrier(MPI_COMM_WORLD);
+	STARPU_ASSERT(barrier_ret == MPI_SUCCESS);
+	#endif
+
+	#if STARPU_USE_MPI
+	starpu_mpi_shutdown();
+	#endif
+
+	/* timing in us */
+	timing = end - begin;
 
 	// end MPI
 	#if STARPU_USE_MPI
