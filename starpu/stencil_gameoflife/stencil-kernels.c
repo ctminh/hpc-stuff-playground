@@ -232,6 +232,11 @@ void update_func_cpu(void *descr[], void *arg)
 		TYPE *ptr = old;
 
         /* Life update */
+		#ifdef LIFE
+		life_update(block->bz, old, newer, oldb->nx, oldb->ny, oldb->nz, oldb->ldy, oldb->ldz, i);
+		#else
+		memcpy(newer, old, oldb->nx * oldb->ny * oldb->nz * sizeof(*newer));
+		#endif /* LIFE */
 	}
 }
 
