@@ -191,6 +191,15 @@ void create_start_task(int z, int dir)
  */
 void create_task_update(unsigned iter, unsigned z, int local_rank)
 {
+    // ------------------------ begin VT -----------------------------
+    #ifdef TRACE
+    int event_c_taskupdate = -1;
+    char eventtag_c_taskupdate[12] = "c_taskupdate";
+    int itac_err = VT_funcdef(eventtag_c_taskupdate, VT_NOCLASS, &event_c_taskupdate);
+    VT_BEGIN_CONSTRAINED(event_c_taskupdate);
+    #endif
+    // ---------------------------------------------------------------
+
 	(void)local_rank; // unneeded parameter, we keep it to have a similar function prototype to the implicit case
 	STARPU_ASSERT(iter != 0);
 
@@ -233,6 +242,12 @@ void create_task_update(unsigned iter, unsigned z, int local_rank)
 			exit(77);
 		STARPU_ABORT();
 	}
+
+    // ------------------------ end VT -------------------------------
+    #ifdef TRACE
+    VT_END_W_CONSTRAINED(event_c_taskupdate);
+    #endif
+    // ---------------------------------------------------------------
 }
 
 /*
@@ -240,9 +255,17 @@ void create_task_update(unsigned iter, unsigned z, int local_rank)
  */
 void create_task_save(unsigned iter, unsigned z, int dir, int local_rank)
 {
+    // ------------------------ begin VT -----------------------------
+    #ifdef TRACE
+    int event_c_tasksave = -1;
+    char eventtag_c_tasksave[12] = "c_tasksave";
+    int itac_err = VT_funcdef(eventtag_c_tasksave, VT_NOCLASS, &event_c_tasksave);
+    VT_BEGIN_CONSTRAINED(event_c_tasksave);
+    #endif
+    // ---------------------------------------------------------------
+
 	int node_z = get_block_mpi_node(z);
 	int node_z_and_d = get_block_mpi_node(z+dir);
-    // printf("[create_task_save] block %d (rank %d), block_d %d (rank %d)\n", z, node_z, (z+dir), node_z_and_d);
 
 #if STARPU_USE_MPI
 	if (node_z == local_rank){
@@ -274,6 +297,12 @@ void create_task_save(unsigned iter, unsigned z, int dir, int local_rank)
 	STARPU_ASSERT((node_z == local_rank) && (node_z_and_d == local_rank));
 	create_task_save_local(iter, z, dir);
 #endif /* STARPU_USE_MPI */
+
+    // ------------------------ end VT -------------------------------
+    #ifdef TRACE
+    VT_END_W_CONSTRAINED(event_c_tasksave);
+    #endif
+    // ---------------------------------------------------------------
 }
 
 
