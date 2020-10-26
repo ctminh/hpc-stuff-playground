@@ -281,7 +281,7 @@ int main(int argc, char **argv)
 	reduce_ret = MPI_Reduce(&timing, &sum_timing, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 	STARPU_ASSERT(reduce_ret == MPI_SUCCESS);
 
-	int *who_runs_what_tmp = malloc(nbz * who_runs_what_len * sizof(*who_runs_what));
+	int *who_runs_what_tmp = malloc(nbz * who_runs_what_len * sizeof(*who_runs_what));
 	reduce_ret = MPI_Reduce(who_runs_what, who_runs_what_tmp, nbz * who_runs_what_len, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 	STARPU_ASSERT(reduce_ret == MPI_SUCCESS);
 
