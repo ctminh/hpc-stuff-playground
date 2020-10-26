@@ -197,9 +197,10 @@ int main(int argc, char **argv)
 	// }
 
 	// create tasks
+	printf("3. creat tasks ...\n");
 	create_tasks(rank);
 
-	// make a barrier here
+	// make a barrier to wait for all the tasks created
 	#if STARPU_USE_MPI
 	int barrier_ret = MPI_Barrier(MPI_COMM_WORLD);
 	STARPU_ASSERT(barrier_ret == MPI_SUCCESS);
@@ -211,16 +212,22 @@ int main(int argc, char **argv)
 	start = starpu_timing_now();
 	begin = starpu_timing_now();
 
+	// Explicitly unlock tag id. It may be useful in the case of applications which execute part of
+	// their computation outside StarPU tasks (e.g. third-party libraries)
 	starpu_tag_notify_from_apps(TAG_INIT_TASK);
 
 	wait_end_tasks(rank);
 
 	end = starpu_timing_now();
 
-	// make a barrier here
+	// make a barrier here to wait for all the tasks finished
 	#if STARPU_USE_MPI
 	barrier_ret = MPI_Barrier(MPI_COMM_WORLD);
 	STARPU_ASSERT(barrier_ret == MPI_SUCCESS);
+	#endif
+
+	#if 0
+	check(rank);
 	#endif
 
 	#if STARPU_USE_MPI
@@ -229,12 +236,91 @@ int main(int argc, char **argv)
 
 	/* timing in us */
 	timing = end - begin;
+	double min_timing = timing;
+	double max_timing = timing;
+	double sum_timing = timing;
+
+	#if STARPU_USE_MPI
+	int reduce_ret;
+
+	reduce_ret = MPI_Reduce(&timing, &min_timing, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+	STARPU_ASSERT(reduce_ret == MPI_SUCCESS);
+
+	reduce_ret = MPI_Reduce(&timing, &max_timing, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+	STARPU_ASSERT(reduce_ret == MPI_SUCCESS);
+
+	reduce_ret = MPI_Reduce(&timing, &sum_timing, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+	STARPU_ASSERT(reduce_ret == MPI_SUCCESS);
+
+	int *who_runs_what_tmp = malloc(nbz * who_runs_what_len * sizof(*who_runs_what));
+	reduce_ret = MPI_Reduce(who_runs_what, who_runs_what_tmp, nbz * who_runs_what_len, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+	STARPU_ASSERT(reduce_ret == MPI_SUCCESS);
+
+	memcpy(who_runs_what, who_runs_what_tmp, nbz * who_runs_what_len * sizeof(*who_runs_what));
+	free(who_runs_what_tmp);
+
+	int *who_runs_what_index_tmp = malloc(nbz * sizeof(*who_runs_what_index));
+	reduce_ret = MPI_Reduce(who_runs_what_index, who_runs_what_index_tmp, nbz, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+	STARPU_ASSERT(reduce_ret == MPI_SUCCESS);
+
+	memcpy(who_runs_what_index, who_runs_what_index_tmp, nbz * sizeof(*who_runs_what_index));
+	free(who_runs_what_index_tmp);
+	#endif
+
+	if (rank == 0)
+	{
+	#if 1
+		FPRINTF(stderr, "update: \n");
+		f(update_per_worker);
+		FPRINTF(stderr, "top: \n");
+		f(top_per_worker);
+		FPRINTF(stderr, "bottom: \n");
+		f(bottom_per_worker);
+	#endif
+	#if 1
+		unsigned nzblocks_per_process = (nbz + world_size - 1) / world_size;
+		int iter;
+		for (iter = 0; iter < who_runs_what_len; iter++)
+		{
+			starpu_iteration_push(iter);
+			unsigned last, bz;
+			last = 1;
+			for (bz = 0; bz < nbz; bz++)
+			{
+				if ((bz % nzblocks_per_process) == 0)
+					FPRINTF(stderr, "| ");
+
+				if (who_runs_what_index[bz] <= iter)
+					FPRINTF(stderr,"_ ");
+				else
+				{
+					last = 0;
+					if (who_runs_what[bz + iter * nbz] == -1)
+						FPRINTF(stderr,"* ");
+					else
+						FPRINTF(stderr, "%d ", who_runs_what[bz + iter * nbz]);
+				}
+			}
+			FPRINTF(stderr, "\n");
+			starpu_iteration_pop();
+			if (last)
+				break;
+		}
+	#endif
+		fflush(stderr);
+		FPRINTF(stdout, "Computation took: %f ms on %d MPI processes\n", max_timing/1000, world_size);
+		FPRINTF(stdout, "\tMIN : %f ms\n", min_timing/1000);
+		FPRINTF(stdout, "\tMAX : %f ms\n", max_timing/1000);
+		FPRINTF(stdout, "\tAVG : %f ms\n", sum_timing/(world_size*1000));
+	}
+
+	free_problem(rank);
+	starpu_shutdown();
 
 	// end MPI
 	#if STARPU_USE_MPI
 	MPI_Finalize();
 	#endif
-
 
     return 0;
 }
