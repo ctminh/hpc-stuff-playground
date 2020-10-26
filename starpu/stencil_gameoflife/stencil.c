@@ -7,8 +7,8 @@ static unsigned niter = 4;
 #define NBZ 8
 #else
 static unsigned niter = 32;
-#define SIZE 128
-#define NBZ 64
+#define SIZE 16
+#define NBZ 2
 #endif
 
 int who_runs_what_len;
