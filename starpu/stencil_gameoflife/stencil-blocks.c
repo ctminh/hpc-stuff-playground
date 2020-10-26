@@ -117,7 +117,7 @@ void create_blocks_array(unsigned _sizex, unsigned _sizey, unsigned _sizez, unsi
         block->bz = bz;
 
         // for simplicity, we store which are the neighbours blocks
-        // printf("\t[create_blocks_array] block %d: B=%d (%d), T=%d (%d)\n", bz, B, ((bz-1+nbz) % nbz), T, ((bz+1) % nbz));
+        printf("\t[create_blocks_array] block %d: B=%d (%d), T=%d (%d)\n", bz, B, ((bz-1+nbz) % nbz), T, ((bz+1) % nbz));
         block->boundary_blocks[B] = get_block_description((bz-1+nbz) % nbz);
         block->boundary_blocks[T] = get_block_description((bz+1) % nbz);
     }
