@@ -212,7 +212,7 @@ void allocate_block_on_node(starpu_data_handle_t *handleptr, unsigned bz, TYPE *
 /* Allocate the different mem blocks on node */
 void allocate_memory_on_node(int rank)
 {
-    unsigned bz;
+    unsigned bz;    // block
     for (bz = 0; bz < nbz; bz++){
         struct block_description *block = get_block_description(bz);
         int node = block->mpi_node;
