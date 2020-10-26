@@ -136,6 +136,35 @@ static void init_problem(int argc, char **argv, int rank, int world_size)
 }
 
 
+/* free the problem */
+static void free_problem(int rank)
+{
+    free_memory_on_node(rank);
+	free_blocks_array();
+	free(who_runs_what);
+	free(who_runs_what_index);
+	free(last_tick);
+}
+
+/* f function ??? */
+void f(unsigned task_per_worker[STARPU_NMAXWORKERS])
+{
+	unsigned total = 0;
+	int worker;
+
+	for (worker = 0; worker < STARPU_NMAXWORKERS; worker++)
+		total += task_per_worker[worker];
+	for (worker = 0; worker < STARPU_NMAXWORKERS; worker++)
+	{
+		if (task_per_worker[worker])
+		{
+			char name[64];
+			starpu_worker_get_name(worker, name, sizeof(name));
+			FPRINTF(stderr,"\t%s -> %u (%2.2f%%)\n", name, task_per_worker[worker], (100.0*task_per_worker[worker])/total);
+		}
+	}
+}
+
 /* Main body */
 double start;
 double begin, end;
