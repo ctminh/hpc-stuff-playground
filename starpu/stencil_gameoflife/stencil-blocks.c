@@ -273,3 +273,80 @@ unsigned get_block_size(int bz)
 	return block_sizes_z[bz];
 }
 
+
+/* Free block arrays */
+void free_blocks_array()
+{
+	free(blocks);
+	free(block_sizes_z);
+}
+
+/* Free block on node */
+static void free_block_on_node(starpu_data_handle_t handleptr, unsigned nx, unsigned ny, unsigned nz)
+{
+	void *ptr = (void *) starpu_block_get_local_ptr(handleptr);
+	size_t block_size = nx*ny*nz*sizeof(TYPE);
+	starpu_data_unregister(handleptr);
+	starpu_free_flags(ptr, block_size, STARPU_MALLOC_PINNED|STARPU_MALLOC_SIMULATION_FOLDED);
+}
+
+void free_memory_on_node(int rank)
+{
+	unsigned bz;
+	for (bz = 0; bz < nbz; bz++)
+	{
+		struct block_description *block = get_block_description(bz);
+
+		int node = block->mpi_node;
+
+		/* Main blocks */
+		if (node == rank)
+		{
+			free_block_on_node(block->layers_handle[0], (sizex + 2*K), (sizey + 2*K), K);
+			free_block_on_node(block->layers_handle[1], (sizex + 2*K), (sizey + 2*K), K);
+		}
+
+		/* Boundary blocks : Top */
+		int top_node = block->boundary_blocks[T]->mpi_node;
+		if ((node == rank) || (top_node == rank))
+		{
+			free_block_on_node(block->boundaries_handle[T][0], (sizex + 2*K), (sizey + 2*K), K);
+			free_block_on_node(block->boundaries_handle[T][1], (sizex + 2*K), (sizey + 2*K), K);
+		}
+
+		/* Boundary blocks : Bottom */
+		int bottom_node = block->boundary_blocks[B]->mpi_node;
+		if ((node == rank) || (bottom_node == rank))
+		{
+			free_block_on_node(block->boundaries_handle[B][0], (sizex + 2*K), (sizey + 2*K), K);
+			free_block_on_node(block->boundaries_handle[B][1], (sizex + 2*K), (sizey + 2*K), K);
+		}
+	}
+}
+
+/* check how many cells are alive */
+void check(int rank)
+{
+	unsigned bz;
+	for (bz = 0; bz < nbz; bz++)
+	{
+		struct block_description *block = get_block_description(bz);
+
+		int node = block->mpi_node;
+
+		/* Main blocks */
+		if (node == rank)
+		{
+        #ifdef LIFE
+			unsigned size_bz = block_sizes_z[bz];
+			unsigned x, y, z;
+			unsigned sum = 0;
+			for (x = 0; x < sizex; x++)
+				for (y = 0; y < sizey; y++)
+					for (z = 0; z < size_bz; z++)
+						sum += block->layers[0][(K+x)+(K+y)*(sizex + 2*K)+(K+z)*(sizex+2*K)*(sizey+2*K)];
+			printf("block %u got %u/%u alive\n", bz, sum, sizex*sizey*size_bz);
+        #endif
+		}
+	}
+}

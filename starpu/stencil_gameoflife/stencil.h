@@ -106,8 +106,6 @@ unsigned global_workerid(unsigned local_workerid);
 
 /* ///////////////////////////////////////////// */
 
-
-
 /* define some util functions | stencil-blocks.c */
 /* define MPI and StarPU tags */
 #define TAG_INIT_TASK	((starpu_tag_t)1)
@@ -124,9 +122,11 @@ void assign_blocks_to_workers(int rank);
 void display_memory_consumption(int rank);
 int get_block_mpi_node(int z);
 unsigned get_block_size(int bz);
+void free_blocks_array();
+void free_memory_on_node(int rank);
+void check(int rank);
 
 /* ///////////////////////////////////////////// */
-
 
 /* util about tasks | stencil-tasks.c */
 extern struct starpu_codelet cl_update;
