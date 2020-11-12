@@ -6,7 +6,7 @@ static unsigned niter = 4;
 #define SIZE 16
 #define NBZ 8
 #else
-static unsigned niter = 32;
+static unsigned niter = 10;
 #define SIZE 8
 #define NBZ 4
 #endif
@@ -222,7 +222,8 @@ int main(int argc, char **argv)
 	// unsigned b_idx;
 	// for (b_idx = 0; b_idx < nbz; b_idx++){
 	// 	struct block_description *block = get_block_description(b_idx);
-	// 	printf("\t[main] block %d -> mpi_rank_%d, preferred_worker_%d\n", block->bz, block->mpi_node, block->preferred_worker);
+	// 	printf("\t[main] block %d: rank_%d, lay_hand1_%p, lay_hand2_%p\n", block->bz, block->mpi_node, &block->layers_handle[0], &block->layers_handle[1]);
+	// 	printf("\t\t block %d: bound_h[B]_%p, bound_h[T]_%p\n", block->bz, &block->boundary_blocks[B], &block->boundary_blocks[T]);
 	// }
 
 	// create tasks
@@ -298,15 +299,16 @@ int main(int argc, char **argv)
 
 	if (rank == 0)
 	{
-	#if 1
+		#if 1
 		FPRINTF(stderr, "update: \n");
 		f(update_per_worker);
 		FPRINTF(stderr, "top: \n");
 		f(top_per_worker);
 		FPRINTF(stderr, "bottom: \n");
 		f(bottom_per_worker);
-	#endif
-	#if 1
+		#endif
+		
+		#if 1
 		unsigned nzblocks_per_process = (nbz + world_size - 1) / world_size;
 		int iter;
 		for (iter = 0; iter < who_runs_what_len; iter++)
@@ -335,7 +337,8 @@ int main(int argc, char **argv)
 			if (last)
 				break;
 		}
-	#endif
+		#endif
+		
 		fflush(stderr);
 		FPRINTF(stdout, "Computation took: %f ms on %d MPI processes\n", max_timing/1000, world_size);
 		FPRINTF(stdout, "\tMIN : %f ms\n", min_timing/1000);

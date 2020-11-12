@@ -66,6 +66,8 @@ static void create_task_save_local(unsigned iter, unsigned z, int dir)
     save_task->handles[2] = neighbour->boundaries_handle[(1-dir)/2][0];
     save_task->handles[3] = neighbour->boundaries_handle[(1-dir)/2][1];
 
+    // printf("[task_save_local-iter%d] block %d (dir=%d): block_neighbour[%d]=%d, neighbour_boundaries_handle[%d][0/1]\n", iter, z, dir, (1+dir)/2, neighbour->bz, (1-dir)/2);
+
     // binding ...
     if (iter <= BIND_LAST)
         save_task->execute_on_a_specific_worker = get_bind_tasks();
@@ -166,6 +168,7 @@ void create_start_task(int z, int dir)
     wait_init->handles[0] = descr->boundaries_handle[(1 + dir) / 2][0];
     wait_init->handles[1] = descr->boundaries_handle[(1 + dir) / 2][1];
     starpu_tag_declare_deps_array(wait_init->tag_id, 1, &tag_init);
+    // printf("[create_start_task] task->block %d: tag_id %ld depends on task %p\n", z, wait_init->tag_id, &tag_init);
 
     int ret = starpu_task_submit(wait_init);
     if (ret)
@@ -264,8 +267,8 @@ void create_task_save(unsigned iter, unsigned z, int dir, int local_rank)
     #endif
     // ---------------------------------------------------------------
 
-	int node_z = get_block_mpi_node(z);
-	int node_z_and_d = get_block_mpi_node(z+dir);
+	int node_z = get_block_mpi_node(z);             // get mpi rank of block z
+	int node_z_and_d = get_block_mpi_node(z+dir);   // 
 
 #if STARPU_USE_MPI
 	if (node_z == local_rank){
@@ -327,11 +330,9 @@ void create_tasks(int rank)
     for (bz = 0; bz < nbz; bz++)
     {
         if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz+1) == rank)){
-            // printf("block %d (rank %d): create start_task (+1)\n", bz, rank);
             create_start_task(bz, +1);
         }
         if ((get_block_mpi_node(bz) == rank) || (get_block_mpi_node(bz-1) == rank)){
-            // printf("block %d (rank %d): create start_task (11)\n", bz, rank);
             create_start_task(bz, -1);
         }   
     }
@@ -341,7 +342,6 @@ void create_tasks(int rank)
         starpu_iteration_push(iter);
         for (bz = 0; bz < nbz; bz++){
 		    if ((iter > 0) && (get_block_mpi_node(bz) == rank)){
-                // printf("iter %d - block %d - rank %d: create task_update\n", iter, bz, rank);
                 create_task_update(iter, bz, rank);
             }
 	    }
@@ -352,12 +352,10 @@ void create_tasks(int rank)
                 int bz_pos1_mpi_node = get_block_mpi_node(bz+1);
                 int bz_neg1_mpi_node = get_block_mpi_node(bz-1);
                 if ((bz_mpi_node == rank) || (bz_pos1_mpi_node == rank)){
-                    // printf("\t -> iter %d - block %d - rank %d: create task_save (+1)\n", iter, bz, rank);
                     create_task_save(iter, bz, +1, rank);
                 }
 
                 if ((bz_mpi_node == rank) || (bz_neg1_mpi_node == rank)){
-                    // printf("\t -> iter %d - block %d - rank %d: create task_save (-1)\n", iter, bz, rank);
                     create_task_save(iter, bz, -1, rank);
                 }
             }

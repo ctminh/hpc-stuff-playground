@@ -3,9 +3,9 @@
 
 /* Manage block and tags allocation */
 static struct block_description *blocks;    // an array of blocks
-static unsigned sizex, sizey, sizez;
-static unsigned nbz;
-static unsigned *block_sizes_z;
+static unsigned sizex, sizey, sizez;        // blobal vars about x, y, z
+static unsigned nbz;                        // global var about num of blocks
+static unsigned *block_sizes_z;             // an array containing sizes of all the blocks
 static size_t allocated = 0;
 
 
@@ -78,6 +78,7 @@ static void compute_block_sizes(void)
 	unsigned b;
 	for (b = 0; b < nbz; b++)
 	{
+        // store sizes of other blocks to this golbal arr
 		block_sizes_z[b] = MIN(default_block_size, remaining);
 		remaining -= block_sizes_z[b];
 	}
@@ -104,7 +105,6 @@ void create_blocks_array(unsigned _sizex, unsigned _sizey, unsigned _sizez, unsi
 
     /* create a grid of block descriptors */
     blocks = (struct block_description *) calloc(nbz, sizeof(struct block_description));
-    STARPU_ASSERT(blocks);
 
     /* what is the size of the different blocks? */
     compute_block_sizes();
@@ -112,12 +112,13 @@ void create_blocks_array(unsigned _sizex, unsigned _sizey, unsigned _sizez, unsi
     unsigned bz;
     for (bz = 0; bz < nbz; bz++)
     {
-        struct block_description * block = get_block_description(bz);
-        // which block is it?
+        /* point to the block with the order is bz = 0, 1, ... */
+        struct block_description *block = get_block_description(bz);
+
+        /* assign the id for each block */
         block->bz = bz;
 
-        // for simplicity, we store which are the neighbours blocks
-        printf("\t[create_blocks_array] block %d: B=%d (%d), T=%d (%d)\n", bz, B, ((bz-1+nbz) % nbz), T, ((bz+1) % nbz));
+        /* for simplicity, we create the pointer for neighbours blocks */
         block->boundary_blocks[B] = get_block_description((bz-1+nbz) % nbz);
         block->boundary_blocks[T] = get_block_description((bz+1) % nbz);
     }
@@ -216,15 +217,17 @@ void allocate_memory_on_node(int rank)
     for (bz = 0; bz < nbz; bz++){
         struct block_description *block = get_block_description(bz);
         int node = block->mpi_node;
+        // printf("[allocate_mem_on_node] block %d: rank %d\n", bz, node);
 
         // main blocks
         if (node == rank){
             unsigned size_bz = block_sizes_z[bz];
+            // printf("[allocate_mem_on_rank_%d] main block %d: size = %d, block->layers[0] = %p\n", node, bz, size_bz, &block->layers[0]);
             allocate_block_on_node(&block->layers_handle[0], bz, &block->layers[0],
                                         (sizex + 2*K),
                                         (sizey + 2*K),
                                         (size_bz + 2*K));
-
+            // printf("[allocate_mem_on_rank_%d] main block %d: size = %d, block->layers[1] = %p\n", node, bz, size_bz, &block->layers[1]);
             allocate_block_on_node(&block->layers_handle[1], bz, &block->layers[1],
                                         (sizex + 2*K),
                                         (sizey + 2*K),
@@ -235,8 +238,10 @@ void allocate_memory_on_node(int rank)
         int top_node = block->boundary_blocks[T]->mpi_node;
         if ((node == rank) || (top_node == rank))
         {
+            // printf("[allocate_mem_on_rank_%d/top_rank_%d] top block %d: block->boundaries[T][0] %p\n", node, top_node, bz, &block->boundaries[T][0]);
             allocate_block_on_node(&block->boundaries_handle[T][0], bz, &block->boundaries[T][0],
                                         (sizex + 2*K), (sizey + 2*K), K);
+            // printf("[allocate_mem_on_rank_%d/top_rank_%d] top block %d: block->boundaries[T][1] %p\n", node, top_node, bz, &block->boundaries[T][1]);
             allocate_block_on_node(&block->boundaries_handle[T][1], bz, &block->boundaries[T][1],
                                         (sizex + 2*K), (sizey + 2*K), K);
         }
@@ -245,8 +250,10 @@ void allocate_memory_on_node(int rank)
         int bottom_node = block->boundary_blocks[B]->mpi_node;
         if ((node == rank) || (bottom_node == rank))
         {
+            // printf("[allocate_mem_on_rank_%d/bot_rank_%d] bot block %d: block->boundaries[B][0] %p\n", node, bottom_node, bz, &block->boundaries[B][0]);
             allocate_block_on_node(&block->boundaries_handle[B][0], bz, &block->boundaries[B][0],
                                         (sizex + 2*K), (sizey + 2*K), K);
+            // printf("[allocate_mem_on_rank_%d/bot_rank_%d] bot block %d: block->boundaries[B][1] %p\n", node, bottom_node, bz, &block->boundaries[B][1]);
             allocate_block_on_node(&block->boundaries_handle[B][1], bz, &block->boundaries[B][1],
                                         (sizex + 2*K), (sizey + 2*K), K);
         }

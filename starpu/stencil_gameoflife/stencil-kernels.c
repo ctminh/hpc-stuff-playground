@@ -186,9 +186,14 @@ void update_func_cpu(void *descr[], void *arg)
     int workerid = starpu_worker_get_id_check();
     DEBUG("!!!!!!!!!!!!! cl_update_cpu !!!!!!!!!!!!\n");
     if (block->bz == 0)
-        FPRINTF(stderr, "!!! DO update_func_cpu z %u CPU%d !!!\n", block->bz, workerid);
+	{
+		FPRINTF(stderr, "!!! DO update_func_cpu z %u CPU%d !!!\n", block->bz, workerid);
+	}
     else
-        DEBUG("!!! DO update_func_cpu z %u CPU%d !!!\n", block->bz, workerid);
+	{
+		DEBUG("!!! DO update_func_cpu z %u CPU%d !!!\n", block->bz, workerid);
+		// FPRINTF(stderr, "!!! DO update_func_cpu z %u CPU%d !!!\n !!!\n", block->bz, workerid);
+	}
     
     #if STARPU_USE_MPI
     int rank = 0;
@@ -216,11 +221,14 @@ void update_func_cpu(void *descr[], void *arg)
     /* Stencils ... do the actual work here :) TODO */
     for (i=1; i<=K; i++)
 	{
-		struct starpu_block_interface *oldb = (struct starpu_block_interface *) descr[i%2], *newb = (struct starpu_block_interface *) descr[(i+1)%2];
-		TYPE *old = (TYPE*) oldb->ptr, *newer = (TYPE*) newb->ptr;
+		struct starpu_block_interface *oldb = (struct starpu_block_interface *) descr[i%2];
+		struct starpu_block_interface *newb = (struct starpu_block_interface *) descr[(i+1)%2];
+		TYPE *old = (TYPE*) oldb->ptr;
+		TYPE *newer = (TYPE*) newb->ptr;
 
 		/* Shadow data */
-		unsigned ldy = oldb->ldy, ldz = oldb->ldz;
+		unsigned ldy = oldb->ldy;
+		unsigned ldz = oldb->ldz;
 		unsigned nx = oldb->nx, ny = oldb->ny, nz = oldb->nz;
 		unsigned x, y, z;
 		unsigned stepx = 1;
@@ -230,6 +238,8 @@ void update_func_cpu(void *descr[], void *arg)
 		unsigned idy = 0;
 		unsigned idz = 0;
 		TYPE *ptr = old;
+
+		// printf("Iter%d: nx=%d, ny=%d, nz=%d, ldy=%d, ldz=%d\n", i, nx, ny, nz, ldy, ldz);
 
         /* Life update */
 		#ifdef LIFE
@@ -249,6 +259,7 @@ void dummy_func_bottom_cpu(void *descr[], void *arg)
 	bottom_per_worker[workerid]++;
 
 	DEBUG("DO SAVE Top block %d\n", block->bz);
+	// FPRINTF(stderr, "DO SAVE Top block %d\n", block->bz);
 
 	load_subblock_into_buffer_cpu(descr[0], descr[2], K);
 	load_subblock_into_buffer_cpu(descr[1], descr[3], K);
@@ -262,6 +273,7 @@ void dummy_func_top_cpu(void *descr[], void *arg)
 	top_per_worker[workerid]++;
 
 	DEBUG("DO SAVE Bottom block %d\n", block->bz);
+	// FPRINTF(stderr, "DO SAVE Bottom block %d\n", block->bz);
 
 	// the offset along the z axis is (block_size_z + K) - K;
 	unsigned block_size_z = get_block_size(block->bz);
