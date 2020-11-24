@@ -30,7 +30,7 @@ void life_update(int bz, const TYPE *old, TYPE *newp, int nx, int ny, int nz, in
         {
             for (x = K; x < (nx-K); x++)
             {
-                printf("iter%d: updating block %d -> z = %d, y = %d, x = %d\n", z, bz, z, y, x);
+                // printf("iter%d: updating block %d -> z = %d, y = %d, x = %d\n", z, bz, z, y, x);
 
                 num = 0
                     + old[x + (y+1)*ldy + (z+0)*ldz]

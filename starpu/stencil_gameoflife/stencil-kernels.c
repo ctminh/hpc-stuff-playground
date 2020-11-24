@@ -253,6 +253,15 @@ void update_func_cpu(void *descr[], void *arg)
 /* bottom save, CPU version */
 void dummy_func_bottom_cpu(void *descr[], void *arg)
 {
+	// ------------------------ begin VT -----------------------------
+    #ifdef TRACE
+    int event_save_bottom = -1;
+    char eventtag_save_bottom[12] = "save_bottom";
+    int itac_err = VT_funcdef(eventtag_save_bottom, VT_NOCLASS, &event_save_bottom);
+    VT_BEGIN_CONSTRAINED(event_save_bottom);
+    #endif
+    // ---------------------------------------------------------------
+
 	struct block_description *block = (struct block_description *) arg;
 	(void) block;
 	int workerid = starpu_worker_get_id_check();
@@ -263,11 +272,26 @@ void dummy_func_bottom_cpu(void *descr[], void *arg)
 
 	load_subblock_into_buffer_cpu(descr[0], descr[2], K);
 	load_subblock_into_buffer_cpu(descr[1], descr[3], K);
+
+	// ------------------------ end VT -------------------------------
+    #ifdef TRACE
+    VT_END_W_CONSTRAINED(event_save_bottom);
+    #endif
+    // ---------------------------------------------------------------
 }
 
 /* top save, CPU version */
 void dummy_func_top_cpu(void *descr[], void *arg)
 {
+	// ------------------------ begin VT -----------------------------
+    #ifdef TRACE
+    int event_save_top = -1;
+    char eventtag_save_top[12] = "save_top";
+    int itac_err = VT_funcdef(eventtag_save_top, VT_NOCLASS, &event_save_top);
+    VT_BEGIN_CONSTRAINED(event_save_top);
+    #endif
+    // ---------------------------------------------------------------
+
 	struct block_description *block = (struct block_description *) arg;
 	int workerid = starpu_worker_get_id_check();
 	top_per_worker[workerid]++;
@@ -280,6 +304,12 @@ void dummy_func_top_cpu(void *descr[], void *arg)
 
 	load_subblock_into_buffer_cpu(descr[0], descr[2], block_size_z);
 	load_subblock_into_buffer_cpu(descr[1], descr[3], block_size_z);
+
+	// ------------------------ end VT -------------------------------
+    #ifdef TRACE
+    VT_END_W_CONSTRAINED(event_save_top);
+    #endif
+    // ---------------------------------------------------------------
 }
 
 /* ****************************************************** */

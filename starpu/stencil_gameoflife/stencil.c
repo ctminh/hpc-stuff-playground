@@ -6,9 +6,9 @@ static unsigned niter = 4;
 #define SIZE 16
 #define NBZ 8
 #else
-static unsigned niter = 10;
-#define SIZE 8
-#define NBZ 4
+static unsigned niter = 100;
+#define SIZE 128	//8
+#define NBZ 32	//4
 #endif
 
 int who_runs_what_len;
