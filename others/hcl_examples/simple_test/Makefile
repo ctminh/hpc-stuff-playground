@@ -1,5 +1,4 @@
 MPICC = mpicxx
-# CFLAGS = -DTRACE -I$(VT_ROOT)/include -trace
 LDLIBS = -lhcl
 
 simple_test: simple_test.cpp
