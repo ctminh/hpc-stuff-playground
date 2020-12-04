@@ -26,8 +26,8 @@ if(HCL_ENABLE_RPCLIB)
 endif()
 
 # find HCL
-find_library(HCL_LIB NAMES hcl PATHS /dss/dsshome1/0A/di49mew/loc-libs/rpclib-master/install/lib)
-find_library(RPC_LIB NAMES rpc PATHS /dss/dsshome1/0A/di49mew/hcl/install/lib64)
+find_library(HCL_LIB NAMES hcl PATHS /dss/dsshome1/0A/di49mew/hcl/install/lib64)
+find_library(RPC_LIB NAMES rpc PATHS /dss/dsshome1/0A/di49mew/loc-libs/rpclib-master/install/lib)
 
 # Compile the example
 add_executable(${example} ${example}.cpp util.h)
