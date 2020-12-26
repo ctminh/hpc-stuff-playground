@@ -29,8 +29,7 @@ void test_itac(int call_id)
     int N = 10000;
     double result = 0.0;
     double pi = 3.14;
-    for (i = 0; i < N; i++)
-    {
+    for (i = 0; i < N; i++){
         result += i * pi;
     }
 
@@ -43,7 +42,7 @@ int main(int argc, char *argv[])
 {
     int i, rank, num_procs, len;
     int localbuffer[NUM_ELEMENT];   // a local buffer on each rank
-    int sharedbuffer[NUM_ELEMENT];  // a global-accessible buffer for all ranks
+    int sharedbuffer[NUM_ELEMENT];  // a shared window for global-access
     char name[MPI_MAX_PROCESSOR_NAME];
 
     // buffers for p2p test
@@ -61,7 +60,7 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     MPI_Get_processor_name(name, &len);
 
-    // create a windows/rank for global-access
+    // create a window/rank for global-access
     printf("R%d: create a shared-windows\n", rank);
     MPI_Win win;
     MPI_Win_create(sharedbuffer, NUM_ELEMENT, sizeof(int), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
@@ -104,6 +103,10 @@ int main(int argc, char *argv[])
 
     //////////////////////////////////////////////////////////////////////////
     ///////////////////////////// TEST MPI_PUT ///////////////////////////////
+    /* Fence is one of the synchronization models used in active target communication.
+    The MPI_Win_fenceroutine synchronizes RMA operations on a specified window. It is a
+    collective call over the processgroup of the window. The fence is like a barrier: it synchronizes
+    a sequence of RMA calls (e.g. put, get,accumulate) and it should be used before and after that sequence */
     MPI_Win_fence(0, win);
     /* For example: there are 4 ranks - R0, R1, R2, R3
         R0: puts data from local_buf to the shared_windows of R1
@@ -136,10 +139,6 @@ int main(int argc, char *argv[])
 
     //////////////////////////////////////////////////////////////////////////
     ///////////////////////////// TEST MPI_GET ///////////////////////////////
-    /* Fence is one of the synchronization models used in active target communication.
-    The MPI_Win_fenceroutine synchronizes RMA operations on a specified window. It is a
-    collective call over the processgroup of the window. The fence is like a barrier: it synchronizes
-    a sequence of RMA calls (e.g. put, get,accumulate) and it should be used before and after that sequence */
     MPI_Win_fence(0, win);
 
     t_get_begin = clock();
