@@ -4,7 +4,7 @@
 #include <string.h>
 #include <VT.h>
 
-#define NUM_ELEMENT 500000
+#define NUM_ELEMENT 10000
 #define _tracing_enabled 1
 
 #ifndef VT_BEGIN_CONSTRAINED
@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
     int p2p_recv_buffer[NUM_ELEMENT];
 
     // measure time
-    clock_t t_begin, t_end;
+    clock_t t_get_begin, t_get_end;
+    clock_t t_put_begin, t_put_end;
     clock_t p2p_t_begin, p2p_t_end;
 
     // init MPI/rank
@@ -104,14 +105,13 @@ int main(int argc, char *argv[])
     //////////////////////////////////////////////////////////////////////////
     ///////////////////////////// TEST MPI_PUT ///////////////////////////////
     MPI_Win_fence(0, win);
-
     /* For example: there are 4 ranks - R0, R1, R2, R3
         R0: puts data from local_buf to the shared_windows of R1
         R1: ...       ...       ...         ...         ...   R2
         R2: ...       ...       ...         ...         ...   R3
         R3: ...       ...       ...         ...         ...   R0
      */
-    t_begin = clock();
+    t_put_begin = clock();
     if (rank < num_procs-1){
         // printf("[PUT] R%d: putting data from loca_buf to shar_win at R%d\n", rank, rank+1);
         MPI_Put(&localbuffer[0], NUM_ELEMENT, MPI_INT, rank+1, 0, NUM_ELEMENT, MPI_INT, win);
@@ -120,12 +120,12 @@ int main(int argc, char *argv[])
         // printf("[PUT] R%d: putting data from loca_buf to shar_win at R%d\n", rank, 0);
         MPI_Put(&localbuffer[0], NUM_ELEMENT, MPI_INT, 0, 0, NUM_ELEMENT, MPI_INT, win);
     }
-    t_end = clock();
+    t_put_end = clock();
 
     MPI_Win_fence(0, win);
 
     // print the measurement for PUT
-    double put_elapsed_time = ((double)(t_end - t_begin)) / CLOCKS_PER_SEC; // in seconds
+    double put_elapsed_time = ((double)(t_put_end - t_put_begin)) / CLOCKS_PER_SEC; // in seconds
     if (rank < num_procs-1)
         printf("[ELAPSED-TIME] R%d - PUT to R%d = %f (s)\n", rank, rank+1, put_elapsed_time);
     else
@@ -142,8 +142,7 @@ int main(int argc, char *argv[])
     a sequence of RMA calls (e.g. put, get,accumulate) and it should be used before and after that sequence */
     MPI_Win_fence(0, win);
 
-    // MPI get data from local buffers
-    t_begin = clock();
+    t_get_begin = clock();
     if (rank != 0){
         // printf("[GET] R%d: getting data from shar_win at R%d\n", rank, rank-1);
         MPI_Get(&localbuffer[0], NUM_ELEMENT, MPI_INT, rank-1, 0, NUM_ELEMENT, MPI_INT, win);
@@ -152,13 +151,13 @@ int main(int argc, char *argv[])
         // printf("[GET] R%d: getting data from shar_win at R%d\n", rank, num_procs-1);
         MPI_Get(&localbuffer[0], NUM_ELEMENT, MPI_INT, num_procs-1, 0, NUM_ELEMENT, MPI_INT, win);
     }
-    t_end = clock();
+    t_get_end = clock();
 
     // set synchronization
     MPI_Win_fence(0, win);
 
     // print the measurement for GET
-    double get_elapsed_time = ((double)(t_end - t_begin)) / CLOCKS_PER_SEC; // in seconds
+    double get_elapsed_time = ((double)(t_get_end - t_get_begin)) / CLOCKS_PER_SEC; // in seconds
     if (rank != 0)
         printf("[ELAPSED-TIME] R%d - GET from R%d = %f (s)\n", rank, rank-1, get_elapsed_time);
     else
@@ -172,11 +171,11 @@ int main(int argc, char *argv[])
     // check 10-elems of the result buff at R0 / R1
     if (rank == 0){
         printf("[CHECK] R%d: recv-buffer (P2P) and local-buffer (GET)\n", rank);
-        for (int i = 0; i < 10; i++){
+        for (i = 0; i < 10; i++){
             printf("%d ", p2p_recv_buffer[i]);
         } printf("\n");
 
-        for (int i = 0; i < 10; i++){
+        for (i = 0; i < 10; i++){
             printf("%d ", localbuffer[i]);
         } printf("\n");
     }
