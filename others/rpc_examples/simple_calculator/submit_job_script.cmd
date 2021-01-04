@@ -3,7 +3,7 @@
 #SBATCH -o ./logs/rpc_test_%J.out
 #SBATCH -e ./logs/rpc_test_%J.err
 #SBATCH -D ./
-#SBATCH --time=00:30:00
+#SBATCH --time=00:05:00
 #SBATCH --get-user-env
 #SBATCH --nodes=2
 #SBATCH --ntasks=2
