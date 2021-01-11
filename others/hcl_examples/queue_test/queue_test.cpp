@@ -102,12 +102,6 @@ int main (int argc,char* argv[])
         printf("%s/%d: %d\n", processor_name, my_rank, getpid());
     }
 
-    // write server_list file
-    std::ofstream server_list_file;
-    server_list_file.open ("./server_list");
-    server_list_file << processor_name;
-    server_list_file.close();
-
     if(debug && my_rank==0){
         printf("%d ready for attach\n", comm_size);
         fflush(stdout);
@@ -117,6 +111,14 @@ int main (int argc,char* argv[])
     bool is_server=(my_rank+1) % ranks_per_server == 0;
     size_t my_server=my_rank / ranks_per_server;
     int num_servers=comm_size/ranks_per_server;
+
+    // write server_list file
+    if (is_server){
+        std::ofstream server_list_file;
+        server_list_file.open ("./server_list");
+        server_list_file << processor_name;
+        server_list_file.close();
+    }
 
     // The following is used to switch to 40g network on Ares.
     // This is necessary when we use RoCE on Ares.
