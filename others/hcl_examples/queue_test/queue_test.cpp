@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <queue>
+#include <fstream>
 
 #include <mpi.h>
 
@@ -100,6 +101,12 @@ int main (int argc,char* argv[])
     if (debug) {
         printf("%s/%d: %d\n", processor_name, my_rank, getpid());
     }
+
+    // write server_list file
+    ofstream server_list_file;
+    server_list_file.open ("./server_list");
+    server_list_file << processor_name;
+    server_list_file.close();
 
     if(debug && my_rank==0){
         printf("%d ready for attach\n", comm_size);
