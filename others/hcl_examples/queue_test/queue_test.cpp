@@ -103,7 +103,7 @@ int main (int argc,char* argv[])
     }
 
     // write server_list file
-    ofstream server_list_file;
+    std::ofstream server_list_file;
     server_list_file.open ("./server_list");
     server_list_file << processor_name;
     server_list_file.close();
