@@ -17,53 +17,96 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <chrono>
 #include <queue>
 #include <fstream>
-
 #include <mpi.h>
 
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
 
-struct KeyType{
+struct ChamTaskType{
+    // target entry point - function that holds the code that should be executed
+    intptr_t tgt_entry_ptr;
+
+    // we need index of image here as well since pointers are not matching for other ranks
+    int32_t idx_image = 0;
+
+    // task id (unique id that combines the host rank and a unique id per rank)
+    int task_id;
+
+    // number of arguments that should be passed to "function call" for target region
+    int32_t arg_num;
+
+    // host pointers will be used for transfer execution target region
+    std::vector<void *> arg_hst_pointers;
+    std::vector<int64_t> arg_sizes;
+    std::vector<int64_t> arg_types;
+
+    // target pointers will just be used at sender side for host pointer lookup 
+    // and freeing of entries in data entry table
+    std::vector<void *> arg_tgt_pointers;
+    std::vector<ptrdiff_t> arg_tgt_offsets;
+
+    int32_t is_remote_task      = 0;
+    int32_t is_manual_task      = 0;
+    int32_t is_replicated_task  = 0;
+    int32_t is_migrated_task    = 0;
+    int32_t is_cancelled        = 0;
+
+    int32_t num_outstanding_recvbacks = 0;
+    int32_t num_outstanding_replication_sends = 0;
+
+    // Some special settings for stolen tasks
+    int32_t source_mpi_rank             = 0;
+    int32_t target_mpi_rank             = -1;
+    int64_t buffer_size_output_data     = 0;
+
+    // Mutex for either execution or receiving back/cancellation of a replicated task
+    std::atomic<bool> result_in_progress;
+
+    // Vector of replicating ranks
+    std::vector<int> replication_ranks;
+
     size_t a;
-    KeyType():a(0){}
-    KeyType(size_t a_):a(a_){}
+
+    ChamTaskType():a(0) { }
+    ChamTaskType(size_t a_):a(a_) { }
+
 #ifdef HCL_ENABLE_RPCLIB
     MSGPACK_DEFINE(a);
 #endif
+
     /* equal operator for comparing two Matrix. */
-    bool operator==(const KeyType &o) const {
+    bool operator==(const ChamTaskType &o) const {
         return a == o.a;
     }
-    KeyType& operator=( const KeyType& other ) {
+
+    ChamTaskType& operator=( const ChamTaskType& other ) {
         a = other.a;
         return *this;
     }
-    bool operator<(const KeyType &o) const {
+
+    bool operator<(const ChamTaskType &o) const {
         return a < o.a;
     }
-    bool operator>(const KeyType &o) const {
+
+    bool operator>(const ChamTaskType &o) const {
         return a > o.a;
     }
-    bool Contains(const KeyType &o) const {
+
+    bool contains(const ChamTaskType &o) const {
         return a==o.a;
     }
-#if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
-    template<typename A>
-    void serialize(A& ar) const {
-        ar & a;
-    }
-#endif
 };
 
 namespace std {
     template<>
-    struct hash<KeyType> {
-        size_t operator()(const KeyType &k) const {
+    struct hash<ChamTaskType> {
+        size_t operator()(const ChamTaskType &k) const {
             return k.a;
         }
     };
@@ -78,11 +121,12 @@ int main (int argc,char* argv[])
         printf("Didn't receive appropriate MPI threading specification\n");
         exit(EXIT_FAILURE);
     }
-    int comm_size,my_rank;
-    MPI_Comm_size(MPI_COMM_WORLD,&comm_size);
-    MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
-    int ranks_per_server=comm_size,num_request=10000;
-    long size_of_request=1000;
+    int comm_size, my_rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    int ranks_per_server = comm_size;
+    int num_request = 10000;
+    long size_of_request = 1000;
     bool debug = true;
     bool server_on_node = false;
     if(argc > 1)    ranks_per_server = atoi(argv[1]);
@@ -91,10 +135,6 @@ int main (int argc,char* argv[])
     if(argc > 4)    server_on_node = (bool)atoi(argv[4]);
     if(argc > 5)    debug = (bool)atoi(argv[5]);
 
-   /* if(comm_size/ranks_per_server < 2){
-        perror("comm_size/ranks_per_server should be atleast 2 for this test\n");
-        exit(-1);
-    }*/
     int len;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     MPI_Get_processor_name(processor_name, &len);
@@ -102,20 +142,20 @@ int main (int argc,char* argv[])
         printf("%s/%d: %d\n", processor_name, my_rank, getpid());
     }
 
-    if(debug && my_rank==0){
+    if(debug && my_rank == 0){
         printf("%d ready for attach\n", comm_size);
         fflush(stdout);
         getchar();
     }
     MPI_Barrier(MPI_COMM_WORLD);
-    bool is_server=(my_rank+1) % ranks_per_server == 0;
-    size_t my_server=my_rank / ranks_per_server;
-    int num_servers=comm_size/ranks_per_server;
+    bool is_server = (my_rank+1) % ranks_per_server == 0;
+    size_t my_server = my_rank / ranks_per_server;
+    int num_servers = comm_size / ranks_per_server;
 
     // write server_list file
     if (is_server){
         std::ofstream server_list_file;
-        server_list_file.open ("./server_list");
+        server_list_file.open("./server_list");
         server_list_file << processor_name;
         server_list_file.close();
     }
@@ -130,9 +170,9 @@ int main (int argc,char* argv[])
 
     size_t size_of_elem = sizeof(int);
 
-    printf("rank %d, is_server %d, my_server %zu, num_servers %d\n",my_rank,is_server,my_server,num_servers);
+    printf("rank %d, is_server %d, my_server %zu, num_servers %d\n", my_rank, is_server, my_server, num_servers);
 
-    const int array_size=TEST_REQUEST_SIZE;
+    const int array_size = TEST_REQUEST_SIZE;
 
     if (size_of_request != array_size) {
         printf("Please set TEST_REQUEST_SIZE in include/hcl/common/constants.h instead. Testing with %d\n", array_size);
@@ -140,36 +180,31 @@ int main (int argc,char* argv[])
 
     std::array<int,array_size> my_vals=std::array<int,array_size>();
 
-
     HCL_CONF->IS_SERVER = is_server;
     HCL_CONF->MY_SERVER = my_server;
     HCL_CONF->NUM_SERVERS = num_servers;
     HCL_CONF->SERVER_ON_NODE = server_on_node || is_server;
     HCL_CONF->SERVER_LIST_PATH = "./server_list";
 
-    hcl::queue<KeyType> *queue;
+    // create hcl_queue with type is ChamTaskType
+    hcl::queue<ChamTaskType> *queue;
     if (is_server) {
-        queue = new hcl::queue<KeyType>();
+        queue = new hcl::queue<ChamTaskType>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if (!is_server) {
-        queue = new hcl::queue<KeyType>();
+        queue = new hcl::queue<ChamTaskType>();
     }
 
-    std::queue<KeyType> lqueue=std::queue<KeyType>();
+    // 
+    std::queue<ChamTaskType> lqueue=std::queue<ChamTaskType>();
 
     MPI_Comm client_comm;
     MPI_Comm_split(MPI_COMM_WORLD, !is_server, my_rank, &client_comm);
     int client_comm_size;
     MPI_Comm_size(client_comm, &client_comm_size);
-    // if(is_server){
-    //     std::function<int(int)> func=[](int x){ std::cout<<x<<std::endl;return x; };
-    //     int a;
-    //     std::function<std::pair<bool,int>(KeyType&,std::array<int, array_size>&,std::string,int)> putFunc(std::bind(&hcl::queue<KeyType,std::array<int,
-    //                                                                                                                 array_size>>::LocalPutWithCallback<int,int>,queue,std::placeholders::_1, std::placeholders::_2,std::placeholders::_3, std::placeholders::_4));
-    //     queue->Bind("CB_Put", func, "APut",putFunc);
-    // }
     MPI_Barrier(MPI_COMM_WORLD);
+
     if (!is_server) {
         Timer llocal_queue_timer=Timer();
         std::hash<KeyType> keyHash;
