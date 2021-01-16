@@ -81,177 +81,18 @@ void offload_action(mig_task_t *task, int target_rank, bool use_synchronous_mode
     void *buffer = NULL;
     int num_bytes_sent = 0;
 
-    buffer = encode_send_buffer(tasks, &buffer_size);
+    // buffer = encode_send_buffer(tasks, &buffer_size);
 
-    MPI_Request *requests = new MPI_Request[n_requests];
-    #if MPI_BLOCKING
-        MPI_Send(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm);
-    #else
-    if(use_synchronous_mode)
-        MPI_Issend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[0]);
-    else
-        MPI_Isend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[0]);
-    #endif
+    // MPI_Request *requests = new MPI_Request[n_requests];
+    // #if MPI_BLOCKING
+    //     MPI_Send(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm);
+    // #else
+    // if(use_synchronous_mode)
+    //     MPI_Issend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[0]);
+    // else
+    //     MPI_Isend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[0]);
+    // #endif
 
-#if OFFLOAD_DATA_PACKING_TYPE > 0 && CHAM_STATS_RECORD
-    cur_time = omp_get_wtime();
-#endif
-
-#if OFFLOAD_DATA_PACKING_TYPE == 1
-    int cur_req_index = 1;
-#if CHAM_STATS_RECORD
-    int tmp_bytes_send = 0;
-#endif
-    for(int i_task = 0; i_task < num_tasks; i_task++) {
-        cham_migratable_task_t *task = tasks[i_task];
-        for(int i=0; i<task->arg_num; i++) {
-            int is_lit      = task->arg_types[i] & CHAM_OMP_TGT_MAPTYPE_LITERAL;
-            int is_to       = task->arg_types[i] & CHAM_OMP_TGT_MAPTYPE_TO;
-            if(is_to) {
-                if(is_lit) {
-                    #if MPI_BLOCKING
-                    MPI_Send(&task->arg_hst_pointers[i], task->arg_sizes[i], MPI_BYTE, target_rank, tmp_tag, chameleon_comm);
-                    #else
-                    if(use_synchronous_mode)
-                        MPI_Issend(&task->arg_hst_pointers[i], task->arg_sizes[i], MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[cur_req_index]);
-                    else
-                        MPI_Isend(&task->arg_hst_pointers[i], task->arg_sizes[i], MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[cur_req_index]);
-                    #endif                
-                }
-                else {
-                    #if MPI_BLOCKING
-                    MPI_Send(task->arg_hst_pointers[i], task->arg_sizes[i], MPI_BYTE, target_rank, tmp_tag, chameleon_comm);
-                    #else
-                    if(use_synchronous_mode)
-                        MPI_Issend(task->arg_hst_pointers[i], task->arg_sizes[i], MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[cur_req_index]);
-                    else
-                        MPI_Isend(task->arg_hst_pointers[i], task->arg_sizes[i], MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[cur_req_index]);
-                    #endif
-                }
-#if CHAM_STATS_RECORD
-                tmp_bytes_send += task->arg_sizes[i];
-                _stats_bytes_send_per_message.add_stat_value((double)task->arg_sizes[i]);
-#endif
-                cur_req_index++;
-                print_arg_info("offload_action - sending argument", task, i);
-            }
-        }
-    }
-#if CHAM_STATS_RECORD
-    num_bytes_sent += tmp_bytes_send;
-    cur_time = omp_get_wtime()-cur_time;
-    #if MPI_BLOCKING
-    add_throughput_send(cur_time, tmp_bytes_send);
-    #endif
-#endif
-
-#elif OFFLOAD_DATA_PACKING_TYPE == 2
-    int tmp_overall_arg_nums = 0;
-    for(int i_task = 0; i_task < num_tasks; i_task++) {
-        for(int tmp_i_arg = 0; tmp_i_arg < tasks[i_task]->arg_num; tmp_i_arg++) {
-            int is_to = tasks[i_task]->arg_types[tmp_i_arg] & CHAM_OMP_TGT_MAPTYPE_TO;
-            if(is_to)
-                tmp_overall_arg_nums++;
-        }
-    }
-
-    MPI_Datatype type_mapped_vars;
-    MPI_Datatype separate_types[tmp_overall_arg_nums];
-    int blocklen[tmp_overall_arg_nums];
-    MPI_Aint disp[tmp_overall_arg_nums];
-    int ierr = 0;
-    int tmp_count = 0;
-
-    for(int i_task = 0; i_task < num_tasks; i_task++) {
-        cham_migratable_task_t *task = tasks[i_task];
-
-        for(int i=0; i<task->arg_num; i++) {
-            int is_to                       = task->arg_types[i] & CHAM_OMP_TGT_MAPTYPE_TO;
-            if(is_to) {
-                separate_types[tmp_count]   = MPI_BYTE;
-                blocklen[tmp_count]         = task->arg_sizes[i];
-                int is_lit                  = task->arg_types[i] & CHAM_OMP_TGT_MAPTYPE_LITERAL;
-                
-                if(is_lit) {
-                    ierr = MPI_Get_address(&task->arg_hst_pointers[i], &(disp[tmp_count]));
-                }
-                else {
-                    ierr = MPI_Get_address(task->arg_hst_pointers[i], &(disp[tmp_count]));
-                }
-                tmp_count++;
-            }
-        }
-    }
-
-    ierr = MPI_Type_create_struct(tmp_overall_arg_nums, blocklen, disp, separate_types, &type_mapped_vars);
-    assert(ierr==MPI_SUCCESS);
-    ierr = MPI_Type_commit(&type_mapped_vars);
-    assert(ierr==MPI_SUCCESS);
-
-#if CHAM_STATS_RECORD
-    int size = 0;
-    MPI_Type_size(type_mapped_vars, &size);
-    num_bytes_sent += size;
-    _stats_bytes_send_per_message.add_stat_value((double)size);
-#endif
-    #if MPI_BLOCKING
-    ierr = MPI_Send(MPI_BOTTOM, 1, type_mapped_vars, target_rank, tmp_tag, chameleon_comm);
-    #else
-    if( use_synchronous_mode )
-        ierr = MPI_Issend(MPI_BOTTOM, 1, type_mapped_vars, target_rank, tmp_tag, chameleon_comm, &requests[1]);
-    else
-        ierr = MPI_Isend(MPI_BOTTOM, 1, type_mapped_vars, target_rank, tmp_tag, chameleon_comm, &requests[1]);
-    #endif
-
-    assert(ierr==MPI_SUCCESS);
-
-#if CHAM_STATS_RECORD
-    cur_time = omp_get_wtime()-cur_time;
-    #if MPI_BLOCKING
-    add_throughput_send(cur_time, size);
-    #endif
-#endif
-
-    ierr = MPI_Type_free(&type_mapped_vars);
-    assert(ierr==MPI_SUCCESS);
-#endif /* OFFLOAD_DATA_PACKING_TYPE */
-
-    for(int i_task = 0; i_task < num_tasks; i_task++) {
-        cham_migratable_task_t *task = tasks[i_task];
-        if(task->HasAtLeastOneOutput()) {
-            _tasks_to_deallocate.push_back(task);
-            _map_offloaded_tasks_with_outputs.insert(task->task_id, task);
-            DBP("offload_action - inserted task with id %ld and pointer %p into offloaded map with outputs\n", task->task_id, task);
-            assert(task->num_outstanding_recvbacks>=0);
-            task->num_outstanding_recvbacks++;
-            DBP("offload_action - increment outstanding recvbacks for task with id %ld new count: %d\n", task->task_id, task->num_outstanding_recvbacks);
-            assert(task->num_outstanding_recvbacks>0);
-
-            // early irecv here
-            #if CHAM_REPLICATION_MODE==0 && ENABLE_EARLY_IRECVS==1
-            if(!task->is_replicated_task) {
-                action_post_recvback_requests(task, target_rank, task->task_id, &request_manager_receive);
-            }
-            #endif
-        }
-    }
-    _active_migrations_per_target_rank[target_rank]++;
-
-    #if MPI_BLOCKING
-    send_handler(buffer, tmp_tag, target_rank, nullptr, 0);
-    #else
-    request_manager_send.submitRequests(start_time_requests, tmp_tag, target_rank, n_requests, 
-                                requests,
-                                num_bytes_sent,
-                                0,
-                                send_handler,
-                                send,
-                                buffer,
-                                tasks,
-                                num_tasks);
-    #endif
-    delete[] requests;
-    DBP("offload_action (exit)\n");
 }
 
 
