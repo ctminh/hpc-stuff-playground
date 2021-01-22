@@ -75,13 +75,24 @@ typedef struct mig_task_t {
 
 } mig_task_t;
 
-void offload_action(mig_task_t *task, int target_rank, bool use_synchronous_mode) {
+void *encode_send_buffer(mig_task_t **tasks, int32_t num_tasks, int32_t *buffer_size){
+    int total_size = sizeof(int32_t);   // 0. num of tasks
+
+    for (int i = 0; i < num_tasks; i++){
+        total_size += sizeof(int)       // 1. task_id
+                + sizeof(int32_t)       // 2. idx_image
+                + sizeof(int32_t)       // 3. arg_num
+                + tasks[i]->arg_num * sizeof(int64_t);   // 5. list of arg_sizes
+    }
+}
+
+void offload_action(mig_task_t **tasks, int32_t num_tasks, int target_rank, bool use_synchronous_mode) {
     // encode buffer before sending tasks
     int32_t buffer_size = 0;
     void *buffer = NULL;
     int num_bytes_sent = 0;
 
-    // buffer = encode_send_buffer(tasks, &buffer_size);
+    buffer = encode_send_buffer(tasks, num_tasks, &buffer_size);
 
     // MPI_Request *requests = new MPI_Request[n_requests];
     // #if MPI_BLOCKING
@@ -93,6 +104,13 @@ void offload_action(mig_task_t *task, int target_rank, bool use_synchronous_mode
     //     MPI_Isend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[0]);
     // #endif
 
+}
+
+int offload_tasks_to_rank(mig_task_t **tasks, int32_t num_tasks, int target_rank, bool use_synchronous_mode){
+    // call the core function
+    offload_action(tasks, num_tasks, target_rank, use_synchronous_mode);
+
+    return 0;
 }
 
 
@@ -314,8 +332,25 @@ int main (int argc,char* argv[])
 
 
     /* ///////////////// Test 2-Sided Communication  ////////////////////////////// */
-    /* ///////////////// Paired_Process for Send/Recv Tasks       ///////////////// */
+    /* ///////////////// Paired_Process for Send/Recv Tasks /////////////////////// */
+    if (my_rank % 2 == 0) // send tasks to the odd ranks
+    {
+        // determine target-rank to send
+        int send_target = my_rank + 1;
 
+        // create tasks
+        printf("[CHECK] 2sided-comm: R%d creates tasks & send to R%d\n", my_rank, send_target);
+        for(int i = 0; i < num_request; i++){
+            mig_task_t task = mig_task_t(my_rank, i, 5);
+        }
+
+    } else {
+        // determine target-rank to recv from
+        int recv_target = my_rank - 1;
+
+        // receive tasks and add to the queue
+        printf("[CHECK] 2sided-comm: R%d recv tasks from R%d\n", my_rank, recv_target);
+    }
 
 
     MPI_Finalize();
