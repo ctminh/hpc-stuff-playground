@@ -76,14 +76,48 @@ typedef struct mig_task_t {
 } mig_task_t;
 
 void *encode_send_buffer(mig_task_t **tasks, int32_t num_tasks, int32_t *buffer_size){
+    // calculate the size
     int total_size = sizeof(int32_t);   // 0. num of tasks
+    for (int i = 0; i < num_tasks; i++){
+        total_size += sizeof(int)       // 1. task_id   : int
+                + sizeof(int32_t)       // 2. idx_image : int32_t
+                + sizeof(int32_t)       // 3. arg_num   : int32_t
+                + sizeof(void)          // 4. it's null-void ptr, so dont need to pack  : std::vector<void *>
+                + tasks[i]->arg_num * sizeof(int64_t);   // 5. list of arg_sizes        : std::vector<int64_t>
+    }
+
+    // allocate mem for transfering data
+    char *buff = (char *) malloc(total_size);
+    char *cur_ptr = (char *) buff;
+
+    // contain the value # tasks in this message
+    ((int32_t *) cur_ptr)[0] = num_tasks;
+    cur_ptr += sizeof(int32_t);
 
     for (int i = 0; i < num_tasks; i++){
-        total_size += sizeof(int)       // 1. task_id
-                + sizeof(int32_t)       // 2. idx_image
-                + sizeof(int32_t)       // 3. arg_num
-                + tasks[i]->arg_num * sizeof(int64_t);   // 5. list of arg_sizes
+        // 1. task id
+        ((int *) cur_ptr)[0] = tasks[i]->id;
+        cur_ptr += sizeof(int);
+
+        // 2. idx image
+        ((int32_t *) cur_ptr)[0] = tasks[i]->idx_image;
+        cur_ptr += sizeof(int32_t);
+
+        // 3. arg_num
+        ((int32_t *) cur_ptr)[0] = tasks[i]->arg_num;
+        cur_ptr += sizeof(int32_t);
+
+        // 4. arg_hst_pointers
+        memcpy(cur_ptr, &(tasks[i]->arg_hst_pointers[0]), sizeof(void));
+        cur_ptr += sizeof(void);
+
+        // 5. arg_sizes
+        memcpy(cur_ptr, &(tasks[i]->arg_sizes[0]), tasks[i]->arg_num * sizeof(int64_t));
+        cur_ptr += tasks[i]->arg_num * sizeof(int64_t);
     }
+
+    *buffer_size = total_size;
+    return buff;
 }
 
 void offload_action(mig_task_t **tasks, int32_t num_tasks, int target_rank, bool use_synchronous_mode) {
@@ -91,18 +125,23 @@ void offload_action(mig_task_t **tasks, int32_t num_tasks, int target_rank, bool
     int32_t buffer_size = 0;
     void *buffer = NULL;
     int num_bytes_sent = 0;
+    int tmp_tag = 0;
 
     buffer = encode_send_buffer(tasks, num_tasks, &buffer_size);
 
-    // MPI_Request *requests = new MPI_Request[n_requests];
-    // #if MPI_BLOCKING
-    //     MPI_Send(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm);
-    // #else
-    // if(use_synchronous_mode)
-    //     MPI_Issend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[0]);
-    // else
-    //     MPI_Isend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, chameleon_comm, &requests[0]);
-    // #endif
+    // set n_requests
+    int n_requests = 2;
+
+    MPI_Request *requests = new MPI_Request[n_requests];
+
+#if MPI_BLOCKING
+    MPI_Send(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, MPI_COMM_WORLD);
+#else
+    if(use_synchronous_mode)
+        MPI_Issend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, MPI_COMM_WORLD, &requests[0]);
+    else
+        MPI_Isend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, MPI_COMM_WORLD, &requests[0]);
+#endif
 
 }
 
