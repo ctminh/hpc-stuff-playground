@@ -29,6 +29,13 @@
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
 
+
+#ifndef MPI_BLOCKING
+#define MPI_BLOCKING 1
+#endif
+
+
+/* struct for tasks */
 typedef struct mig_task_t {
     // task id, img_idx, args-num
     int id;
@@ -42,24 +49,22 @@ typedef struct mig_task_t {
 #endif
     
     // constructor 1
-    mig_task_t()
-    {
-        id = 1;
-        idx_image = 1;
-        arg_num = 5;
+    mig_task_t(){
+        id = 0;
+        idx_image = 0;
+        arg_num = 0;
         void *ptr = nullptr;
         arg_hst_pointers.push_back(ptr);
-        arg_sizes.push_back(10240);
-        arg_sizes.push_back(20480);
-        arg_sizes.push_back(40960);
-        arg_sizes.push_back(51200);
-        arg_sizes.push_back(102400);
-        arg_sizes.push_back(204800);
+        arg_sizes.push_back(0);
+        arg_sizes.push_back(0);
+        arg_sizes.push_back(0);
+        arg_sizes.push_back(0);
+        arg_sizes.push_back(0);
+        arg_sizes.push_back(0);
     }
 
     // constructor 2
-    mig_task_t(int32_t img, int task_id, int32_t num_args)
-    {
+    mig_task_t(int32_t img, int task_id, int32_t num_args){
         id = task_id;
         idx_image = img;
         arg_num = num_args;
@@ -75,6 +80,8 @@ typedef struct mig_task_t {
 
 } mig_task_t;
 
+
+/* encode data before sending */
 void *encode_send_buffer(mig_task_t **tasks, int32_t num_tasks, int32_t *buffer_size){
     // calculate the size
     int total_size = sizeof(int32_t);   // 0. num of tasks
@@ -120,36 +127,91 @@ void *encode_send_buffer(mig_task_t **tasks, int32_t num_tasks, int32_t *buffer_
     return buff;
 }
 
-void offload_action(mig_task_t **tasks, int32_t num_tasks, int target_rank, bool use_synchronous_mode) {
-    // encode buffer before sending tasks
+
+/* decode data before sending */
+void decode_send_buffer(void *buffer, int mpi_tag, int32_t *num_tasks, std::vector<mig_task_t *> &recv_tasks){
+    // current pointer position
+    char *cur_ptr = (char *) buffer;
+    int num_recv_bytes = 0;
+
+    // 0. num of recv_tasks
+    int n_tasks = ((int32_t *) cur_ptr)[0];
+    cur_ptr += sizeof(int32_t);
+    num_recv_bytes += sizeof(int32_t);
+
+    *num_tasks = n_tasks;
+
+    // decode task by task
+    for (int i = 0; i < n_tasks; i++){
+        mig_task_t *task = new mig_task_t();
+
+        // 1. task id
+        task->id = ((int *) cur_ptr)[0];
+        cur_ptr += sizeof(int);
+        num_recv_bytes += sizeof(int);
+
+        // 2. idx image
+        task->idx_image = ((int32_t *) cur_ptr)[0];
+        cur_ptr += sizeof(int32_t);
+        num_recv_bytes += sizeof(int32_t);
+
+        // 3. arg_num
+        task->arg_num = ((int32_t *) cur_ptr)[0];
+        cur_ptr += sizeof(int32_t);
+        num_recv_bytes += sizeof(int32_t);
+
+        // 4. arg_hst_pointers
+        memcpy(&(task->arg_hst_pointers[0]), cur_ptr, sizeof(void));
+        cur_ptr += sizeof(void);
+        num_recv_bytes += sizeof(void);
+
+        // 5. arg_sizes
+        memcpy(&(task->arg_sizes[0]), cur_ptr, task->arg_num * sizeof(int64_t));
+        cur_ptr += task->arg_num * sizeof(int64_t);
+        num_recv_bytes += task->arg_num * sizeof(int64_t);
+
+        recv_tasks.push_back(task);
+    }
+}
+
+
+/* send tasks to a target rank */
+int offload_tasks_to_rank(int my_rank, mig_task_t **tasks, int32_t num_tasks, int target_rank){
+    
     int32_t buffer_size = 0;
     void *buffer = NULL;
-    int num_bytes_sent = 0;
-    int tmp_tag = 0;
+    int tmp_tag = my_rank;
 
+    // encode buffer before sending tasks
     buffer = encode_send_buffer(tasks, num_tasks, &buffer_size);
 
     // set n_requests
-    int n_requests = 2;
-
+    int n_requests = num_tasks;
     MPI_Request *requests = new MPI_Request[n_requests];
 
 #if MPI_BLOCKING
     MPI_Send(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, MPI_COMM_WORLD);
 #else
-    if(use_synchronous_mode)
-        MPI_Issend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, MPI_COMM_WORLD, &requests[0]);
-    else
-        MPI_Isend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, MPI_COMM_WORLD, &requests[0]);
+    MPI_Isend(buffer, buffer_size, MPI_BYTE, target_rank, tmp_tag, MPI_COMM_WORLD, &requests[0]);
 #endif
 
+    return 0;
 }
 
-int offload_tasks_to_rank(mig_task_t **tasks, int32_t num_tasks, int target_rank, bool use_synchronous_mode){
-    // call the core function
-    offload_action(tasks, num_tasks, target_rank, use_synchronous_mode);
 
-    return 0;
+/* recv tasks from a source-rank */
+void recv_tasks_from_rank(void *buffer, int tag, int source, int recv_buff_size, std::vector<mig_task_t *> &list_recv_tasks){
+    MPI_Request request = MPI_REQUEST_NULL;
+
+#if MPI_BLOCKING
+    int res = MPI_Recv(buffer, recv_buff_size, MPI_BYTE, source, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+#else
+    int res = MPI_Irecv(buffer, recv_buff_size, MPI_BYTE, source, tag, MPI_COMM_WORLD, &request);
+#endif
+
+    int num_tasks;
+    decode_send_buffer(buffer, tag, &num_tasks, list_recv_tasks);
+
 }
 
 
@@ -167,7 +229,7 @@ int main (int argc,char* argv[])
     int ranks_per_server = comm_size;
     int num_request = 10000;
     long size_of_request = 1000;
-    bool debug = true;
+    bool debug = false;
     bool server_on_node = false;
     if(argc > 1)    ranks_per_server = atoi(argv[1]);
     if(argc > 2)    num_request = atoi(argv[2]);
@@ -185,7 +247,6 @@ int main (int argc,char* argv[])
     if(debug && my_rank == 0){
         printf("%d ready for attach\n", comm_size);
         fflush(stdout);
-        getchar();
     }
     MPI_Barrier(MPI_COMM_WORLD);
     bool is_server = (my_rank+1) % ranks_per_server == 0;
@@ -372,25 +433,45 @@ int main (int argc,char* argv[])
 
     /* ///////////////// Test 2-Sided Communication  ////////////////////////////// */
     /* ///////////////// Paired_Process for Send/Recv Tasks /////////////////////// */
-    if (my_rank % 2 == 0) // send tasks to the odd ranks
-    {
-        // determine target-rank to send
-        int send_target = my_rank + 1;
+    /* R0 <- R1, R2 <- R3                                                           */
+    int recv_buff_size = 110;   // given temporarily
+    Timer timer_2side_comm = Timer();
+    for (int i = 0; i < num_request; i++){
+        timer_2side_comm.resumeTime();
+        if (my_rank % 2 == 0) // recieve tasks from the odd ranks
+        {
+            // determine target-rank to recv from
+            int recv_from_rank = my_rank + 1;
+            int mpi_tag = recv_from_rank;
 
-        // create tasks
-        printf("[CHECK] 2sided-comm: R%d creates tasks & send to R%d\n", my_rank, send_target);
-        for(int i = 0; i < num_request; i++){
-            mig_task_t task = mig_task_t(my_rank, i, 5);
+            // recieving tasks
+            void *buffer = malloc(recv_buff_size);
+            std::vector<mig_task_t *> recv_task_list;
+            recv_tasks_from_rank(buffer, mpi_tag, recv_from_rank, recv_buff_size, recv_task_list);
+
+        } else {
+
+            // determine target-rank to send
+            int send_to_rank = my_rank - 1;
+            int num_tasks = 1;
+
+            // create tasks
+            mig_task_t **task_ptr = (mig_task_t**) malloc(sizeof(mig_task_t *) * num_tasks);
+            for (int i = 0; i < num_tasks; i++){
+                mig_task_t task = mig_task_t(my_rank, i, 5);
+                mig_task_t *ptr = &task;
+                task_ptr[i] = ptr;
+            }
+
+            // send tasks
+            offload_tasks_to_rank(my_rank, task_ptr, num_tasks, send_to_rank);
         }
-
-    } else {
-        // determine target-rank to recv from
-        int recv_target = my_rank - 1;
-
-        // receive tasks and add to the queue
-        printf("[CHECK] 2sided-comm: R%d recv tasks from R%d\n", my_rank, recv_target);
+        timer_2side_comm.pauseTime();
     }
+    double throughput_2side_comm = (num_request*recv_buff_size*1000) / (timer_2side_comm.getElapsedTime()*1024*1024);
 
+    // printf("CHECK_TIMER: R%d elapsed time = %f\n", my_rank, timer_2side_comm.getElapsedTime()/1000);
+    printf("Total throughput_2side_comm: %f (MB/s)\n", throughput_2side_comm);
 
     MPI_Finalize();
     
