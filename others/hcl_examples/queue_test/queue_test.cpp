@@ -80,6 +80,25 @@ typedef struct mig_task_t {
 
 } mig_task_t;
 
+/* basic struct for testing queue from hcl-src */
+typedef struct KeyType{
+    int a;
+
+#ifdef HCL_ENABLE_RPCLIB
+    MSGPACK_DEFINE(a);
+#endif
+
+    // constructor 1
+    KeyType(){
+        a = 0;
+    }
+    // constructor 2
+    KeyType(int val){
+        a = val;
+    }
+
+} KeyType;
+
 
 /* encode data before sending */
 void *encode_send_buffer(mig_task_t **tasks, int32_t num_tasks, int32_t *buffer_size){
@@ -279,12 +298,15 @@ int main (int argc,char* argv[])
 
     // create hcl_queue with type is ChamTaskType
     hcl::queue<mig_task_t> *glob_queue;
+    // hcl::queue<KeyType> *dist_keytype_queue;
     if (is_server) {
         glob_queue = new hcl::queue<mig_task_t>();
+        // dist_keytype_queue = new hcl::queue<KeyType>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if (!is_server) {
         glob_queue = new hcl::queue<mig_task_t>();
+        // dist_keytype_queue = new hcl::queue<KeyType>();
     }
 
     // create local queue per rank
@@ -343,7 +365,6 @@ int main (int argc,char* argv[])
 
         Timer timer_glob_queue_loc_get = Timer();
         for(int i = 0; i < num_request; i++){
-            mig_task_t task = mig_task_t(1, i, 5);
             timer_glob_queue_loc_get.resumeTime();
             auto glob_pop_result = glob_queue->Pop(my_server_key);
             timer_glob_queue_loc_get.pauseTime();
@@ -395,7 +416,6 @@ int main (int argc,char* argv[])
 
         Timer timer_glob_queue_remote_get = Timer();
         for(int i = 0; i < num_request; i++){
-            mig_task_t task = mig_task_t(1, i, 5);
             // measure time
             timer_glob_queue_remote_get.resumeTime();
             auto glob_rem_pop_result = glob_queue->Pop(my_server_remote_key);
@@ -425,11 +445,61 @@ int main (int argc,char* argv[])
             printf("total throughput_glob_queue remote-access with put: %f (MB/s)\n", total_throughput_glob_queue_rem_put);
             printf("total throughput_glob_queue remote-access with get: %f (MB/s)\n", total_throughput_glob_queue_rem_get);
         }
-
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
 
+    /* ///////////////// Test HCL-dis-queue with bas-type  //////////////////////// */
+    /* ///////////////// local/remote access ////////////////////////////////////// */
+
+    // size_t keytype_size = sizeof(int);
+
+    // if (!is_server){
+    //     /* ///////////////// LOCAL ACCESS on Global Queue  ///////////////// */
+    //     uint16_t server_key = my_server % num_servers;
+
+    //     Timer t_keytype_queue_loc_put = Timer();
+    //     for(int i = 0; i < num_request; i++){
+    //         KeyType k = KeyType(my_rank);
+    //         t_keytype_queue_loc_put.resumeTime();
+    //         dist_keytype_queue->Push(k, server_key);
+    //         t_keytype_queue_loc_put.pauseTime();
+    //     }
+    //     double throughput_loc_put = (num_request*keytype_size*1000) / (t_keytype_queue_loc_put.getElapsedTime()*1024*1024);
+
+    //     Timer t_keytype_queue_loc_get = Timer();
+    //     for(int i = 0; i < num_request; i++){
+    //         t_keytype_queue_loc_get.resumeTime();
+    //         auto k_pop_result = dist_keytype_queue->Pop(server_key);
+    //         t_keytype_queue_loc_get.pauseTime();
+    //     }
+    //     double throughput_loc_get = (num_request*keytype_size*1000) / (t_keytype_queue_loc_get.getElapsedTime()*1024*1024);
+
+    //     // accumulate the throughput-results
+    //     double total_throughput_loc_put, total_throughput_loc_get;
+    //     if (client_comm_size > 1) {
+    //         MPI_Reduce(&throughput_loc_put, &total_throughput_loc_put, 1,
+    //                    MPI_DOUBLE, MPI_SUM, 0, client_comm);
+    //         MPI_Reduce(&throughput_loc_get, &total_throughput_loc_get, 1,
+    //                    MPI_DOUBLE, MPI_SUM, 0, client_comm);
+    //         total_throughput_loc_put /= client_comm_size;
+    //         total_throughput_loc_get /= client_comm_size;
+    //     }
+    //     else {
+    //         total_throughput_loc_put = throughput_loc_put;
+    //         total_throughput_loc_get = throughput_loc_get;
+    //     }
+
+    //     // print the throughput-results
+    //     if (my_rank == 0){
+    //         printf("total throughput KEYTYPE-queue local-access with put: %f (MB/s)\n", total_throughput_loc_put);
+    //         printf("total throughput KEYTYPE-queue local-access with get: %f (MB/s)\n", total_throughput_loc_get);
+    //     }
+
+    //     MPI_Barrier(client_comm);
+    // }
+    
+    // MPI_Barrier(MPI_COMM_WORLD);
 
     /* ///////////////// Test 2-Sided Communication  ////////////////////////////// */
     /* ///////////////// Paired_Process for Send/Recv Tasks /////////////////////// */
