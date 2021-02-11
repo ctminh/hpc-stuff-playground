@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
     ).name("allocate_y");
 
     // create a task flow for the program
-    tf::Task cudaflow = taskflow.emplace([&](tf::cudaflow &cf) {
+    tf::Task cudaflow = taskflow.emplace([&](tf::cudaFlow &cf) {
         // create data transfer tasks
         tf::cudaTask h2d_x = cf.copy(dx, hx.data(), N).name("h2d_x");
         tf::cudaTask h2d_y = cf.copy(dy, hx.data(), N).name("h2d_y");
