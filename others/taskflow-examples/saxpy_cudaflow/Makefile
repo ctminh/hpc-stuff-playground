@@ -7,13 +7,13 @@ LDLIBS=-pthread
 
 # for compiling
 saxpy_cuda: saxpy_cudaflow.cu
-        $(CUDA_COMPILER) $^ $(CFLAGS) -o $@
+	$(CUDA_COMPILER) $^ $(CFLAGS) -o $@
 
 run:
-        ./saxpy_cuda
+	./saxpy_cuda
 
 run_tfprof:
-        TF_ENABLE_PROFILER=simple_test.json ./saxpy_cuda
+    TF_ENABLE_PROFILER=simple_test.json ./saxpy_cuda
 
 clean:
-        rm -f saxpy_cuda *.o
+    rm -f saxpy_cuda *.o
