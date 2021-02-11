@@ -1,4 +1,4 @@
-#include <taskflow/cudaflow.hpp
+#include <taskflow/cudaflow.hpp>
 
 // saxpy (single-precision A·X Plus Y) kernel
 __global__ void saxpy(int n, float a, float *x, float *y) {

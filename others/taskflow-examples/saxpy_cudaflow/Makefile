@@ -1,20 +1,19 @@
-CXX_COMPILER=icpc
-C_COMPILER=icc
-CFLAGS=-std=c++17 -O2 
+CXX_COMPILER=g++
+C_COMPILER=gcc
+CUDA_COMPILER=nvcc
+CFLAGS=-std=c++17 -O2
 LDLIBS=-pthread
 
-# for compiling
-simple_test: simple_test.o
-	$(CXX_COMPILER) $^ $(LDLIBS) -o $@
 
-simple_test.o: simple_test.cpp
-	$(CXX_COMPILER) $(CFLAGS) -c $^
+# for compiling
+saxpy_cuda: saxpy_cudaflow.cu
+        $(CUDA_COMPILER) $^ $(CFLAGS) -o $@
 
 run:
-	./simple_test
+        ./saxpy_cuda
 
 run_tfprof:
-	TF_ENABLE_PROFILER=simple_test.json ./simple_test
+        TF_ENABLE_PROFILER=simple_test.json ./saxpy_cuda
 
 clean:
-	rm -f simple_test *.o
+        rm -f saxpy_cuda *.o
