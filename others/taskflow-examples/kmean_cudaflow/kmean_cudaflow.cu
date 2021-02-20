@@ -36,7 +36,7 @@ std::pair<std::vector<float>, std::vector<float>> cpu_seq(
     // loop for all iterations
     for (int iter = 0; iter < M; iter++){
 
-        // clear the points of each group
+        // clear the statistics
         for (int k = 0; k < K; k++){
             sx[k] = 0.0f;
             sy[k] = 0.0f;
@@ -48,10 +48,29 @@ std::pair<std::vector<float>, std::vector<float>> cpu_seq(
         for (int i = 0; i < N; i++){
             float x = px[i];
             float y = py[i];
-            float best_distance = std::numeric_limits<float>::max();
-            std::cout << "best_distance = " << best_distance << std::endl;
+            float best_distance = std::numeric_limits<float>::max();    // just to assign a big value
+            int best_k = 0;
+
+            for (int k = 0; k < K; k++){
+                const float d = L2(x, y, mx[k], my[k]);
+                if (d < best_distance){
+                    best_distance = d;
+                    best_k = k;
+                }
+            }
+        
+            // ???
+            sx[best_k] += x;
+            sy[best_k] += y;
+            c[best_k] += 1;
         }
 
+        // update the centroids
+        for (int k = 0; k < K; k++){
+            const int count = max(1, c[k]);
+            mx[k] = sx[k] / count;
+            my[k] = sy[k] / count;
+        }
     }
 
     return {mx, my};
