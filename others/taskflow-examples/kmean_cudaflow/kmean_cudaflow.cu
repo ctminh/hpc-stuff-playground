@@ -45,9 +45,16 @@ std::pair<std::vector<float>, std::vector<float>> cpu_seq(
 
         // find the best cluster-id for each points
         // loop: check all points, calculate the distance
-        
+        for (int i = 0; i < N; i++){
+            float x = px[i];
+            float y = py[i];
+            float best_distance = std::numeric_limits<float>::max();
+            std::cout << "best_distance = " << best_distance << std::endl;
+        }
+
     }
-    
+
+    return {mx, my};
 }
 
 // ----------------------------------------------------------------------------
@@ -113,7 +120,7 @@ int main(int argc, const char *argv[])
             << std::chrono::duration_cast<std::chrono::milliseconds>(send-sbeg).count()
             << " ms\n";
     std::cout << "k centroids found by cpu (sequential)\n";
-    for(int k=0; k<K; ++k) {
+    for(int k = 0; k < K; ++k) {
         std::cout << "centroid " << k << ": " << std::setw(10) << mx[k] << ' ' 
                                             << std::setw(10) << my[k] << '\n';  
     }
