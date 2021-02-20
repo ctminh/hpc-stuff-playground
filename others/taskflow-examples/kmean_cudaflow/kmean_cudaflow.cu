@@ -63,6 +63,9 @@ std::pair<std::vector<float>, std::vector<float>> cpu_seq(
             sx[best_k] += x;
             sy[best_k] += y;
             c[best_k] += 1;
+            std::cout << "sx[" << best_k << "] = " << x << std::endl;
+            std::cout << "sy[" << best_k << "] = " << y << std::endl;
+            std::cout << "c[" << best_k << "] = " << c[best_k] << std::endl;
         }
 
         // update the centroids
