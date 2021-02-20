@@ -63,9 +63,9 @@ std::pair<std::vector<float>, std::vector<float>> cpu_seq(
             sx[best_k] += x;
             sy[best_k] += y;
             c[best_k] += 1;
-            std::cout << "sx[" << best_k << "] = " << x << std::endl;
-            std::cout << "sy[" << best_k << "] = " << y << std::endl;
-            std::cout << "c[" << best_k << "] = " << c[best_k] << std::endl;
+            // std::cout << "sx[" << best_k << "] = " << x << std::endl;
+            // std::cout << "sy[" << best_k << "] = " << y << std::endl;
+            // std::cout << "c[" << best_k << "] = " << c[best_k] << std::endl;
         }
 
         // update the centroids
@@ -82,7 +82,21 @@ std::pair<std::vector<float>, std::vector<float>> cpu_seq(
 // ----------------------------------------------------------------------------
 // CPU (parallel) implementation
 // ----------------------------------------------------------------------------
+std::pair<std::vector<float>, std::vector<float>> cpu_par(
+    const int N, const int K, const int M,
+    const std::vector<float>& px,
+    const std::vector<float>& py)
+{
+    const auto num_threads = std::thread::hardware_concurrency();
 
+    tf::Executor executor;
+    tf::Taskflow taskflow("kmean-cpu-parallel");
+
+    std::vector<int> c(K), best_ks(N);
+    std::vector<float> sx(K), sy(K), mx(K), my(K);
+
+    return {mx, my};
+}   
 
 // ----------------------------------------------------------------------------
 // GPU implementation
@@ -129,7 +143,7 @@ int main(int argc, const char *argv[])
         h_py.push_back(rand()%1000 - 500);
     }
 
-    // k-means on cpu_seq
+    // ----------------- k-means on cpu_seq
     std::cout << "running k-means on cpu (sequential) ... ";
     // start_time
     auto sbeg = std::chrono::steady_clock::now();
@@ -144,7 +158,23 @@ int main(int argc, const char *argv[])
     std::cout << "k centroids found by cpu (sequential)\n";
     for(int k = 0; k < K; ++k) {
         std::cout << "centroid " << k << ": " << std::setw(10) << mx[k] << ' ' 
-                                            << std::setw(10) << my[k] << '\n';  
+                                            << std::setw(10) << my[k] << '\n';
+    }
+
+
+    // ---------------- k-mean cpu parallel
+    std::cout << "running k-means on cpu (parallel) ... ";
+    auto p_beg_time = std::chrono::steady_clock::now();
+    std::tie(mx, my) = cpu_par(N, K, M, h_px, h_py);
+    auto p_end_time = std::chrono::steady_clock::now();
+    std::cout << "completed with " 
+            << std::chrono::duration_cast<std::chrono::milliseconds>(p_end_time-p_beg_time).count()
+            << " ms\n";
+  
+    std::cout << "k centroids found by cpu (parallel)\n";
+    for(int k=0; k<K; ++k) {
+    std::cout << "centroid " << k << ": " << std::setw(10) << mx[k] << ' ' 
+                                          << std::setw(10) << my[k] << '\n';  
     }
 
     return 0;
