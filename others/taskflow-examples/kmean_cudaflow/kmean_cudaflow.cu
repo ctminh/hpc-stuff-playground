@@ -171,6 +171,9 @@ std::pair<std::vector<float>, std::vector<float>> cpu_par(
     // execute the taskflow
     executor.run(taskflow).wait();
 
+    // dump the taskflow
+    taskflow.dump(std::cout);
+
     return {mx, my};
 }   
 
