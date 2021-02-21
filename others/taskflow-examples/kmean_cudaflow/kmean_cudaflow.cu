@@ -111,7 +111,7 @@ std::pair<std::vector<float>, std::vector<float>> cpu_par(
     }).name("task_clean_up");
 
     // the main task for updating centroids
-    td::Task pf;
+    tf::Task pf;
     // define this as a for-par-loop task (like omp_for)
     pf = taskflow.for_each_index(0, N, 1, [&](int i){
         float x = px[i];
