@@ -59,13 +59,10 @@ std::pair<std::vector<float>, std::vector<float>> cpu_seq(
                 }
             }
         
-            // ???
+            // gather all points belong to a cluster
             sx[best_k] += x;
             sy[best_k] += y;
             c[best_k] += 1;
-            // std::cout << "sx[" << best_k << "] = " << x << std::endl;
-            // std::cout << "sy[" << best_k << "] = " << y << std::endl;
-            // std::cout << "c[" << best_k << "] = " << c[best_k] << std::endl;
         }
 
         // update the centroids
@@ -94,6 +91,85 @@ std::pair<std::vector<float>, std::vector<float>> cpu_par(
 
     std::vector<int> c(K), best_ks(N);
     std::vector<float> sx(K), sy(K), mx(K), my(K);
+
+    // initial centroids for each cluster/group
+    // define this as a task
+    auto task_init = taskflow.emplace([&](){
+        for (int i = 0; i < K; i++){
+            mx[i] = px[i];
+            my[i] = py[i];
+        }
+    }).name("task_init");
+
+    // clean the working vectors for storing values
+    audo task_clean_up = taskflow.emplace([&](){
+        for (int k = 0; k < K; ++k){
+            sx[k] = 0.0f;
+            sy[k] = 0.0f;
+            c[k] = 0;
+        }
+    }).name("task_clean_up");
+
+    // the main task for updating centroids
+    td::Task pf;
+    // define this as a for-par-loop task (like omp_for)
+    pf = taskflow.for_each_index(0, N, 1, [&](int i){
+        float x = px[i];
+        float y = py[i];
+        float best_distance = std::numeric_limits<float>::max();
+        int best_k = 0;
+        for (int k = 0; k < K; ++k){
+            const float d = L2(x, y, mx[k], my[k]);
+            if (d < best_distance){
+                best_distance = d;
+                best_k = k;
+            }
+        }
+
+        // just store indices to mark which points belong to which cluster
+        best_ks[i] = best_k;
+    });
+
+    // name this task as par-for-loop-task
+    pf.name("task_par_for_loop");
+
+    // this task stores the coordinates of points belong to a cluster
+    auto task_update_cluster = taskflow.emplace([&](){
+        // traverse all points again
+        for (int i = 0; i < N; i++){
+            sx[best_ks[i]] += px[i];    // best_ks[i] indicates the cluster of the point i
+            sy[best_ks[i]] += py[i];
+            c[best_ks] += 1;
+        }
+
+        for (int k = 0; k < K; ++k){
+            auto count = max(1, c[k]);
+            mx[k] = sx[k] / count;
+            my[k] = sy[k] / count;
+        }
+    }).name("task_update_centroids");
+
+    // conditions for executing tasks
+    auto condition = taskflow.emplace([m=0, M]() mutable {
+        return (m++ < M) ? 0 : 1
+    }).name("task_check_converged");
+
+    // describe the order of executing tasks
+    /* order for executions
+        task_init() -->
+        condition {
+            task_clean_up() -->
+            pf  -->
+            task_update_cluster -->
+        } */
+    task_init.precede(task_clean_up);
+    task_clean_up.precede(pf);
+    pf.precede(task_update_cluster);
+    condition.precede(task_clean_up)
+            .succeed(task_update_cluster);
+        
+    // execute the taskflow
+    executor.run(taskflow).wait();
 
     return {mx, my};
 }   
