@@ -139,7 +139,7 @@ std::pair<std::vector<float>, std::vector<float>> cpu_par(
         for (int i = 0; i < N; i++){
             sx[best_ks[i]] += px[i];    // best_ks[i] indicates the cluster of the point i
             sy[best_ks[i]] += py[i];
-            c[best_ks] += 1;
+            c[best_ks[i]] += 1;
         }
 
         for (int k = 0; k < K; ++k){
