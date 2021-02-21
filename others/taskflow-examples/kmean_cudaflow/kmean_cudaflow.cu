@@ -102,7 +102,7 @@ std::pair<std::vector<float>, std::vector<float>> cpu_par(
     }).name("task_init");
 
     // clean the working vectors for storing values
-    audo task_clean_up = taskflow.emplace([&](){
+    auto task_clean_up = taskflow.emplace([&](){
         for (int k = 0; k < K; ++k){
             sx[k] = 0.0f;
             sy[k] = 0.0f;
@@ -151,7 +151,7 @@ std::pair<std::vector<float>, std::vector<float>> cpu_par(
 
     // conditions for executing tasks
     auto condition = taskflow.emplace([m=0, M]() mutable {
-        return (m++ < M) ? 0 : 1
+        return (m++ < M) ? 0 : 1;
     }).name("task_check_converged");
 
     // describe the order of executing tasks
