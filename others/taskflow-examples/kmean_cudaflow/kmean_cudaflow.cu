@@ -272,8 +272,8 @@ std::pair<std::vector<float>, std::vector<float>> gpu_cond_tasks(
     auto h2d = taskflow.emplace([&](tf::cudaFlow &cf){
         cf.copy(d_px, h_px.data(), N).name("h2d_px"); // cp data from h_px to d_px
         cf.copy(d_py, h_py.data(), N).name("h2d_py");
-        cf.copy(d_mx, h_mx.data(), N).name("h2d_dx");
-        cf.copy(d_my, h_my.data(), N).name("h2d_dy");
+        cf.copy(d_mx, h_mx.data(), K).name("h2d_dx");
+        cf.copy(d_my, h_my.data(), K).name("h2d_dy");
     }).name("h2d_copy_data");
 
     // the computation task
