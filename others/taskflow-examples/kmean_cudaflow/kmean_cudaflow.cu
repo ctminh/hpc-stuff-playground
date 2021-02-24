@@ -331,7 +331,7 @@ std::pair<std::vector<float>, std::vector<float>> gpu_cond_tasks(
     executor.run(taskflow).wait();
 
     //std::cout << "dumping kmeans graph ...\n";
-    //taskflow.dump(std::cout);
+    taskflow.dump(std::cout);
     return {h_mx, h_my};
 }
 
