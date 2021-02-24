@@ -172,7 +172,7 @@ std::pair<std::vector<float>, std::vector<float>> cpu_par(
     executor.run(taskflow).wait();
 
     // dump the taskflow
-    taskflow.dump(std::cout);
+    // taskflow.dump(std::cout);
 
     return {mx, my};
 }   
@@ -180,6 +180,160 @@ std::pair<std::vector<float>, std::vector<float>> cpu_par(
 // ----------------------------------------------------------------------------
 // GPU implementation
 // ----------------------------------------------------------------------------
+
+/* Each point (thread) computes its distance to each centroid 
+and adds its x and y values to the sum of its closest
+centroid, as well as incrementing that centroid's count of assigned points. */
+__global__ void assign_clusters(
+    const float *px, const float *py,
+    int N, const float *mx, const float *my,
+    float *sx, float *sy, int k, int *c)
+{
+    const int index = blockIdx.x * blockDim.x + threadIdx.x;
+    if (index >= N){
+        return;
+    }
+
+    // make global loads
+    const float x = px[index];
+    const float y = py[index];
+
+    float best_distance = FLT_MAX;
+    int best_cluster = 0;
+    for (int c = 0; c < k; ++c){
+        const float distance = L2(x, y, mx[c], my[c]);
+        if (distance < best_distance){
+            best_distance = distance;
+            best_cluster = cluster;
+        }
+    }
+
+    // update clusters/assign clusters to compute the centroids
+    atomicAdd(&sx[best_cluster], x);
+    atomicAdd(&sy[best_cluster], y);
+    atomicAdd(&c[best_cluster], 1);
+}
+
+/* Each thread is one cluster, which just recomputes its coordinates as the mean
+ of all points assigned to it. */
+__global__ void compute_new_means(
+    float *mx, float *my,
+    const float *sx, const float *sy, const int *c)
+{
+    const int cluster = threadIdx.x;
+    const int count = max(1, c[cluster]);
+    mx[cluster] = sx[cluster] / count;
+    my[cluster] = sy[cluster] / count;
+}
+
+
+std::pair<std::vector<float>, std::vector<float>> gpu_cond_tasks(
+    const int N, const int K, const int M,
+    const std::vector<float> &h_px,
+    const std::vector<float> &h_py)
+{
+    std::vector<float> h_mx, h_my;  // contains the returned centroids
+    float *d_px, *d_py, *d_mx, *d_my, *d_sx, *d_sy, *d_c;   // mx, my for keeping centroids/cluster per iter
+
+    // copy values of all points to host_mx, _my
+    for (int i = 0; i < K; i++){
+        h_mx.push_back(h_px[i]);
+        h_my.push_back(h_py[i]);
+    }
+
+    // create a taskflow graph
+    tf::Executor executor;
+    tf::Taskflow taskflow("K-Means-GPU-without-cond-tasks");
+
+    // tasks for allocating mem on GPU devices
+    auto allocate_px = taskflow.emplace([&](){
+        TF_CHECK_CUDA(cudaMalloc(&d_px, N*sizeof(float)), "failed to allocate d_px");
+    }).name("allocate_px_gpu");
+    auto allocate_py = taskflow.emplace([&](){
+        TF_CHECK_CUDA(cudaMalloc(&d_py, N*sizeof(float)), "failed to allocate d_py");
+    }).name("allocate_py_gpu");
+    auto allocate_mx = taskflow.emplace([&](){
+        TF_CHECK_CUDA(cudaMalloc(&d_mx, K*sizeof(float)), "failed to allocate d_mx");
+    }).name("allocate_mx_gpu");
+    auto allocate_my = taskflow.emplace([&](){
+        TF_CHECK_CUDA(cudaMalloc(&d_my, K*sizeof(float)), "failed to allocate d_my");
+    }).name("allocate_my_gpu");
+    auto allocate_sx = taskflow.emplace([&](){
+        TF_CHECK_CUDA(cudaMalloc(&d_sx, K*sizeof(float)), "failed to allocate d_sx"); 
+    }).name("allocate_sx_gpu");
+    auto allocate_sy = taskflow.emplace([&](){
+        TF_CHECK_CUDA(cudaMalloc(&d_sy, K*sizeof(float)), "failed to allocate d_sy"); 
+    }).name("allocate_sy_gpu");
+    auto allocate_c = taskflow.emplace([&](){
+        TF_CHECK_CUDA(cudaMalloc(&d_c, K*sizeof(float)), "failed to allocate d_c");
+    }).name("allocate_c_gpu");
+
+    // task for copying data from host to device
+    auto h2d = taskflow.emplace([&](tf::cudaFlow &cf){
+        cf.copy(d_px, h_px.data(), N).name("h2d_px"); // cp data from h_px to d_px
+        cf.copy(d_py, h_py.data(), N).name("h2d_py");
+        cf.copy(d_mx, h_mx.data(), N).name("h2d_dx");
+        cf.copy(d_my, h_my.data(), N).name("h2d_dy");
+    }).name("h2d_copy_data");
+
+    // the computation task
+    auto kmeans = taskflow.emplace([&](tf::cudaFlow &cf){
+        // init data on GPU
+        auto zero_c = cf.zero(d_c, K).name("zero_c");
+        auto zero_sx = cf.zero(d_sx, K).name("zero_sx");
+        auto zero_sy = cf.zero(d_sy, K).name("zero_sy");
+
+        auto cluster = cf.kernel((N+1024-1)/1024, 1024, 0,
+                                assign_clusters,
+                                d_px, d_py, N, d_mx, d_my, d_sx, d_sy, K, d_c).name("assign_clus_kernel");
+
+        auto new_centroids = cf.kernel(
+            1, K, 0,
+            compute_new_means,
+            d_mx, d_my, d_sx, d_sy, d_c).name("update_centroids_kernel");
+        
+        // decide the order for executing the main tasks
+        cluster.precede(new_centroids)
+                .succeed(zero_c, zero_sx, zero_sy);
+    }).name("update_means_gpu");
+
+
+    // declare the conditions for tasks
+    auto condition = taskflow.emplace([i=0, M]() mutable {
+        return i++ < M ? 0 : 1;
+    }).name("check_converged");
+
+    // the task, copying data back from GPU to host
+    auto stop = taskflow.emplace([&](tf::cudaFlow &cf){
+        cf.copy(h_mx.data(), d_mx, K).name("d2h_mx");
+        cf.copy(h_my.data(), d_my, K).name("d2h_my");
+    }).name("d2h_copy_back_data");
+
+    // free memory task
+    auto free = taskflow.emplace([&](){
+        TF_CHECK_CUDA(cudaFree(d_px), "failed to free d_px");
+        TF_CHECK_CUDA(cudaFree(d_py), "failed to free d_py");
+        TF_CHECK_CUDA(cudaFree(d_mx), "failed to free d_mx");
+        TF_CHECK_CUDA(cudaFree(d_my), "failed to free d_my");
+        TF_CHECK_CUDA(cudaFree(d_sx), "failed to free d_sx");
+        TF_CHECK_CUDA(cudaFree(d_sy), "failed to free d_sy");
+        TF_CHECK_CUDA(cudaFree(d_c),  "failed to free d_c");
+    }).name("free_mem_on_gpu");
+
+    // make the global orders
+    h2d.succeed(allocate_px, allocate_py, allocate_mx, allocate_my);
+    kmeans.succeed(allocate_sx, allocate_sy, allocate_c, h2d)
+            .precede(condition);
+    condition.precede(kmeans, stop);
+    stop.precede(free);
+
+    // run the taskflow
+    executor.run(taskflow).wait();
+
+    //std::cout << "dumping kmeans graph ...\n";
+    //taskflow.dump(std::cout);
+    return {h_mx, h_my};
+}
 
 
 // ----------------------------------------------------------------------------
@@ -255,6 +409,16 @@ int main(int argc, const char *argv[])
     std::cout << "centroid " << k << ": " << std::setw(10) << mx[k] << ' ' 
                                           << std::setw(10) << my[k] << '\n';  
     }
+
+
+    // ----------------- k-means on gpu with conditional tasking
+    std::cout << "running k-means on GPU (with conditional tasking) ..."
+    auto pgpu_con_beg_time = std::chrono::steady_clock::now();
+    std::tie(mx, my) = gpu_cond_tasks(N, K, M, h_px, h_py);
+    auto pgpu_con_end_time = std::chrono::steady_clock::now();
+    std::cout << "completed with "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(pgpu_con_end_time-pgpu_con_beg_time).count()
+            << " ms\n";
 
     return 0;
 }
