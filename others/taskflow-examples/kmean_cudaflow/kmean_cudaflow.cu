@@ -204,7 +204,7 @@ __global__ void assign_clusters(
         const float distance = L2(x, y, mx[c], my[c]);
         if (distance < best_distance){
             best_distance = distance;
-            best_cluster = cluster;
+            best_cluster = c;
         }
     }
 
@@ -412,7 +412,7 @@ int main(int argc, const char *argv[])
 
 
     // ----------------- k-means on gpu with conditional tasking
-    std::cout << "running k-means on GPU (with conditional tasking) ..."
+    std::cout << "running k-means on GPU (with conditional tasking) ...";
     auto pgpu_con_beg_time = std::chrono::steady_clock::now();
     std::tie(mx, my) = gpu_cond_tasks(N, K, M, h_px, h_py);
     auto pgpu_con_end_time = std::chrono::steady_clock::now();
