@@ -27,8 +27,8 @@ module load hcl-dev
 
 # indicate which compiler for C/C++
 echo "4. Setting which C/C++ compiler is used..."
-export C_COMPILER=icc
-export CXX_COMPILER=icpc
+export C_COMPILER=gcc
+export CXX_COMPILER=g++
 
 # run cmake
 echo "5. Running cmake to config..."
