@@ -246,7 +246,7 @@ int main (int argc,char* argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     int ranks_per_server = comm_size;
-    int num_request = 10000;
+    int num_request = 1000;
     long size_of_request = 1000;
     bool debug = false;
     bool server_on_node = false;
@@ -320,12 +320,12 @@ int main (int argc,char* argv[])
     MPI_Barrier(MPI_COMM_WORLD);
 
     /* ///////////////// Test Throughput of Local Queue per Rank ///////////////// */
+    size_t size_of_task = 110; // try a given calculation by hand
     if (!is_server) {
         Timer timer_loca_queue_put = Timer();
-        size_t size_of_task = 0;
         for(int i = 0; i < num_request; i++){
             mig_task_t task = mig_task_t(1, i, 5);
-            size_of_task = sizeof(task);
+            // size_of_task = sizeof(task);
             // measure time of put
             timer_loca_queue_put.resumeTime();
             loca_queue.push(task);
@@ -445,6 +445,7 @@ int main (int argc,char* argv[])
             printf("total throughput_glob_queue remote-access with put: %f (MB/s)\n", total_throughput_glob_queue_rem_put);
             printf("total throughput_glob_queue remote-access with get: %f (MB/s)\n", total_throughput_glob_queue_rem_get);
         }
+        MPI_Barrier(client_comm);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -540,7 +541,7 @@ int main (int argc,char* argv[])
     }
     double throughput_2side_comm = (num_request*recv_buff_size*1000) / (timer_2side_comm.getElapsedTime()*1024*1024);
 
-    // printf("CHECK_TIMER: R%d elapsed time = %f\n", my_rank, timer_2side_comm.getElapsedTime()/1000);
+    printf("CHECK_TIMER: R%d elapsed time = %f\n", my_rank, timer_2side_comm.getElapsedTime()/1000);
     printf("Total throughput_2side_comm: %f (MB/s)\n", throughput_2side_comm);
 
     MPI_Finalize();
