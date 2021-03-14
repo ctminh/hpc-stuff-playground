@@ -37,7 +37,7 @@ endif()
 # find_library(HCL_LIB NAMES hcl PATHS /dss/dsshome1/0A/di49mew/hcl/install/lib64)
 # find_library(RPC_LIB NAMES rpc PATHS /dss/dsshome1/0A/di49mew/loc-libs/rpclib-master/install/lib)
 
-set(LIB_FLAGS ${RPC_LIB_FLAGS} -lmpicxx) # -lpthread -lrt
+set(LIB_FLAGS ${RPC_LIB_FLAGS} -lmpicxx -lpthread -lrt)
 
 # Compile the example
 # because libhcl.so is linked by LD_PRELOAD, so don't need to link it in target_link_libs
