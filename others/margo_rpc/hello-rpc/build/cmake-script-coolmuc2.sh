@@ -17,8 +17,8 @@ echo "4. Loading margo..."
 module load cmake-3.19.5-gcc-7.5.0-bxubtlf
 module load argobots-1.0-gcc-7.5.0-x75podl
 module load boost-1.75.0-gcc-7.5.0-xdru65d
-# module load cereal-1.3.0-gcc-7.5.0-jwb3bux
-# module load libfabric-1.11.1-gcc-7.5.0-p6j52ik
+module load cereal-1.3.0-gcc-7.5.0-jwb3bux
+module load libfabric-1.11.1-gcc-7.5.0-p6j52ik
 module load mercury-2.0.0-gcc-7.5.0-z55j3mp
 module load mochi-abt-io-0.5.1-gcc-7.5.0-w7nm5r2
 module load mochi-margo-0.9.1-gcc-7.5.0-n2p7v3n
