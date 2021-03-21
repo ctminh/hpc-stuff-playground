@@ -9,7 +9,7 @@
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
 #SBATCH --export=NONE
-#SBATCH --time=00:10:00
+#SBATCH --time=00:05:00
 
 ## load slurm-setups
 module load slurm_setup
@@ -26,7 +26,9 @@ module load mercury-2.0.0-gcc-7.5.0-z55j3mp
 module load mochi-abt-io-0.5.1-gcc-7.5.0-w7nm5r2
 module load mochi-margo-0.9.1-gcc-7.5.0-n2p7v3n
 module load mochi-thallium-0.8.4-gcc-7.5.0-u5zn3qg
-module load hcl-dev
+
+## check the list of assigned nodes
+echo ${SLURM_JOB_NODELIST}
 
 ## run the programs
-mpirun -n 1 ./margo_server : n -1 ./margo_client
+mpirun -np 1 ./margo_server : -np 1 ./margo_client
