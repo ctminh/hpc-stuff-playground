@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
     // get process id of the client
     pid_t c_pid = getpid();
-    printf("[CLIENT] pid=%d: init margo OK at %s...\n", c_pid, my_address);
+    printf("[CLIENT] pid=%d: init margo OK at %s...\n", c_pid, addr_str);
 
     // margo_finalize is used to finalize the margo_instance_id object.
     margo_finalize(mid);
