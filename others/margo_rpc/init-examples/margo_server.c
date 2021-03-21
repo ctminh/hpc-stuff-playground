@@ -38,6 +38,7 @@ int main(int argc, char *argv[]){
     margo_info(mid, "[SERVER] running at address %s", addr_str);
 
     margo_wait_for_finalize(mid);
+    margo_info(mid, "[SERVER] passed wait_for_finalize...");
 
     return 0;
 }
