@@ -51,11 +51,15 @@ echo "    fields[0] = ${fields[0]}"
 echo "    fields[1] = ${fields[1]}"
 echo "    fields[2] = ${fields[2]}"
 
+## seperate IP_addr and Port_number
+IFS=\: read -a ser_addr <<< ${fields[2]}
+echo "    IP_addr=${ser_addr[0]} | Port=${ser_addr[1]}"
+
 ## -----------------------------------------
 ## -------- Running clients ----------------
 echo "3. Running client..."
-echo "    mpirun -n 1 ./rpc_client ${fields[2]}"
-mpirun -n 1 ./rpc_client ${fields[2]}
+echo "    mpirun -n 1 ./rpc_client ${ser_addr[0]}"
+mpirun -n 1 ./rpc_client ${ser_addr[0]}
 
 echo "Done!"
 
