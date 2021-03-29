@@ -9,7 +9,7 @@
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
 #SBATCH --export=NONE
-#SBATCH --time=00:10:00
+#SBATCH --time=00:02:00
 
 module load slurm_setup
 
@@ -43,10 +43,10 @@ IFS=\/ read -a fields <<< $input_file ##"$ADDRESS"
 ## set | grep ^IFS=
 
 ## fields now is an array with separate values
-echo "    Print the array after reading with delimiter..."
-set | grep ^fields=\\\|^IN=
+## echo "    Print the array after reading with delimiter..."
+## set | grep ^fields=\\\|^IN=
 
-## fields=([0]="ofi+tcp" [1]="ofi_rxm://10.7.5.34:35271")
+## e.g., fields=([0]="ofi+tcp" [1]="ofi_rxm://10.7.5.34:35271")
 echo "    fields[0] = ${fields[0]}"
 echo "    fields[1] = ${fields[1]}"
 echo "    fields[2] = ${fields[2]}"
@@ -54,6 +54,9 @@ echo "    fields[2] = ${fields[2]}"
 ## -----------------------------------------
 ## -------- Running clients ----------------
 echo "3. Running client..."
+echo "    mpirun -n 1 ./rpc_client ${fields[2]}"
 mpirun -n 1 ./rpc_client ${fields[2]}
+
+echo "Done!"
 
 
