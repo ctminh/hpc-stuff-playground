@@ -35,7 +35,8 @@ mpirun -n 1 ./rpc_server &
 ## -------- Running bash-script ------------
 ## read and split the chars
 echo "2. [BASH-SCRIPT] Reading input_file..."
-input_file=$(<f_server_addr.txt)
+cur_dir=$(pwd)
+input_file=$(<${cur_dir}/f_server_addr.txt)
 IFS=\/ read -a fields <<< $input_file ##"$ADDRESS"
 
 ## reset IFS back the default
