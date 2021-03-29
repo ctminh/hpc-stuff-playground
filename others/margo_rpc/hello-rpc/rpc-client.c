@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <margo.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 int main(int argc, char** argv)
 {
