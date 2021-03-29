@@ -26,5 +26,33 @@ module load mochi-margo-0.9.1-gcc-7.5.0-n2p7v3n
 module load mochi-thallium-0.8.4-gcc-7.5.0-u5zn3qg
 module load hcl-dev
 
+## -----------------------------------------
+## -------- Running server -----------------
+echo "1. Init the server..."
+mpirun -n 1 ./rpc_server &
 
-mpirun -n 1 ./rpc_server : n -1 ./rpc_client
+## -----------------------------------------
+## -------- Running bash-script ------------
+## read and split the chars
+echo "2. [BASH-SCRIPT] Reading input_file..."
+input_file=$(<f_server_addr.txt)
+IFS=\/ read -a fields <<< $input_file ##"$ADDRESS"
+
+## reset IFS back the default
+## set | grep ^IFS=
+
+## fields now is an array with separate values
+echo "    Print the array after reading with delimiter..."
+set | grep ^fields=\\\|^IN=
+
+## fields=([0]="ofi+tcp" [1]="ofi_rxm://10.7.5.34:35271")
+echo "    fields[0] = ${fields[0]}"
+echo "    fields[1] = ${fields[1]}"
+echo "    fields[2] = ${fields[2]}"
+
+## -----------------------------------------
+## -------- Running clients ----------------
+echo "3. Running client..."
+mpirun -n 1 ./rpc_client ${fields[2]}
+
+

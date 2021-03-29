@@ -3,6 +3,7 @@
 #include <margo.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 // declare num total rpc requests
 static const int TOTAL_RPCS = 4;
@@ -29,6 +30,16 @@ int main(int argc, char** argv)
     margo_set_log_level(mid, MARGO_LOG_INFO);
     pid_t s_pid = getpid();
     margo_info(mid, "[SERVER] pid=%d is running at address %s", s_pid, addr_str);
+
+    // write the addr to file, then scriptor'd catch it and pass it to client-side
+    FILE *file_server_addr;
+    file_server_addr = fopen("./f_server_addr.txt", "w");
+    if(file_server_addr == NULL){
+        printf("Error: cannot open file to write!");   
+        exit(1);             
+    }
+    fprintf(file_server_addr, "%s", addr_str);
+    fclose(file_server_addr);
 
     // The two lines that register the RPC handler in the Margo instance are the following
     //  + MARGO_REGISTER is a macro that registers the RPC handler. Its first argument is the
