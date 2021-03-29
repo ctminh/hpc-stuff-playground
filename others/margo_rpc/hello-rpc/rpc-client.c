@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <margo.h>
+#include <sys/types.h>
 
 int main(int argc, char** argv)
 {
@@ -12,6 +13,7 @@ int main(int argc, char** argv)
         fprintf(stderr,"Usage: %s <server address>\n", argv[0]);
         exit(0);
     }
+    printf("[CLIENT] Got the server_addr - %s...\n", argv[0]);
 
     // init margo-client
     margo_instance_id mid = MARGO_INSTANCE_NULL;
