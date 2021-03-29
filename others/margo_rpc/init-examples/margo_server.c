@@ -3,6 +3,7 @@
 #include <margo.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 
 int main(int argc, char *argv[]){
@@ -22,6 +23,7 @@ int main(int argc, char *argv[]){
     margo_instance_id mid = margo_init("tcp", MARGO_SERVER_MODE, 0, -1);
     assert(mid);
 
+    // get pid of the server
     pid_t s_pid = getpid();
     printf("[SERVER] pid=%d: init margo OK...\n", s_pid);
 
@@ -32,6 +34,16 @@ int main(int argc, char *argv[]){
     size_t addr_str_size = 128;
     margo_addr_to_string(mid, addr_str, &addr_str_size, my_address);
     margo_addr_free(mid, my_address);
+
+    // write the addr of server to file
+    FILE *file_server_addr;
+    file_server_addr = fopen("./f_server_addr.txt", "w");
+    if(file_server_addr == NULL){
+        printf("Error: cannot open file to write!");   
+        exit(1);             
+    }
+    fprintf(file_server_addr, "%s", addr_str);
+    fclose(file_server_addr);
 
     // blocks the server in the Mercury progress loop until another ES calls
     margo_set_log_level(mid, MARGO_LOG_INFO);

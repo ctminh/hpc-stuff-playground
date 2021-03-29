@@ -18,6 +18,18 @@ int main(int argc, char** argv)
     mid = margo_init("tcp", MARGO_CLIENT_MODE, 0, 0);
     assert(mid);
 
+    // get the address of the client, which is then converted into a string
+    hg_addr_t my_address;
+    margo_addr_self(mid, &my_address);
+    char addr_str[128];
+    size_t addr_str_size = 128;
+    margo_addr_to_string(mid, addr_str, &addr_str_size, my_address);
+    margo_addr_free(mid, my_address);
+
+    // get process id of the client
+    pid_t c_pid = getpid();
+    printf("[CLIENT] pid=%d: init margo OK at %s...\n", c_pid, addr_str);
+
     // register the function to be called at the server side
     hg_id_t hello_rpc_id = MARGO_REGISTER(mid, "hello", void, void, NULL);
     margo_registered_disable_response(mid, hello_rpc_id, HG_TRUE);
