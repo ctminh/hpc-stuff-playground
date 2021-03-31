@@ -73,8 +73,8 @@ echo "    IP_addr=${ser_addr[0]} | Port=${ser_addr[1]}"
 ## -----------------------------------------
 ## -------- Running clients ----------------
 echo "4. Running client..."
-echo "    mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${ser_addr[0]}"
-mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${ser_addr[0]}:${ser_addr[1]}
+echo "    mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${node_arr[0]}"
+mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${node_arr[0]}
 
 echo "Done!"
 rm ./nodelist.txt
