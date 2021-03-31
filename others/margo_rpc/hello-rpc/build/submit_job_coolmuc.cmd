@@ -41,7 +41,7 @@ done < "${nodelist_file}"
 ## -------- Running server -----------------
 echo "1. Init the server..."
 echo "   srun -n 1 -w ${node_arr[0]} ./rpc_server &"
-srun -n 1 -w ${node_arr[0]} ./rpc_server &
+mpirun -n 1 --host ${node_arr[0]} ./rpc_server &
 
 ## -----------------------------------------
 ## -------- Running bash-script ------------
@@ -74,7 +74,7 @@ echo "    IP_addr=${ser_addr[0]} | Port=${ser_addr[1]}"
 ## -------- Running clients ----------------
 echo "4. Running client..."
 echo "    srun -n 1 -w ${node_arr[1]} ./rpc_client ${ser_addr[0]}"
-srun -n 1 -w ${node_arr[1]} ./rpc_client ${ser_addr[0]}
+mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${ser_addr[0]}
 
 echo "Done!"
 
