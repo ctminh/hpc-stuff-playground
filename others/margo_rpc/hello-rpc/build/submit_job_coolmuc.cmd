@@ -36,6 +36,8 @@ srun -n 1 ./rpc_server &
 ## read and split the chars
 echo "2. [BASH-SCRIPT] Sleeping a while before reading file..."
 scontrol show hostname ${SLURM_JOB_NODELIST}
+echo "    node1: ${SLURM_JOB_NODELIST[0]}"
+echo "    node2: ${SLURM_JOB_NODELIST[1]}"
 sleep 5
 echo "3. [BASH-SCRIPT] Reading input_file..."
 cur_dir=$(pwd)
