@@ -53,6 +53,7 @@ echo "3. [BASH-SCRIPT] Reading input_file..."
 cur_dir=$(pwd)
 input_file=$(<${cur_dir}/f_server_addr.txt)
 IFS=\/ read -a fields <<< $input_file ##"$ADDRESS"
+IFS=   read -a w_addr <<< $input_file
 
 ## reset IFS back the default
 ## set | grep ^IFS=
@@ -73,8 +74,8 @@ echo "    IP_addr=${ser_addr[0]} | Port=${ser_addr[1]}"
 ## -----------------------------------------
 ## -------- Running clients ----------------
 echo "4. Running client..."
-echo "    mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${node_arr[0]}"
-mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${node_arr[0]}
+echo "    mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${w_addr}"
+mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${w_addr}
 
 echo "Done!"
 rm ./nodelist.txt
