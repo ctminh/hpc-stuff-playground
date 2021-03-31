@@ -29,7 +29,7 @@ module load hcl-dev
 ## -----------------------------------------
 ## -------- Running server -----------------
 echo "1. Init the server..."
-mpirun -n 1 ./rpc_server &
+srun -n 1 ./rpc_server &
 
 ## -----------------------------------------
 ## -------- Running bash-script ------------
@@ -59,7 +59,7 @@ echo "    IP_addr=${ser_addr[0]} | Port=${ser_addr[1]}"
 ## -------- Running clients ----------------
 echo "3. Running client..."
 echo "    mpirun -n 1 ./rpc_client ${ser_addr[0]}"
-mpirun -n 1 ./rpc_client ${ser_addr[0]}
+srun -n 1 ./rpc_client ${ser_addr[0]}
 
 echo "Done!"
 
