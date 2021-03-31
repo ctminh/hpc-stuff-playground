@@ -77,5 +77,7 @@ echo "    mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${ser_addr[0]}"
 mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${ser_addr[0]}:${ser_addr[1]}
 
 echo "Done!"
+rm ./nodelist.txt
+rm ./f_server_addr.txt
 
 
