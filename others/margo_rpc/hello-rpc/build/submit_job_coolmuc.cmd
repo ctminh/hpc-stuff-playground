@@ -35,7 +35,7 @@ srun -n 1 ./rpc_server &
 ## -------- Running bash-script ------------
 ## read and split the chars
 echo "2. [BASH-SCRIPT] Sleeping a while before reading file..."
-sleep 2
+sleep 5
 echo "3. [BASH-SCRIPT] Reading input_file..."
 cur_dir=$(pwd)
 input_file=$(<${cur_dir}/f_server_addr.txt)
@@ -59,7 +59,7 @@ echo "    IP_addr=${ser_addr[0]} | Port=${ser_addr[1]}"
 
 ## -----------------------------------------
 ## -------- Running clients ----------------
-echo "3. Running client..."
+echo "4. Running client..."
 echo "    mpirun -n 1 ./rpc_client ${ser_addr[0]}"
 srun -n 1 ./rpc_client ${ser_addr[0]}
 
