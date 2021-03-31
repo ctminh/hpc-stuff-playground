@@ -34,7 +34,9 @@ srun -n 1 ./rpc_server &
 ## -----------------------------------------
 ## -------- Running bash-script ------------
 ## read and split the chars
-echo "2. [BASH-SCRIPT] Reading input_file..."
+echo "2. [BASH-SCRIPT] Sleeping a while before reading file..."
+sleep 2
+echo "3. [BASH-SCRIPT] Reading input_file..."
 cur_dir=$(pwd)
 input_file=$(<${cur_dir}/f_server_addr.txt)
 IFS=\/ read -a fields <<< $input_file ##"$ADDRESS"
