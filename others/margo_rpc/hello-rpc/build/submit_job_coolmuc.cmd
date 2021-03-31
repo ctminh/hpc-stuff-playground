@@ -27,18 +27,28 @@ module load mochi-thallium-0.8.4-gcc-7.5.0-u5zn3qg
 module load hcl-dev
 
 ## -----------------------------------------
+## -------- Checking Allocated Nodes -------
+scontrol show hostname ${SLURM_JOB_NODELIST} > nodelist.txt
+nodelist_file="./nodelist.txt"
+i=0
+while IFS= read -r line
+do  
+    node_arr[$i]=$line
+    let "i++"
+done < "${nodelist_file}"
+
+## -----------------------------------------
 ## -------- Running server -----------------
 echo "1. Init the server..."
-srun -n 1 ./rpc_server &
+echo "   srun -n 1 -w ${node_arr[0]}./rpc_server &"
+srun -n 1 -w ${node_arr[0]}./rpc_server &
 
 ## -----------------------------------------
 ## -------- Running bash-script ------------
 ## read and split the chars
 echo "2. [BASH-SCRIPT] Sleeping a while before reading file..."
-scontrol show hostname ${SLURM_JOB_NODELIST}
-echo "    node1: ${SLURM_JOB_NODELIST[0]}"
-echo "    node2: ${SLURM_JOB_NODELIST[1]}"
 sleep 5
+
 echo "3. [BASH-SCRIPT] Reading input_file..."
 cur_dir=$(pwd)
 input_file=$(<${cur_dir}/f_server_addr.txt)
@@ -63,8 +73,8 @@ echo "    IP_addr=${ser_addr[0]} | Port=${ser_addr[1]}"
 ## -----------------------------------------
 ## -------- Running clients ----------------
 echo "4. Running client..."
-echo "    mpirun -n 1 ./rpc_client ${ser_addr[0]}"
-srun -n 1 ./rpc_client ${ser_addr[0]}
+echo "    srun -n 1 -w ${node_arr[1]} ./rpc_client ${node_arr[0]}"
+srun -n 1 -w ${node_arr[1]} ./rpc_client ${node_arr[0]}
 
 echo "Done!"
 
