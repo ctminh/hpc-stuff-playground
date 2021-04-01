@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J bulkdat_rdma_rpc
+#SBATCH -J bulkdat_rdma
 #SBATCH -o ./logs/bulkdat_trans_test_%J.out
 #SBATCH -e ./logs/bulkdat_trans_test_%J.err
 #SBATCH -D ./
