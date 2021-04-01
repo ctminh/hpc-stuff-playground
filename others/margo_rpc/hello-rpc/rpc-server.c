@@ -69,7 +69,8 @@ static void hello_world(hg_handle_t h)
 
     margo_instance_id mid = margo_hg_handle_get_instance(h);
 
-    margo_info(mid, "Hello World!");
+    pid_t hel_pid = getpid();
+    margo_info(mid, "Hello World! is being called at pid=%d\n", hel_pid);
     num_rpcs += 1;
 
     ret = margo_destroy(h);
