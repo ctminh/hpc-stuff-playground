@@ -6,7 +6,7 @@ project(margo_send_recv_rpc)
 
 # compile the code
 add_executable (server_sum server_sum.c)
-target_link_libraries (server_sum -lmargo -labt)
+target_link_libraries (server_sum -lmercury -lmargo -labt)
 
 add_executable (client_call client_call.c)
-target_link_libraries (client_call -lmargo -labt)
+target_link_libraries (client_call -lmercury -lmargo -labt)
