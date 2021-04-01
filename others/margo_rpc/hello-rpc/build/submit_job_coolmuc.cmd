@@ -28,6 +28,7 @@ module load hcl-dev
 
 ## -----------------------------------------
 ## -------- Checking Allocated Nodes -------
+echo "1. Checking assigned nodes for this job..."
 scontrol show hostname ${SLURM_JOB_NODELIST} > nodelist.txt
 nodelist_file="./nodelist.txt"
 i=0
@@ -39,43 +40,42 @@ done < "${nodelist_file}"
 
 ## -----------------------------------------
 ## -------- Running server -----------------
-echo "1. Init the server..."
+echo "2. Init the server on the 1st node..."
 echo "   mpirun -n 1 --host ${node_arr[0]} ./rpc_server &"
 mpirun -n 1 --host ${node_arr[0]} ./rpc_server &
 
 ## -----------------------------------------
 ## -------- Running bash-script ------------
 ## read and split the chars
-echo "2. [BASH-SCRIPT] Sleeping a while before reading file..."
+echo "-----[BASH-SCRIPT] Sleeping a while to let the server share addr..."
 sleep 5
 
-echo "3. [BASH-SCRIPT] Reading input_file..."
+echo "-----[BASH-SCRIPT] Getting the server addr..."
 cur_dir=$(pwd)
 input_file=$(<${cur_dir}/f_server_addr.txt)
 IFS=\/ read -a fields <<< $input_file
-IFS=   read -a s_addr <<< $input_file
+IFS=   read -a server_addr <<< $input_file
 
 ## reset IFS back the default
 ## set | grep ^IFS=
 
 ## fields now is an array with separate values
-## echo "    Print the array after reading with delimiter..."
+## echo "       + Print the array after reading with delimiter..."
 ## set | grep ^fields=\\\|^IN=
-
 ## e.g., fields=([0]="ofi+tcp" [1]="ofi_rxm://10.7.5.34:35271")
-## echo "    fields[0] = ${fields[0]}"
-## echo "    fields[1] = ${fields[1]}"
-## echo "    fields[2] = ${fields[2]}"
+## echo "          fields[0] = ${fields[0]}"
+## echo "          fields[1] = ${fields[1]}"
+## echo "          fields[2] = ${fields[2]}"
 
 ## seperate IP_addr and Port_number
-IFS=\: read -a ser_addr <<< ${fields[2]}
-echo "    Server_IP_Addr=${ser_addr[0]} | Port=${ser_addr[1]}"
+IFS=\: read -a sepa_addr <<< ${fields[2]}
+echo "-----[BASH-SCRIPT] Server_IP_Addr=${sepa_addr[0]} | Port=${sepa_addr[1]}"
 
 ## -----------------------------------------
 ## -------- Running clients ----------------
-echo "4. Running client (just work with the ser_addr format)..."
-echo "    mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${w_addr}"
-mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${s_addr}
+echo "3. Running client (just work with the margo server_addr format)..."
+echo "   mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${server_addr}"
+mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${server_addr}
 
 echo "Done!"
 rm ./nodelist.txt
