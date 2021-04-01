@@ -78,6 +78,11 @@ echo "   mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${server_addr}"
 mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${server_addr}
 
 echo "Done!"
+echo "--------------------------------------"
+echo "--------------------------------------"
+
+## -----------------------------------------
+## -------- Remove tmp-stuff ---------------
 rm ./nodelist.txt
 rm ./f_server_addr.txt
 
