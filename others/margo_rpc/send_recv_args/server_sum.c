@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <margo.h>
 #include "inout_struct.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 /**
  * Struct for Server Data.
@@ -43,6 +46,17 @@ int main(int argc, char** argv)
     margo_addr_free(mid,my_address);
 
     margo_info(mid, "Server running at address %s", addr_str);
+
+    // write the addr to file, then scriptor'd catch it
+    // and pass it to client-side
+    FILE *file_server_addr;
+    file_server_addr = fopen("./f_server_addr.txt", "w");
+    if(file_server_addr == NULL){
+        printf("Error: cannot open file to write!");   
+        exit(1);             
+    }
+    fprintf(file_server_addr, "%s", addr_str);
+    fclose(file_server_addr);
 
     hg_id_t rpc_id = MARGO_REGISTER(mid, "sum", sum_in_t, sum_out_t, sum);
     margo_register_data(mid, rpc_id, &svr_data, NULL);
