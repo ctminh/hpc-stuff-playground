@@ -35,15 +35,16 @@ int main(int argc, char** argv) {
         
         size_t dst_rank = lrand48() % BCL::nprocs();
 
-        // init info for each tasks
+        // init info for each task
         task_t tmp;
-        tmp.tid = i;
+        tmp.tid = BCL::rank()*NUM_TASKS + i;    // just for make different tids per rank
         for (int j = 0;  j < 100; j++){
             tmp.A[j] = 1;
             tmp.B[j] = 2;
             tmp.C[j] = 3;
         }
 
+        BCL::print("[PUSH] R%d pushes Task-%d\n", BCL::rank(), tmp.tid);
         bcl_c_queue[dst_rank].push(tmp);
     }
 
@@ -52,6 +53,8 @@ int main(int argc, char** argv) {
     // Sort local queue in place
     // std::sort(bcl_c_queue[BCL::rank()].begin().local(), bcl_f_queue[BCL::rank()].end().local());
 
+    BCL::print("-----------------------------------------\n");
+
     // Pop out of queue
     size_t count = 0;
     while (!bcl_c_queue[BCL::rank()].empty()) {
@@ -59,7 +62,7 @@ int main(int argc, char** argv) {
 
         bool success = bcl_c_queue[BCL::rank()].pop(t_value);
 
-        BCL::print("Task %d: rank %d...\n", t_value.tid, BCL::rank());
+        BCL::print("[POP] Task %d: from Rank %d...\n", t_value.tid, BCL::rank());
 
         if (success) {
             count++;
