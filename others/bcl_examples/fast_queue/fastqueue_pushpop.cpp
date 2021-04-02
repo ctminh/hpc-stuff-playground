@@ -2,6 +2,7 @@
 
 #include <bcl/bcl.hpp>
 #include <bcl/containers/FastQueue.hpp>
+#include <bcl/containers/CircularQueue.hpp>
 
 #define NUM_TASKS 100
 
@@ -22,10 +23,10 @@ int main(int argc, char** argv) {
     /* declare queue size (num of elements in queue) */
     size_t queue_size = NUM_TASKS * 2;
 
-    std::vector<BCL::FastQueue<task_t>> bcl_f_queue;
+    std::vector<BCL::CircularQueue<task_t>> bcl_f_queue;
 
     for (size_t rank = 0; rank < BCL::nprocs(); rank++) {
-        bcl_f_queue.push_back(BCL::FastQueue<task_t>(rank, queue_size));
+        bcl_f_queue.push_back(BCL::CircularQueue<task_t>(rank, queue_size));
     }
 
     srand48(BCL::rank());
