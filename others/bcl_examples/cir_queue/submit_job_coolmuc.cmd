@@ -14,11 +14,11 @@
 module load slurm_setup
 
 ## Create a log folder for slurm output
-LOGDIR="./logs"
-if [ -d "$LOGDIR" ]; then  ## if exists already
-    echo "${LOGDIR} is already exist..."
-else    ## if not, create a new one
-    mkdir ${LOGDIR}
-fi
+##LOGDIR="./logs"
+##if [ -d "$LOGDIR" ]; then  ## if exists already
+##    echo "${LOGDIR} is already exist..."
+##else    ## if not, create a new one
+##    mkdir ${LOGDIR}
+##fi
 
 mpirun -n 2 ./cirqueue_pushpop

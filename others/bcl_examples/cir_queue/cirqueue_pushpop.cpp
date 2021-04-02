@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
             tmp.C[j] = 3;
         }
 
-        BCL::print("[PUSH] R%d pushes Task-%d\n", BCL::rank(), tmp.tid);
+        BCL::print("[PUSH] R%d pushes Task-%d to the queue...\n", BCL::rank(), tmp.tid);
         bcl_c_queue[dst_rank].push(tmp);
     }
 
@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
 
     size_t total_count = BCL::allreduce<size_t>(count, std::plus<size_t>{});
 
-    BCL::print("Popped %lu values total.\n", total_count);
+    BCL::print("Done! Popped %lu values total.\n", total_count);
 
     BCL::finalize();
     return 0;
