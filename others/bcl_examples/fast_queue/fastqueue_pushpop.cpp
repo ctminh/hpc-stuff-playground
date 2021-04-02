@@ -22,10 +22,10 @@ int main(int argc, char** argv) {
     /* declare queue size (num of elements in queue) */
     size_t queue_size = NUM_TASKS * 2;
 
-    std::vector<BCL::FastQueue<task_t *>> bcl_f_queue;
+    std::vector<BCL::FastQueue<task_t>> bcl_f_queue;
 
     for (size_t rank = 0; rank < BCL::nprocs(); rank++) {
-        bcl_f_queue.push_back(BCL::FastQueue<task_t *>(rank, queue_size));
+        bcl_f_queue.push_back(BCL::FastQueue<task_t>(rank, queue_size));
     }
 
     srand48(BCL::rank());
@@ -35,12 +35,12 @@ int main(int argc, char** argv) {
         size_t dst_rank = lrand48() % BCL::nprocs();
 
         // init info for each tasks
-        task_t *tmp = new task_t;
-        tmp->tid = i;
+        task_t tmp;
+        tmp.tid = i;
         for (int j = 0;  j < 100; j++){
-            tmp->A[j] = 1;
-            tmp->B[j] = 2;
-            tmp->C[j] = 3;
+            tmp.A[j] = 1;
+            tmp.B[j] = 2;
+            tmp.C[j] = 3;
         }
 
         bcl_f_queue[dst_rank].push(tmp);
@@ -54,11 +54,11 @@ int main(int argc, char** argv) {
     // Pop out of queue
     size_t count = 0;
     while (!bcl_f_queue[BCL::rank()].empty()) {
-        task_t *t_value;
+        task_t t_value;
 
         bool success = bcl_f_queue[BCL::rank()].pop(t_value);
 
-        BCL::print("Task %d: rank %d...\n", t_value->tid, BCL::rank());
+        BCL::print("Task %d: rank %d...\n", t_value.tid, BCL::rank());
 
         if (success) {
             count++;
