@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J bcl_c_queue
-#SBATCH -o ./logs/cir_queue_test_%J.out
-#SBATCH -e ./logs/cir_queue_test_%J.err
+#SBATCH -o ./cir_queue_test_%J.out
+#SBATCH -e ./cir_queue_test_%J.err
 #SBATCH -D ./
 #SBATCH --get-user-env
 #SBATCH --clusters=cm2_tiny

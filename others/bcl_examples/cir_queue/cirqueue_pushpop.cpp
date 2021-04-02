@@ -12,9 +12,9 @@
 typedef struct task_t
 {
     int tid;
-	double	A[100];
-	double  B[100];
-	double	C[100];
+    double	A[100];
+    double  B[100];
+    double	C[100];
 } task_t;
 
 int main(int argc, char** argv) {
@@ -37,14 +37,14 @@ int main(int argc, char** argv) {
 
         // init info for each task
         task_t tmp;
-        tmp.tid = BCL::rank()*NUM_TASKS + i;    // just for make different tids per rank
+        tmp.tid = dst_rank*NUM_TASKS + i;    // just for make different tids per rank
         for (int j = 0;  j < 100; j++){
             tmp.A[j] = 1;
             tmp.B[j] = 2;
             tmp.C[j] = 3;
         }
 
-        BCL::print("[PUSH] R%d pushes Task-%d to the queue...\n", BCL::rank(), tmp.tid);
+        BCL::print("[PUSH] R%d pushes Task-%d to the queue...\n", dst_rank, tmp.tid);
         bcl_c_queue[dst_rank].push(tmp);
     }
 
