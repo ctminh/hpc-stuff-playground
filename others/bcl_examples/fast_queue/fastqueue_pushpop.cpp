@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     std::vector<BCL::FastQueue<task_t *>> bcl_f_queue;
 
     for (size_t rank = 0; rank < BCL::nprocs(); rank++) {
-        queues.push_back(BCL::FastQueue<task_t *>(rank, queue_size));
+        bcl_f_queue.push_back(BCL::FastQueue<task_t *>(rank, queue_size));
     }
 
     srand48(BCL::rank());
@@ -43,20 +43,20 @@ int main(int argc, char** argv) {
             tmp->C[j] = 3;
         }
 
-        queues[dst_rank].push(tmp);
+        bcl_f_queue[dst_rank].push(tmp);
     }
 
     BCL::barrier();
 
     // Sort local queue in place
-    std::sort(queues[BCL::rank()].begin().local(), queues[BCL::rank()].end().local());
+    std::sort(bcl_f_queue[BCL::rank()].begin().local(), bcl_f_queue[BCL::rank()].end().local());
 
     // Pop out of queue
     size_t count = 0;
-    while (!queues[BCL::rank()].empty()) {
+    while (!bcl_f_queue[BCL::rank()].empty()) {
         task_t *t_value;
 
-        bool success = queues[BCL::rank()].pop(t_value);
+        bool success = bcl_f_queue[BCL::rank()].pop(t_value);
 
         BCL::print("Task %d: rank %d...\n", t_value->tid, BCL::rank());
 
@@ -68,8 +68,6 @@ int main(int argc, char** argv) {
     size_t total_count = BCL::allreduce<size_t>(count, std::plus<size_t>{});
 
     BCL::print("Popped %lu values total.\n", total_count);
-
-    /**/
 
     BCL::finalize();
     return 0;
