@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     BCL::barrier();
 
     // Sort local queue in place
-    std::sort(bcl_f_queue[BCL::rank()].begin().local(), bcl_f_queue[BCL::rank()].end().local());
+    // std::sort(bcl_f_queue[BCL::rank()].begin().local(), bcl_f_queue[BCL::rank()].end().local());
 
     // Pop out of queue
     size_t count = 0;
