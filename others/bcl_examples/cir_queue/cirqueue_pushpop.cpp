@@ -12,9 +12,9 @@
 typedef struct task_t
 {
     int tid;
-    double	A[100];
+    double  A[100];
     double  B[100];
-    double	C[100];
+    double  C[100];
 } task_t;
 
 int main(int argc, char** argv) {
