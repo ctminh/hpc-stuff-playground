@@ -6,7 +6,9 @@
 
 #define NUM_TASKS 100
 
-// define the struct of task for testing
+/**
+ * A simple task struct for testing
+ */
 typedef struct task_t
 {
     int tid;
@@ -22,15 +24,13 @@ int main(int argc, char** argv) {
 
     /* declare queue size (num of elements in queue) */
     size_t queue_size = NUM_TASKS * 2;
-
     std::vector<BCL::CircularQueue<task_t>> bcl_c_queue;
-
     for (size_t rank = 0; rank < BCL::nprocs(); rank++) {
         bcl_c_queue.push_back(BCL::CircularQueue<task_t>(rank, queue_size));
     }
 
+    /* Init tasks and push to the queue */
     srand48(BCL::rank());
-
     for (size_t i = 0; i < NUM_TASKS; i++) {
         
         size_t dst_rank = lrand48() % BCL::nprocs();
@@ -52,10 +52,9 @@ int main(int argc, char** argv) {
 
     // Sort local queue in place
     // std::sort(bcl_c_queue[BCL::rank()].begin().local(), bcl_f_queue[BCL::rank()].end().local());
-
     BCL::print("-----------------------------------------\n");
 
-    // Pop out of queue
+    /* Pop tasks out of the queue */
     size_t count = 0;
     while (!bcl_c_queue[BCL::rank()].empty()) {
         task_t t_value;
@@ -70,7 +69,6 @@ int main(int argc, char** argv) {
     }
 
     size_t total_count = BCL::allreduce<size_t>(count, std::plus<size_t>{});
-
     BCL::print("Done! Popped %lu values total.\n", total_count);
 
     BCL::finalize();
