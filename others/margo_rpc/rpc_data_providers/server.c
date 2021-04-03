@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <margo.h>
-#include <service_alpha_server.h>
+#include <provider_alpha_server.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>

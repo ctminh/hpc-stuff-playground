@@ -41,7 +41,7 @@ done < "${nodelist_file}"
 ## -----------------------------------------
 ## -------- Running server -----------------
 echo "2. Init the server on the 1st node..."
-echo "   mpirun -n 1 --host ${node_arr[0]} ./rpc_server &"
+echo "   mpirun -n 1 --host ${node_arr[0]} ./server &"
 mpirun -n 1 --host ${node_arr[0]} ./server &
 
 ## -----------------------------------------
@@ -74,7 +74,7 @@ echo "-----[BASH-SCRIPT] Server_IP_Addr=${sepa_addr[0]} | Port=${sepa_addr[1]}"
 ## -----------------------------------------
 ## -------- Running clients ----------------
 echo "3. Running client (just work with the margo server_addr format)..."
-echo "   mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${server_addr}"
+echo "   mpirun -n 1 --host ${node_arr[1]} ./client ${server_addr}"
 mpirun -n 1 --host ${node_arr[1]} ./client ${server_addr}
 
 echo "Done!"
