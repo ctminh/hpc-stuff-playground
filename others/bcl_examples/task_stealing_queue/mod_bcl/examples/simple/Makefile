@@ -47,7 +47,7 @@ else ifeq ($(BACKEND), UPCXX)
 else
   BACKEND=MPI
   BCLFLAGS = -I$(BCLROOT)
-  CXX=mpicxx
+  CXX=mpicxx -cxx=g++
 
   BCL_RUN=mpirun -n 4
 endif
