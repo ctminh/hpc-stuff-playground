@@ -23,7 +23,7 @@ module load mercury-2.0.0-gcc-7.5.0-z55j3mp
 module load mochi-abt-io-0.5.1-gcc-7.5.0-w7nm5r2
 module load mochi-margo-0.9.1-gcc-7.5.0-n2p7v3n
 # module load mochi-thallium-0.8.4-gcc-7.5.0-u5zn3qg
-module load mochi-thallium-0.7-nbeiinaurlc3wtjdl3abo5ya66ziniov
+module load mochi-thallium-0.7-gcc-7.5.0-nbeiina
 
 
 # indicate which compiler for C/C++
