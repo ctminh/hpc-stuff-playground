@@ -30,7 +30,7 @@ if(HCL_ENABLE_RPCLIB)
 endif()
 
 if(HCL_ENABLE_THALLIUM_ROCE OR HCL_ENABLE_THALLIUM_TCP)
-    set(RPC_LIB_FLAGS -lmercury -lmercury_util -lmargo -labt ${RPC_LIB_FLAGS})
+    set(RPC_LIB_FLAGS -lthallium -lmercury -lmercury_util -lmargo -labt ${RPC_LIB_FLAGS})
 endif()
 
 # find HCL
