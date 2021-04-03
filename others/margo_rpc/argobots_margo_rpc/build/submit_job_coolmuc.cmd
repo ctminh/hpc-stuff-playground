@@ -76,7 +76,7 @@ echo "-----[BASH-SCRIPT] Server_IP_Addr=${sepa_addr[0]} | Port=${sepa_addr[1]}"
 echo "3. Running client (just work with the margo server_addr format)..."
 echo "   mpirun -n 1 --host ${node_arr[1]} ./client ${server_addr}"
 provider_id=42 ## given before, or better we generate it by the other way
-mpirun -n 1 --host ${node_arr[1]} ./client ${server_addr} ${provider_id}
+mpirun -n 1 --host ${node_arr[1]} ./client ${server_addr} {provider_id}
 
 echo "Done!"
 echo "--------------------------------------"
