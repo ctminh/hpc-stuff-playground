@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -J rpc_as_provider
-#SBATCH -o ./logs/rpc_provider_test_%J.out
-#SBATCH -e ./logs/rpc_provider_test_%J.err
+#SBATCH -J argobots_a_rpc
+#SBATCH -o ./logs/rpc_argobot_test_%J.out
+#SBATCH -e ./logs/rpc_argobot_test_%J.err
 #SBATCH -D ./
 #SBATCH --get-user-env
 #SBATCH --clusters=cm2_tiny
