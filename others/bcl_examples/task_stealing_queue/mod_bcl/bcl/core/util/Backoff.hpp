@@ -36,6 +36,6 @@ private:
 };
 
 template <typename BackoffFn = decltype(double_backoff)>
-Backoff(size_t init_sleep = 1, size_t max_sleep = 100, BackoffFn&& backoff_fn = double_backoff) -> Backoff<BackoffFn>;
+Backoff(size_t init_sleep = 1, size_t max_sleep = 100, BackoffFn&& backoff_fn = double_backoff)->Backoff<BackoffFn>;
 
 } // end BCL
