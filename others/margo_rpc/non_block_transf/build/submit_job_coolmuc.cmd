@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -J args_send_recv
-#SBATCH -o ./logs/send_recv_test_%J.out
-#SBATCH -e ./logs/send_recv_test_%J.err
+#SBATCH -J bulkdat_rdma
+#SBATCH -o ./logs/bulkdat_trans_test_%J.out
+#SBATCH -e ./logs/bulkdat_trans_test_%J.err
 #SBATCH -D ./
 #SBATCH --get-user-env
 #SBATCH --clusters=cm2_tiny
@@ -42,7 +42,7 @@ done < "${nodelist_file}"
 ## -------- Running server -----------------
 echo "2. Init the server on the 1st node..."
 echo "   mpirun -n 1 --host ${node_arr[0]} ./rpc_server &"
-mpirun -n 1 --host ${node_arr[0]} ./server_sum &
+mpirun -n 1 --host ${node_arr[0]} ./server_nonblock_resp &
 
 ## -----------------------------------------
 ## -------- Running bash-script ------------
@@ -75,7 +75,7 @@ echo "-----[BASH-SCRIPT] Server_IP_Addr=${sepa_addr[0]} | Port=${sepa_addr[1]}"
 ## -------- Running clients ----------------
 echo "3. Running client (just work with the margo server_addr format)..."
 echo "   mpirun -n 1 --host ${node_arr[1]} ./rpc_client ${server_addr}"
-mpirun -n 1 --host ${node_arr[1]} ./client_call ${server_addr}
+mpirun -n 1 --host ${node_arr[1]} ./client_nonblock_call ${server_addr}
 
 echo "Done!"
 echo "--------------------------------------"

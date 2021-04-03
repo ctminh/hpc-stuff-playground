@@ -21,3 +21,7 @@ set | grep ^fields=\\\|^IN=
 echo "fields[0] = ${fields[0]}"
 echo "fields[1] = ${fields[1]}"
 echo "fields[2] = ${fields[2]}"
+
+## get only IP-addr
+IFS=\: read -a addr <<< ${fields[2]}
+echo "IP_addr=${addr[0]} | Port=${addr[1]}"
