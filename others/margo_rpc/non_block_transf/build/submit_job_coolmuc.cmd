@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -J bulkdat_rdma
-#SBATCH -o ./logs/bulkdat_trans_test_%J.out
-#SBATCH -e ./logs/bulkdat_trans_test_%J.err
+#SBATCH -J nonblock_transf
+#SBATCH -o ./logs/nonblock_transf_test_%J.out
+#SBATCH -e ./logs/nonblock_transf_test_%J.err
 #SBATCH -D ./
 #SBATCH --get-user-env
 #SBATCH --clusters=cm2_tiny
