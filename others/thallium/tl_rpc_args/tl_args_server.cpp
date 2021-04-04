@@ -17,7 +17,11 @@ void sum(const tl::request& req, int x, int y) {
 
 int main(int argc, char** argv) {
 
-    tl::engine myEngine("tcp://127.0.0.1:1234", THALLIUM_SERVER_MODE);
+    // Init thallium engine
+    tl::engine myEngine("tcp", THALLIUM_SERVER_MODE);
+
+    // Define an rpc function - named sum
+    myEngine.define("sum", sum);
     std::cout << "Server running at address " << myEngine.self() << std::endl;
 
     // Try to write the server addr to file
@@ -25,9 +29,6 @@ int main(int argc, char** argv) {
     ser_addr_file.open ("./f_server_addr.txt");
     ser_addr_file << myEngine.self();
     ser_addr_file.close();
-
-    // Define an rpc function - named sum
-    myEngine.define("sum", sum);
 
     return 0;
 }
