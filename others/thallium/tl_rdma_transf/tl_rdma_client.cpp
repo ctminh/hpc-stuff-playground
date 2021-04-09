@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
     clock_t start = clock();
     db_start = double(start);
     std::cout << "[CLIENT] start_time: " << db_start << std::endl;
+    std::cout << "[CLIENT] double(CLOCKS_PER_SEC) = " << double(CLOCKS_PER_SEC) << std::endl;
 
     // Finally we send an RPC to the server, passing the bulk object as an argument.
     // Get back the arrival time at server
