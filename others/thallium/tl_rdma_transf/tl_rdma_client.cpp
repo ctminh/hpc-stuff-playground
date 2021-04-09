@@ -8,7 +8,7 @@ namespace tl = thallium;
 int main(int argc, char** argv) {
     // init the tl-client mode
     tl::engine myEngine("tcp", MARGO_CLIENT_MODE);
-    tl::remote_procedure remote_do_rdma = myEngine.define("do_rdma");
+    tl::remote_procedure remote_do_rdma = myEngine.define("do_rdma").disable_response();
     tl::endpoint server_endpoint = myEngine.lookup(argv[1]);
 
     // we define a buffer with the content “Matthieu” (because it’s a string,
@@ -30,17 +30,18 @@ int main(int argc, char** argv) {
     tl::bulk myBulk = myEngine.expose(segments, tl::bulk_mode::read_only);
 
     // Record start time before sending data
-    clock_t start = clock();
     double db_start, db_end;
+    clock_t start = clock();
     db_start = double(start);
+    std::cout << "[CLIENT] start_time: " << db_start << std::endl;
 
     // Finally we send an RPC to the server, passing the bulk object as an argument.
     // Get back the arrival time at server
-    db_end = remote_do_rdma.on(server_endpoint)(myBulk);
+    remote_do_rdma.on(server_endpoint)(myBulk);
 
     // Calculate the elapsed time
-    double elapsed_time = (db_end - db_start) / double(CLOCKS_PER_SEC);
-    std::cout << "[CLIENT] Elapsed-transf-time = " << elapsed_time  << " sec" << std::endl;
+    // double elapsed_time = (db_end - db_start) / double(CLOCKS_PER_SEC);
+    // std::cout << "[CLIENT] Elapsed-transf-time = " << elapsed_time  << " sec" << std::endl;
 
     return 0;
 }

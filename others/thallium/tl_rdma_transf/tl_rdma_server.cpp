@@ -37,9 +37,10 @@ int main(int argc, char** argv) {
             // Record end time at the server side
             clock_t end = clock();
             double db_end = double(end);
-            req.respond(db_end);
+            // req.respond(db_end);
+            std::cout << "[SERVER] end_time: " << db_end << std::endl;
 
-            std::cout << "Server received bulk: ";
+            std::cout << "[SERVER] received bulk: ";
             for(auto c : v) std::cout << c;
             std::cout << std::endl;
 
