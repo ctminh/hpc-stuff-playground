@@ -21,7 +21,9 @@ int main(int argc, char** argv) {
     // address in local memory and its size. 
     segments[0].first  = (void*)(&buffer[0]);
     segments[0].second = buffer.size()+1;
-    std::cout << "[CLIENT] data_size = " << buffer.size()+1 << std::endl;
+    std::cout << "[CLIENT] num_characters = " << buffer.size()+1
+              << ", size = " << sizeof(buffer)
+              << std::endl;
 
     // We call engine::expose to expose the buffer and get a bulk instance from it.
     // We specify tl::bulk_mode::read_only to indicate that the memory will only be
