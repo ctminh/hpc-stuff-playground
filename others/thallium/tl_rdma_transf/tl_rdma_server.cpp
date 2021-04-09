@@ -2,6 +2,8 @@
 #include <thallium.hpp>
 #include <thallium/serialization/stl/string.hpp>
 #include <fstream>
+#include <chrono>
+#include <bits/stdc++.h>
 
 namespace tl = thallium;
 
@@ -31,6 +33,12 @@ int main(int argc, char** argv) {
             // The call to the >> operator pulls data from the remote
             // bulk object b and the local bulk object. 
             b.on(ep) >> local;
+
+            // Record end time at the server side
+            clock_t end = clock();
+            double db_end = double(end);
+            req.respond(db_end);
+
             std::cout << "Server received bulk: ";
             for(auto c : v) std::cout << c;
             std::cout << std::endl;
