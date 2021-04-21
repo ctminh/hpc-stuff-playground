@@ -19,11 +19,14 @@ module load argobots-1.0-gcc-7.5.0-x75podl
 module load boost-1.75.0-gcc-7.5.0-xdru65d
 module load cereal-1.3.0-gcc-7.5.0-jwb3bux
 module load libfabric-1.11.1-gcc-7.5.0-p6j52ik
-module load mercury-2.0.0-gcc-7.5.0-z55j3mp
+# module load mercury-2.0.0-gcc-7.5.0-z55j3mp
+module load mercury-1.0.1-gcc-7.5.0-edeh2o7
 module load mochi-abt-io-0.5.1-gcc-7.5.0-w7nm5r2
-module load mochi-margo-0.9.1-gcc-7.5.0-n2p7v3n
+# module load mochi-margo-0.9.1-gcc-7.5.0-n2p7v3n
+module load mochi-margo-0.5-gcc-7.5.0-wqceknu
 # module load mochi-thallium-0.8.4-gcc-7.5.0-u5zn3qg
-module load mochi-thallium-0.7-gcc-7.5.0-nbeiina
+# module load mochi-thallium-0.7-gcc-7.5.0-nbeiina
+module load mochi-thallium-0.5.4-gcc-7.5.0-6orqcsa
 module load hcl-dev
 
 # indicate which compiler for C/C++

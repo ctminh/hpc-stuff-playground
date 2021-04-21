@@ -26,7 +26,7 @@ else ifeq ($(BACKEND), UPCXX)
 else
 	BACKEND=MPI
 	BCLFLAGS = -I$(BCLROOT)
-	CXX=mpicxx
+	CXX=mpic++
 
 	BCL_RUN=mpirun -n 4
 endif
@@ -42,10 +42,10 @@ all: $(TARGETS)
 	@time $(CXX) -o $@ $^ $(CXXFLAGS) || echo "$@ $(BACKEND) BUILD FAIL"
 
 run: matrix
-	$(BCL_RUN) ./matrix 200 50 4
+	$(BCL_RUN) ./matrix 400 50 4
 
 run_with_inspector: matrix
-	$(BCL_RUN) inspxe-cl -c mi2 --result-dir=./ins_logs -- ./matrix 200 50 4
+	$(BCL_RUN) inspxe-cl -c mi2 --result-dir=./ins_logs -- ./matrix 100 10 4
 
 clean:
 	rm -f $(TARGETS)

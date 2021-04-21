@@ -73,7 +73,7 @@ void flush() {
 // and whether to start the progress thread.
 void init(uint64_t shared_segment_size = 256, bool thread_safe = false) {
   BCL::comm = MPI_COMM_WORLD;
-  BCL::shared_segment_size = 2*1024*1024*shared_segment_size;
+  BCL::shared_segment_size = 3*1024*1024*shared_segment_size;
 
   if (!mpi_initialized()) {
     if (!thread_safe) {
