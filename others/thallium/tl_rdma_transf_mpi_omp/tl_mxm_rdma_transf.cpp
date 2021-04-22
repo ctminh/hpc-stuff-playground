@@ -72,7 +72,7 @@ void compute_mxm(double *a, double *b, double *c, int size){
     }
 }
 
-void mxm_kernel(double *A, double *B, double *C, int size, int i){
+void mxm_kernel(double *A, double *B, double *C, int size){
 
     // call the compute entry
     compute_mxm(A, B, C, size);
@@ -105,7 +105,7 @@ int main(int argc, char **argv){
     if (my_rank == 0){
         tl::engine ser_engine("tcp", THALLIUM_SERVER_MODE);
         std::cout << "Init tl-server on R0 at " << ser_engine.self() << std::endl;
-        std::string str_serveraddr = (ser_engine.self()).get_addr();
+        std::string str_serveraddr = std::to_string(ser_engine.self());
         std::cout << "Cast the addr to string-type: " << str_serveraddr << std::endl;
 
         // use mpi_send to let the client know the server address
