@@ -10,7 +10,7 @@ module load local-spack
 module use ~/local_libs/spack/share/spack/modules/linux-sles15-haswell
 
 # load dependencies
-echo "4. Loading margo..."
+echo "4. Loading margo, thallium, ..."
 module load cmake-3.19.5-gcc-7.5.0-bxubtlf
 module load argobots-1.0-gcc-7.5.0-x75podl
 module load boost-1.75.0-gcc-7.5.0-xdru65d

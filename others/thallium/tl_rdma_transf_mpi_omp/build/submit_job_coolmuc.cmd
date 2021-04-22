@@ -29,6 +29,7 @@ module load mochi-thallium-0.7-gcc-7.5.0-nbeiina
 
 ## --------------------------------------------------------------------------
 ## -------- Running both tl-server and client in a single mpi-program -------
+echo "mpirun -n ${SLURM_NTASKS} ./tl_mxm_rdma_trans"
 mpirun -n ${SLURM_NTASKS} ./tl_mxm_rdma_transf
 
 
