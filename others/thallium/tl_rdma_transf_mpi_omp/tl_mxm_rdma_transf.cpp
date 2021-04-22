@@ -91,8 +91,8 @@ int main(int argc, char **argv){
 
     // init MPI at runtime
     MPI_Init_thread(&argc, &argv, requested, &provided);
-	MPI_Comm_size(MPI_COMM_WORLD, &num_ranks);
-	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_ranks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
 
     /*
@@ -123,9 +123,9 @@ int main(int argc, char **argv){
         std::string ser_addr;
 
         // init the tl-client mode
-        tl::engine cli_engine("tcp", MARGO_CLIENT_MODE);
-        tl::remote_procedure remote_do_rdma = cli_engine.define("do_rdma").disable_response();
-        tl::endpoint ser_endpoint = cli_engine.lookup(ser_addr);
+        // tl::engine cli_engine("tcp", MARGO_CLIENT_MODE);
+        // tl::remote_procedure remote_do_rdma = cli_engine.define("do_rdma").disable_response();
+        // tl::endpoint ser_endpoint = cli_engine.lookup(ser_addr);
     }
     
 
