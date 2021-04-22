@@ -103,6 +103,10 @@ int main(int argc, char **argv){
     
     // if rank = 0, init thallium server
     if (my_rank == 0){
+        // check the server
+        std::cout << "R0 is initializing the tl-server..." << std::endl;
+
+        // init the tl-server mode
         tl::engine ser_engine("tcp", THALLIUM_SERVER_MODE);
         std::cout << "Init tl-server on R0 at " << ser_engine.self() << std::endl;
         std::string str_serveraddr = ser_engine.self();
@@ -111,7 +115,9 @@ int main(int argc, char **argv){
         // use mpi_send to let the client know the server address
 
 
-    } else {
+    } else if (my_rank == 1) {
+        // check the client
+        std::cout << "R1 is initializing the tl-client..." << std::endl;
 
         // get the ser-addr over mpi-transfer
         std::string ser_addr;
