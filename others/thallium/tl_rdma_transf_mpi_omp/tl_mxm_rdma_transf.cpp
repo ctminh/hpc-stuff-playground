@@ -105,8 +105,11 @@ int main(int argc, char **argv){
     if (my_rank == 0){
         tl::engine ser_engine("tcp", THALLIUM_SERVER_MODE);
         std::cout << "Init tl-server on R0 at " << ser_engine.self(); << std::endl;
+        std::string str_serveraddr = (ser_engine.self()).get_addr();
+        std::cout << "Cast the addr to string-type: " << str_serveraddr << std::endl;
 
-        // use mpi send to let the client know the server address
+        // use mpi_send to let the client know the server address
+
 
     } else {
 
@@ -123,7 +126,6 @@ int main(int argc, char **argv){
     /*
      * ****************************************************************************
      */
-
 
     // declare range of matrix sizes
     // int mat_size_arr[7] = {128, 256, 512, 640, 768, 896, 1024};
