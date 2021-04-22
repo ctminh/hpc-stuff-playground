@@ -9,6 +9,7 @@
 #SBATCH --qos=cm2_std
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=4
 #SBATCH --export=NONE
 #SBATCH --time=01:00:00
 
