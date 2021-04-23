@@ -11,15 +11,15 @@ module use ~/local_libs/spack/share/spack/modules/linux-sles15-haswell
 
 # load dependencies
 echo "4. Loading margo, thallium, ..."
-module load cmake-3.19.5-gcc-7.5.0-bxubtlf
-module load argobots-1.0-gcc-7.5.0-x75podl
-module load boost-1.75.0-gcc-7.5.0-xdru65d
+module load cmake-3.20.1-gcc-7.5.0-4dmivgm
+module load argobots-1.0-gcc-7.5.0-mio7f7m
+module load boost-1.76.0-gcc-7.5.0-fromrfo
 module load cereal-1.3.0-gcc-7.5.0-jwb3bux
-module load libfabric-1.11.1-gcc-7.5.0-p6j52ik
-module load mercury-2.0.0-gcc-7.5.0-z55j3mp
-module load mochi-abt-io-0.5.1-gcc-7.5.0-w7nm5r2
-module load mochi-margo-0.9.1-gcc-7.5.0-n2p7v3n
-module load mochi-thallium-0.7-gcc-7.5.0-nbeiina
+module load libfabric-1.11.1-gcc-7.5.0-yroqjwu
+module load mercury-2.0.0-gcc-7.5.0-mmuxedi
+module load mochi-abt-io-0.5.1-gcc-7.5.0-qo6dgid
+module load mochi-margo-0.9.1-gcc-7.5.0-uw3savi
+module load mochi-thallium-0.8.4-gcc-7.5.0-xdvmfa5
 
 
 # indicate which compiler for C/C++
