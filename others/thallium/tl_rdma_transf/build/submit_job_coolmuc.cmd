@@ -8,7 +8,7 @@
 #SBATCH --partition=cm2_tiny
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
-#SBATCH --export=NONE
+##SBATCH --export=NONE
 #SBATCH --time=00:02:00
 
 module load slurm_setup
@@ -25,6 +25,10 @@ module load mochi-abt-io-0.5.1-gcc-7.5.0-w7nm5r2
 module load mochi-margo-0.9.1-gcc-7.5.0-n2p7v3n
 module load mochi-thallium-0.7-gcc-7.5.0-nbeiina
 ## module load hcl-dev
+
+## -----------------------------------------
+## -------- Export for libfabric -----------
+export MPICH_GNI_NDREG_ENTRIES=1024
 
 ## -----------------------------------------
 ## -------- Checking Allocated Nodes -------
