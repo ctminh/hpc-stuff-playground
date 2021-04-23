@@ -31,15 +31,17 @@ int main(int argc, char **argv)
     int tasks = 0;
 
     //get the number of tasks to enqueue
-    int rankOffset = 0;
-    for (int i = 2; i < argc; i += 2)
-    {
-        if (atoi(argv[i + 1]) + rankOffset > BCL::rank() && rankOffset <= BCL::rank())
-        {
-            tasks = atoi(argv[i]);
-        }
-        rankOffset += atoi(argv[i + 1]);
-    }
+    // int rankOffset = 0;
+    // for (int i = 2; i < argc; i += 2)
+    // {
+    //     if (atoi(argv[i + 1]) + rankOffset > BCL::rank() && rankOffset <= BCL::rank())
+    //     {
+    //         tasks = atoi(argv[i]);
+    //     }
+    //     rankOffset += atoi(argv[i + 1]);
+    // }
+
+    tasks = 20;
 
     std::vector<BCL::CircularQueue<task>> queues;
     for (size_t rank = 0; rank < BCL::nprocs(); rank++)
