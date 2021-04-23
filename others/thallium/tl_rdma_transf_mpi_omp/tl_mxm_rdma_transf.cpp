@@ -108,28 +108,42 @@ int main(int argc, char **argv){
         char hostname[MPI_MAX_PROCESSOR_NAME];
         MPI_Get_processor_name(hostname, &name_len);
         std::string server_addr_str(hostname);
-        std::cout << "R0 is initializing the tl-server at " << server_addr_str << std::endl;
+        std::cout << "[R0] is initializing the tl-server at " << server_addr_str << std::endl;
 
         // init the tl-server mode
         tl::engine ser_engine("verbs", THALLIUM_SERVER_MODE);
-        std::cout << "Init tl-server on R0 at " << ser_engine.self() << std::endl;
+        std::cout << "[R0] inits tl-server at " << ser_engine.self() << std::endl;
         std::string str_serveraddr = ser_engine.self();
-        std::cout << "Cast the addr to string-type: " << str_serveraddr << std::endl;
+        std::cout << "[R0] casts the addr to string-type: " << str_serveraddr << std::endl;
 
         // use mpi_send to let the client know the server address
-
+        int reciever = 1; // rank 1, send_tag = 0
+        MPI_Send(str_serveraddr.c_str(), str_serveraddr.length(), MPI_CHAR, reciever, 0, MPI_COMM_WORLD);
 
     } else if (my_rank == 1) {
         // check the client
-        std::cout << "R1 is initializing the tl-client..." << std::endl;
+        std::cout << "[R1] is initializing the tl-client..." << std::endl;
+
+        // use mpi probe to check the message-size from rank 0
+        MPI_Status status;
+        int sender = 0; // rank 0, send_tag = 0
+        MPI_Probe(sender, 0, MPI_COMM_WORLD, &status);
+        int mess_size;
+        MPI_Get_count(&status, MPI_CHAR, &mess_size);
 
         // get the ser-addr over mpi-transfer
-        std::string ser_addr;
+        char *rec_buf = new char[mess_size];
+        MPI_Recv(rec_buf, mess_size, MPI_CHAR, sender, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        std::string ser_addr(rec_buf, mess_size);
+        std::cout << "[R1] got the serv-addr: " << ser_addr << std::endl;
 
         // init the tl-client mode
         // tl::engine cli_engine("tcp", MARGO_CLIENT_MODE);
         // tl::remote_procedure remote_do_rdma = cli_engine.define("do_rdma").disable_response();
         // tl::endpoint ser_endpoint = cli_engine.lookup(ser_addr);
+
+        // free the memory allocated by new
+        delete[] rec_buf; // because having [size] after new
     }
     
 
