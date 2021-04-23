@@ -19,7 +19,7 @@ module load libfabric-1.11.1-gcc-7.5.0-yroqjwu
 module load mercury-2.0.0-gcc-7.5.0-mmuxedi
 module load mochi-abt-io-0.5.1-gcc-7.5.0-qo6dgid
 module load mochi-margo-0.9.1-gcc-7.5.0-uw3savi
-module load mochi-thallium-0.8.4-gcc-7.5.0-xdvmfa5
+module load mochi-thallium-0.7-gcc-7.5.0-b6d73xq
 
 
 # indicate which compiler for C/C++
