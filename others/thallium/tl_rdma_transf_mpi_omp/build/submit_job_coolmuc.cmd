@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J tl_rdma_transf_mpi_omp
+#SBATCH -J tl_mxm_transf_mpi_omp
 #SBATCH -o ./logs/tl_rdmampiomp_test_%J.out
 #SBATCH -e ./logs/tl_rdmampiomp_test_%J.err
 #SBATCH -D ./

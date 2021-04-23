@@ -5,9 +5,25 @@
 #include <chrono>
 #include <bits/stdc++.h>
 
+// test including mpi/omp
+#include <omp.h>
+#include <mpi.h>
+
 namespace tl = thallium;
 
 int main(int argc, char** argv) {
+
+    // Variables for tracking mpi-processes
+    int my_rank;
+    int num_ranks;
+    int provided;   // level of provided thread support
+    int requested = MPI_THREAD_MULTIPLE;    // level of desired thread support
+
+    // Init MPI at runtime
+    MPI_Init_thread(&argc, &argv, requested, &provided);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_ranks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
     // Init thallium engine
     tl::engine myEngine("tcp", THALLIUM_SERVER_MODE);
 

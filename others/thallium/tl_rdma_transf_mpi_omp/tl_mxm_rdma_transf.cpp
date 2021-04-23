@@ -111,7 +111,7 @@ int main(int argc, char **argv){
         std::cout << "R0 is initializing the tl-server at " << server_addr_str << std::endl;
 
         // init the tl-server mode
-        tl::engine ser_engine("tcp://"+server_addr_str+":1234", THALLIUM_SERVER_MODE);
+        tl::engine ser_engine("tcp", THALLIUM_SERVER_MODE);
         std::cout << "Init tl-server on R0 at " << ser_engine.self() << std::endl;
         std::string str_serveraddr = ser_engine.self();
         std::cout << "Cast the addr to string-type: " << str_serveraddr << std::endl;
