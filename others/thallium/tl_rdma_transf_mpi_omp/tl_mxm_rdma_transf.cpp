@@ -171,7 +171,7 @@ int main(int argc, char **argv){
         std::cout << "[R1] got the serv-addr: " << ser_addr << std::endl;
 
         // init the tl-client mode
-        tl::engine cli_engine("tcp", MARGO_CLIENT_MODE);
+        tl::engine cli_engine("verbs", MARGO_CLIENT_MODE);
         tl::remote_procedure remote_do_rdma = cli_engine.define("do_rdma").disable_response();
         tl::endpoint ser_endpoint = cli_engine.lookup(ser_addr);
 
