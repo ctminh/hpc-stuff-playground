@@ -41,8 +41,9 @@ int main(int argc, char **argv)
     //     rankOffset += atoi(argv[i + 1]);
     // }
 
+    int my_rank = BCL::rank();
     tasks = 20;
-    std::cout << "R"+std::to_string(BCL::rank()) << " is creating " << tasks << " tasks" << std::endl;
+    std::cout << "R"+std::to_string() << " is creating " << tasks << " tasks" << std::endl;
 
     std::vector<BCL::CircularQueue<task>> queues;
     for (size_t rank = 0; rank < BCL::nprocs(); rank++)

@@ -12,7 +12,6 @@ typedef struct cham_t_callbacks_active_s {
     cham_t_callback_thread_finalize_t               cham_t_callback_thread_finalize             = nullptr;
     cham_t_callback_task_create_t                   cham_t_callback_task_create                 = nullptr;
     cham_t_callback_task_schedule_t                 cham_t_callback_task_schedule               = nullptr;
-    cham_t_callback_task_processed_t                cham_t_callback_task_processed              = nullptr;
     cham_t_callback_encode_task_tool_data_t         cham_t_callback_encode_task_tool_data       = nullptr;
     cham_t_callback_decode_task_tool_data_t         cham_t_callback_decode_task_tool_data       = nullptr;
     cham_t_callback_sync_region_t                   cham_t_callback_sync_region                 = nullptr;
@@ -21,7 +20,6 @@ typedef struct cham_t_callbacks_active_s {
     cham_t_callback_select_num_tasks_to_replicate_t cham_t_callback_select_num_tasks_to_replicate = nullptr;
     cham_t_callback_select_tasks_for_migration_t    cham_t_callback_select_tasks_for_migration  = nullptr;
     cham_t_callback_change_freq_for_execution_t     cham_t_callback_change_freq_for_execution   = nullptr;  // change frequency
-    cham_t_callback_task_end_t                      cham_t_callback_task_end                    = nullptr;  // get endtime
 
 } cham_t_callbacks_active_t;
 

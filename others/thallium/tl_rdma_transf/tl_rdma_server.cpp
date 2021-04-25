@@ -77,4 +77,6 @@ int main(int argc, char** argv) {
      */
 
     myEngine.define("do_rdma",f).disable_response();
+
+    return 0;
 }

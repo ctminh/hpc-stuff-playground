@@ -92,11 +92,6 @@ extern MinMaxAvgStats       _stats_bytes_recv_per_message;
 #if CHAMELEON_TOOL_SUPPORT
 extern std::atomic<double>  _time_tool_get_thread_data_sum;
 extern std::atomic<int>     _time_tool_get_thread_data_count;
-// some statistic for the tool to measure the overhead
-extern std::atomic<int>     _count_migration_callback;
-extern std::atomic<double>  _time_migration_callback;
-extern std::atomic<int>     _count_num_task_to_offload_callback;
-extern std::atomic<double>  _time_num_task_to_offload_callback;
 #endif
 
 #ifdef __cplusplus

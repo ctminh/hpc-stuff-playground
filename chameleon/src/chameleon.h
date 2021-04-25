@@ -98,6 +98,8 @@ static chameleon_map_data_entry_t chameleon_map_data_entry_create(void* arg_ptr,
     return entry;
 }
 
+typedef void (*chameleon_external_callback_t)(void* func_param);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -189,6 +191,8 @@ void chameleon_set_img_idx_offset(cham_migratable_task_t *task, int32_t img_idx,
 // ================================================================================
 cham_migratable_task_t* chameleon_create_task(void * entry_point, int num_args, chameleon_map_data_entry_t* args);
 
+void chameleon_set_callback_task_finish(cham_migratable_task_t *task, chameleon_external_callback_t func_ptr, void *func_param);
+
 // not 100% sure whether we still need fortran specific functions
 void* chameleon_create_task_fortran(void * entry_point, int num_args, void* args);
 
@@ -202,8 +206,6 @@ TYPE_TASK_ID chameleon_get_last_local_task_id_added();
 int32_t chameleon_local_task_has_finished(TYPE_TASK_ID task_id);
 
 TYPE_TASK_ID chameleon_get_task_id(cham_migratable_task_t *task);
-
-int32_t chameleon_get_arg_num(cham_migratable_task_t *task);
 
 #ifdef __cplusplus
 }

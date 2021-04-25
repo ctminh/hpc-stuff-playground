@@ -46,7 +46,7 @@ void MinMaxAvgStats::print_stats(FILE *cur_file) {
     ss.str(""); ss.clear(); ss << stat_name << "_sum (" << unit_str << ")";
     fprintf(cur_file, "Stats R#%d:\t%s\t%lf\n", chameleon_comm_rank, ss.str().c_str(), val_sum.load());
     ss.str(""); ss.clear(); ss << stat_name << "_count";
-    fprintf(cur_file, "Stats R#%d:\t%s\t%ld\n", chameleon_comm_rank, ss.str().c_str(), count.load());
+    fprintf(cur_file, "Stats R#%d:\t%s\t%ld\n", chameleon_comm_rank, ss.str().c_str(), (long)count.load());
     ss.str(""); ss.clear(); ss << stat_name << "_min (" << unit_str << ")";
     cham_stats_print_stats_w_mean(cur_file, ss.str(), val_min.load(), 1);
     ss.str(""); ss.clear(); ss << stat_name << "_max (" << unit_str << ")";
@@ -112,11 +112,6 @@ MinMaxAvgStats       _stats_throughput_recv("_throughput_recv", "MB/s, not relia
 #if CHAMELEON_TOOL_SUPPORT
 std::atomic<double>  _time_tool_get_thread_data_sum(0.0);
 std::atomic<int>     _time_tool_get_thread_data_count(0);
-// some statistic for the tool to measure the overhead
-std::atomic<int>     _count_migration_callback(0);
-std::atomic<double>  _time_migration_callback(0.0);
-std::atomic<int>     _count_num_task_to_offload_callback(0);
-std::atomic<double>  _time_num_task_to_offload_callback(0.0);
 #endif
 
 #ifdef __cplusplus
@@ -172,13 +167,6 @@ void cham_stats_reset_for_sync_cycle() {
     _stats_throughput_recv.reset();
     _stats_time_comm_send.reset();
     _stats_time_comm_recv.reset();
-
-    // if the tool is ready
-#if CHAMELEON_TOOL_SUPPORT
-// some statistic for the tool to measure the overhead
-    _count_migration_callback = 0;
-    _count_num_task_to_offload_callback = 0;
-#endif
 }
 
 void cham_stats_print_stats_w_mean(FILE *cur_file, std::string name, double sum, int count, bool cummulative) {
@@ -233,13 +221,6 @@ void cham_stats_print_stats() {
     fprintf(cur_file, "Stats R#%d:\t_num_migration_done\t%d\n", chameleon_comm_rank, _num_migration_done.load());
     fprintf(cur_file, "Stats R#%d:\t_num_load_exchanges_performed\t%d\n", chameleon_comm_rank, _num_load_exchanges_performed.load());
     fprintf(cur_file, "Stats R#%d:\t_num_slow_communication_operations\t%d\n", chameleon_comm_rank, _num_slow_communication_operations.load());
-
-#if CHAMELEON_TOOL_SUPPORT
-    fprintf(cur_file, "Stats R#%d:\t_num_migration_callback called\t%d\n", chameleon_comm_rank, _count_migration_callback.load());
-    fprintf(cur_file, "Stats R#%d:\t_time_migration_callback\t%f\n", chameleon_comm_rank, _time_migration_callback.load());
-    fprintf(cur_file, "Stats R#%d:\t_count_num_task_to_offload_callback called\t%d\n", chameleon_comm_rank, _count_num_task_to_offload_callback.load());
-    fprintf(cur_file, "Stats R#%d:\t_time_num_task_to_offload_callback\t%f\n", chameleon_comm_rank, _time_num_task_to_offload_callback.load());
-#endif
 
     cham_stats_print_stats_w_mean(cur_file, "_time_task_execution_local_sum", _time_task_execution_local_sum, _time_task_execution_local_count);
     cham_stats_print_stats_w_mean(cur_file, "_time_task_execution_stolen_sum", _time_task_execution_stolen_sum, _time_task_execution_stolen_count);

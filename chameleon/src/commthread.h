@@ -51,7 +51,9 @@ extern std::atomic<int32_t> _num_replicated_local_tasks_outstanding_compute;
 extern std::vector<int> _num_replicated_local_tasks_per_victim;
 
 extern thread_safe_task_list_t _replicated_remote_tasks;
+extern thread_safe_task_list_t _replicated_migrated_tasks;
 extern std::atomic<int32_t> _num_replicated_remote_tasks_outstanding;
+extern std::atomic<int32_t> _num_replicated_and_migrated_remote_tasks_outstanding;
 
 // list with stolen task entries that need output data transfer
 extern thread_safe_task_list_t _remote_tasks_send_back;
@@ -89,7 +91,7 @@ extern std::atomic<int> _num_ranks_not_completely_idle;
 
 // number of active migrations per target rank
 // desired: should block new migration to target as long as there are still active migrations ongoing
-extern std::vector<int> _active_migrations_per_target_rank;
+extern std::atomic<int> _active_migrations_per_target_rank[];
 
 extern std::atomic<bool> _trace_events_initialized;
 extern int event_receive_tasks;
@@ -100,6 +102,9 @@ extern int event_offload_decision;
 extern int event_send_back;
 extern int event_progress_send;
 extern int event_progress_recv;
+
+// lock used to ensure that currently only a single thread is doing communication progression
+extern std::mutex _mtx_comm_progression;
 
 class chameleon_comm_thread_session_data_t {
     public:
@@ -163,7 +168,7 @@ int32_t stop_communication_threads();
 
 int32_t put_comm_threads_to_sleep();
 
-void action_communication_progression();
+void action_communication_progression(int comm_thread);
 
 void cleanup_work_phase();
 

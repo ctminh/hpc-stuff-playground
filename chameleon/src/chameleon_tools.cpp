@@ -13,14 +13,13 @@ static cham_t_interface_fn_t cham_t_fn_lookup(const char *s);
 typedef cham_t_start_tool_result_t *(*cham_t_start_tool_t)(unsigned int);
 
 /*****************************************************************************
- * Global Variables
+ * Variables
  ****************************************************************************/
 int _ch_t_initialized = 0;
 std::mutex _mtx_ch_t_initialized;
 
 cham_t_callbacks_active_t cham_t_status;
 cham_t_start_tool_result_t *cham_t_start_tool_result = NULL;
-
 
 /*****************************************************************************
  * Functions
@@ -31,14 +30,7 @@ cham_t_start_tool_result_t * cham_t_start_tool(unsigned int cham_version) {
     // runtime library is linked before the tool. Since glibc 2.2 strong symbols
     // don't override weak symbols that have been found before unless the user
     // sets the environment variable LD_DYNAMIC_WEAK.
-    void *handle = dlopen("/home/chungmi/chameleon_on_mnm/experiment/cham_tool/tool.so", RTLD_LAZY);
-    // void *handle = dlopen("/dss/dsshome1/lxc0D/ra56kop/chameleon_tool_dev/experiment/with-itac/cham_tool/tool_coolmuc.so", RTLD_LAZY);
-    if (!handle){
-        fprintf(stderr, "%s\n", dlerror());
-        exit(EXIT_FAILURE);
-    }
-    dlerror();
-    cham_t_start_tool_t next_tool = (cham_t_start_tool_t)dlsym(handle, "cham_t_start_tool");
+    cham_t_start_tool_t next_tool = (cham_t_start_tool_t)dlsym(RTLD_NEXT, "cham_t_start_tool");
     if (next_tool) {
         ret = next_tool(cham_version);
     }
@@ -119,7 +111,6 @@ void cham_t_init() {
     DBP("cham_t_init: cham_t_status = %d\n", cham_t_status.enabled);
 
     _ch_t_initialized = 1;
-    DBP("cham_t_init: _ch_t_initialized at %p\n", &_ch_t_initialized);
     _mtx_ch_t_initialized.unlock();
 }
 
@@ -149,9 +140,6 @@ static cham_t_set_result_t cham_t_set_callback(cham_t_callback_types_t which, ch
         case cham_t_callback_task_schedule:
             cham_t_status.cham_t_callback_task_schedule = (cham_t_callback_task_schedule_t)callback;
             break;
-        case cham_t_callback_task_processed:
-            cham_t_status.cham_t_callback_task_processed = (cham_t_callback_task_processed_t)(callback);
-            break;
         case cham_t_callback_encode_task_tool_data:
             cham_t_status.cham_t_callback_encode_task_tool_data = (cham_t_callback_encode_task_tool_data_t)callback;
             break;
@@ -175,9 +163,6 @@ static cham_t_set_result_t cham_t_set_callback(cham_t_callback_types_t which, ch
             break;
         case cham_t_callback_change_freq_for_execution:
             cham_t_status.cham_t_callback_change_freq_for_execution = (cham_t_callback_change_freq_for_execution_t)callback;
-            break;
-        case cham_t_callback_task_end:
-            cham_t_status.cham_t_callback_task_end = (cham_t_callback_task_end_t)(callback);
             break;
         default:
             fprintf(stderr, "ERROR: Unable to set callback for specifier %d\n", which);
@@ -225,6 +210,31 @@ cham_t_rank_info_t * cham_t_get_rank_info(void) {
 #endif
 }
 
+cham_t_task_param_info_t cham_t_get_task_param_info(cham_migratable_task_t* task) {
+    cham_t_task_param_info_t ret;
+    ret.arg_sizes       = nullptr;
+    ret.arg_types       = nullptr;
+    ret.arg_pointers    = nullptr;
+    ret.num_args        = -1;
+
+#if CHAMELEON_TOOL_SUPPORT
+    if(task) {
+        ret.num_args            = task->arg_num;        
+        if(ret.num_args > 0) {
+            ret.arg_sizes       = &(task->arg_sizes[0]);
+            ret.arg_types       = &(task->arg_types[0]);
+            ret.arg_pointers    = &(task->arg_hst_pointers[0]);
+        }
+    }
+#endif
+    return ret;
+}
+
+cham_t_task_param_info_t cham_t_get_task_param_info_by_id(TYPE_TASK_ID task_id) {
+    cham_migratable_task_t* task = _map_overall_tasks.find(task_id);
+    return cham_t_get_task_param_info(task);
+}
+
 static cham_t_interface_fn_t cham_t_fn_lookup(const char *s) {
     if(!strcmp(s, "cham_t_set_callback"))
         return (cham_t_interface_fn_t)cham_t_set_callback;
@@ -236,6 +246,10 @@ static cham_t_interface_fn_t cham_t_fn_lookup(const char *s) {
         return (cham_t_interface_fn_t)cham_t_get_rank_data;
     else if(!strcmp(s, "cham_t_get_rank_info"))
         return (cham_t_interface_fn_t)cham_t_get_rank_info;
+    else if(!strcmp(s, "cham_t_get_task_param_info"))
+        return (cham_t_interface_fn_t)cham_t_get_task_param_info;
+    else if(!strcmp(s, "cham_t_get_task_param_info_by_id"))
+        return (cham_t_interface_fn_t)cham_t_get_task_param_info_by_id;
     else if(!strcmp(s, "cham_t_get_task_data"))
         return (cham_t_interface_fn_t)cham_t_get_task_data;
     else

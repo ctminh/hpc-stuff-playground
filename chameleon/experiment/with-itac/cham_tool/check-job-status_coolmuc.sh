@@ -1,1 +1,0 @@
-squeue --clusters=mpp3

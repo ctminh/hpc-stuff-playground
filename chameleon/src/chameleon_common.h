@@ -28,6 +28,7 @@
 #include <cmath>
 #include <list>
 #include <mutex>
+#include <deque>
 #include <vector>
 #include <atomic>
 #include <unordered_map>
@@ -37,9 +38,10 @@
 // flag which communication should be applied (load exchange & migration)
 #ifndef COMMUNICATION_MODE
 #define COMMUNICATION_MODE 0 // communication performed by communication thread (default)
-//#define COMMUNICATION_MODE 1 // communication performed by threads inside distributed taskwait
-//TODO: COMMUNICATION_MODE 2: Hybrid. Which parts should be done by comm thread which should be done by threads?
-//TODO: COMMUNICATION_MODE 3: all thread can do progress. What kind of progress? all? only progress requests?
+//#define COMMUNICATION_MODE 1 // communication performed only by threads inside distributed taskwait. Only a single thread active at a time.
+//#define COMMUNICATION_MODE 2 // communication performed only by threads inside distributed taskwait. All can do progress in parallel. Only one can do load exchange and migration decision at a time.
+//#define COMMUNICATION_MODE 3 // Hybrid mode. All can do progress. Only comm thread responsible for load exchange and migration decision. comm thread pinned.
+//#define COMMUNICATION_MODE 4 // Hybrid mode. All can do progress. Only comm thread responsible for load exchange and migration decision. comm thread not pinned.
 #endif
 
 // flag whether communication thread will be launched or not
@@ -49,10 +51,10 @@
 
 // flag wether migration in general is enabled or disabled
 #ifndef ENABLE_TASK_MIGRATION
-#define ENABLE_TASK_MIGRATION 0
+#define ENABLE_TASK_MIGRATION 1
 #endif
 
-#if COMMUNICATION_MODE == 1
+#if COMMUNICATION_MODE == 1 || COMMUNICATION_MODE == 2
 #undef ENABLE_COMM_THREAD
 #define ENABLE_COMM_THREAD 0
 #endif
@@ -79,7 +81,7 @@
 
 // determines how data (arguments) is packed and send during offloading
 #ifndef OFFLOAD_DATA_PACKING_TYPE
-// #define OFFLOAD_DATA_PACKING_TYPE 0     // 0 = pack meta data and arguments together and send it with a single message (requires copy to buffer)
+//#define OFFLOAD_DATA_PACKING_TYPE 0     // 0 = pack meta data and arguments together and send it with a single message (requires copy to buffer)
 //#define OFFLOAD_DATA_PACKING_TYPE 1     // 1 = zero copy approach, only pack meta data (num_args, arg types ...) + separat send for each mapped argument
 #define OFFLOAD_DATA_PACKING_TYPE 2     // 2 = zero copy approach, only pack meta data (num_args, arg types ...) + ONE separat send for with mapped arguments
 #endif
@@ -112,7 +114,7 @@
 #endif
 
 #ifndef CHAMELEON_TOOL_SUPPORT
-#define CHAMELEON_TOOL_SUPPORT 1
+#define CHAMELEON_TOOL_SUPPORT 0
 #endif
 
 #ifndef SHOW_WARNING_DEADLOCK
@@ -137,6 +139,12 @@
 
 #ifndef CHAMELEON_ENABLE_FINISHED_TASK_TRACKING
 #define CHAMELEON_ENABLE_FINISHED_TASK_TRACKING 0
+#endif
+
+#ifndef REPLICATION_PRIORITIZE_MIGRATED
+//#define REPLICATION_PRIORITIZE_MIGRATED 0 // migrated tasks have same priority as a-priori replicated tasks, Todo(Philipp): should be removed, 1 should be default
+#define REPLICATION_PRIORITIZE_MIGRATED 1 // migrated tasks have low priority but higher priority than a-priori replicated tasks
+//#define REPLICATION_PRIORITIZE_MIGRATED 2 // migrated tasks have high priority
 #endif
 
 #if CHAMELEON_TOOL_SUPPORT
@@ -351,6 +359,10 @@ typedef struct cham_migratable_task_t {
     std::vector<int> replication_ranks;
 
     chameleon_annotations_t* task_annotations = nullptr;
+
+    // external callback when task is finished
+    chameleon_external_callback_t cb_task_finish_func_ptr = nullptr;
+    void *cb_task_finish_func_param = nullptr;
 
 #if CHAMELEON_TOOL_SUPPORT
     cham_t_data_t task_tool_data;
@@ -687,8 +699,165 @@ class thread_safe_list_t {
     }
 
     bool find(T entry) {
+        this->m.lock();
         bool found = (std::find(this->list.begin(), this->list.end(), entry) != this->list.end());
+        this->m.unlock();
         return found;
+    }
+};
+
+template<class T>
+class thread_safe_deque_t {
+    private:
+    
+    std::deque<T> list;
+    std::mutex m;
+    std::atomic<size_t> list_size;
+
+    public:
+
+    thread_safe_deque_t() { list_size = 0; }
+
+    size_t size() {
+        return this->list_size.load();
+    }
+
+    bool empty() {
+        return this->list_size <= 0;
+    }
+
+    void push_back(T entry) {
+        this->m.lock();
+        this->list.push_back(entry);
+        this->list_size++;
+        this->m.unlock();
+    }
+
+    void push_front(T entry) {
+        this->m.lock();
+        this->list.push_front(entry);
+        this->list_size++;
+        this->m.unlock();
+    }
+
+    T pop_front() {
+        if(this->empty())
+            return NULL;
+
+        T ret_val;
+
+        this->m.lock();
+        if(!this->empty()) {
+            this->list_size--;
+            ret_val = this->list.front();
+            this->list.pop_front();
+        } else {
+            this->m.unlock();
+            return NULL;
+        }
+        this->m.unlock();
+        return ret_val;
+    }
+
+    T pop_front_b(bool *success) {
+        *success = true;
+        if(this->empty()) {
+            *success = false;
+            // if (std::is_fundamental<T>::value)
+            //     return -1;
+            // else 
+            //     return NULL;
+            return 0;
+        }
+
+        T ret_val;
+
+        this->m.lock();
+        if(!this->empty()) {
+            this->list_size--;
+            ret_val = this->list.front();
+            this->list.pop_front();
+        } else {
+            this->m.unlock();
+            *success = false;
+            // if (std::is_fundamental<T>::value)
+            //     return -1;
+            // else 
+            //     return NULL;
+            return 0;
+        }
+        this->m.unlock();
+        return ret_val;
+    }
+};
+
+template <typename K,typename V>
+class thread_safe_unordered_map {
+    private:
+    
+    std::unordered_map<K, V> map;
+    std::mutex m;
+
+    public:
+
+    thread_safe_unordered_map() { }
+
+    void insert(const std::pair<K, V> &inPair) {
+        this->m.lock();
+        this->map.insert(inPair);
+        this->m.unlock();
+    }
+
+    V& get(K key) {
+        this->m.lock();
+        V& ret_val = this->map[key];
+        this->m.unlock();
+        return ret_val;
+    }
+
+    void erase(K key) {
+        this->m.lock();
+        this->map.erase(key);
+        this->m.unlock();
+    }
+};
+
+template <typename K, typename V>
+class thread_safe_unordered_map_atomic {
+    private:
+    
+    std::unordered_map<K, std::atomic<V>> map;
+    std::mutex m;
+
+    public:
+
+    thread_safe_unordered_map_atomic() { }
+
+    void insert(K key, V val) {
+        this->m.lock();
+        this->map.insert(std::make_pair(key, val));
+        this->m.unlock();
+    }
+
+    std::atomic<V>& get(K key) {
+        this->m.lock();
+        std::atomic<V> &ret_val = this->map[key];
+        this->m.unlock();
+        return ret_val;
+    }
+
+    V decrement(K key) {
+        this->m.lock();
+        std::atomic<V> &ret_val = this->map[key];
+        V ret_v = --ret_val;
+        this->m.unlock();
+        return ret_v;
+    }
+
+    void erase(K key) {
+        this->m.lock();
+        this->map.erase(key);
+        this->m.unlock();
     }
 };
 #pragma endregion

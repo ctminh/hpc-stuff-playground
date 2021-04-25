@@ -1,8 +1,5 @@
 INCLUDE (CheckSymbolExists)
 
-set(FFI_INCLUDE_DIR "/dss/dsshome1/0A/di49mew/loc-libs/libffi-3.3/build/include")
-set(FFI_LIBRARY_DIR "/dss/dsshome1/0A/di49mew/loc-libs/libffi-3.3/build/lib64")
-
 find_path(FFI_INCLUDE_PATH ffi.h PATHS ${FFI_INCLUDE_DIR})
 if( EXISTS "${FFI_INCLUDE_PATH}/ffi.h" )
     set(FFI_HEADER ffi.h CACHE INTERNAL "")

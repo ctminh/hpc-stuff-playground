@@ -22,6 +22,10 @@
 #define DEADLOCK_WARNING_TIMEOUT 20
 #endif
 
+#ifndef MAX_ATTEMPS_FOR_STANDARD_OPENMP_TASK
+#define MAX_ATTEMPS_FOR_STANDARD_OPENMP_TASK 3
+#endif
+
 #pragma region Variables
 // ================================================================================
 // Variables
@@ -55,34 +59,77 @@ std::atomic<int> _num_threads_finished_dtw(0);
 std::mutex _mtx_comm_progression;
 
 // total tasks created per rank
-int32_t total_created_taksed_per_rank = 0;
+int32_t _total_created_tasks_per_rank = 0;
 
 #pragma endregion Variables
+
+// void char_p_f2c(const char* fstr, int len, char** cstr)
+// {
+//   const char* end;
+//   int i;
+//   /* Leading and trailing blanks are discarded. */
+//   end = fstr + len - 1;
+//   for (i = 0; (i < len) && (' ' == *fstr); ++i, ++fstr) {
+//     continue;
+//   }
+//   if (i >= len) {
+//     len = 0;
+//   } else {
+//     for (; (end > fstr) && (' ' == *end); --end) {
+//       continue;
+//     }
+//     len = end - fstr + 1;
+//   }
+//   /* Allocate space for the C string, if necessary. */
+//   if (*cstr == NULL) {
+//     if ((*cstr = (char*) malloc(len + 1)) == NULL) {
+//       return;
+//     }
+//   }
+//   /* Copy F77 string into C string and NULL terminate it. */
+//   if (len > 0) {
+//     strncpy(*cstr, fstr, len);
+//   }
+//   (*cstr)[len] = '\0';
+// }
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#pragma region Forward Declarations
 // ================================================================================
 // Forward declaration of internal functions (just called inside shared library)
 // ================================================================================
-#pragma region Forward Declarations
 int32_t lookup_hst_pointers(cham_migratable_task_t *task);
 int32_t execute_target_task(cham_migratable_task_t *task);
 int32_t process_local_task();
 int32_t process_remote_task();
 int32_t process_replicated_local_task();
+int32_t process_replicated_migrated_task();
 int32_t process_replicated_remote_task();
 #pragma endregion Forward Declarations
 
-// ================================================================================
-// Annotations / Replication
-// ================================================================================
 #pragma region Annotations / Replication
 chameleon_annotations_t* chameleon_create_annotation_container() {
     chameleon_annotations_t* container = new chameleon_annotations_t();
     return container;
 }
+
+// void* chameleon_create_annotation_container_fortran() {
+//     chameleon_annotations_t* container = new chameleon_annotations_t();
+//     return (void*)container;
+// }
+
+// int chameleon_set_annotation_int_fortran(void* ann, int value) {
+//     return chameleon_set_annotation_int((chameleon_annotations_t*)ann, (char*)"num_cells", value);
+// }
+
+// int chameleon_get_annotation_int_fortran(void* ann) {
+//     int res;
+//     int found = chameleon_get_annotation_int((chameleon_annotations_t*) ann, (char*)"num_cells", &res);
+//     return found ? res : -1;
+// }
 
 int chameleon_set_annotation_int(chameleon_annotations_t* ann, char *key, int value) {
     cham_annotation_value_t val;
@@ -218,9 +265,6 @@ void chameleon_set_task_replication_info(cham_migratable_task_t* task, int num_r
 }
 #pragma endregion Annotations
 
-// ================================================================================
-// Init / Finalize / Helper
-// ================================================================================
 #pragma region Init / Finalize / Helper
 cham_migratable_task_t* create_migratable_task(
         void *p_tgt_entry_ptr, 
@@ -243,10 +287,6 @@ void chameleon_set_img_idx_offset(cham_migratable_task_t *task, int32_t img_idx,
 
 TYPE_TASK_ID chameleon_get_task_id(cham_migratable_task_t *task) {
     return task->task_id;
-}
-
-int32_t chameleon_get_arg_num(cham_migratable_task_t *task){
-    return task->arg_num;
 }
 
 /* 
@@ -323,7 +363,6 @@ int32_t chameleon_init() {
     __rank_data.rank_tool_info.comm_rank = chameleon_comm_rank;
     __rank_data.rank_tool_info.comm_size = chameleon_comm_size;
 #endif
-
     // need +2 for safty measure to cover both communication threads
     __thread_data = (ch_thread_data_t*) malloc((2+omp_get_max_threads())*sizeof(ch_thread_data_t));
 
@@ -334,7 +373,6 @@ int32_t chameleon_init() {
     _num_replicated_local_tasks_per_victim.resize(chameleon_comm_size);
 
     _outstanding_jobs_ranks.resize(chameleon_comm_size);
-    _active_migrations_per_target_rank.resize(chameleon_comm_size);
     _load_info_ranks.resize(chameleon_comm_size);
     for(int i = 0; i < chameleon_comm_size; i++) {
         _outstanding_jobs_ranks[i] = 0;
@@ -452,10 +490,11 @@ void chameleon_print(int print_prefix, const char *prefix, int rank, ... ) {
     va_list args;
     va_start(args, rank);
     chameleon_dbg_print_help(print_prefix, prefix, rank, args);
-    va_end(args);
+    va_end (args);
 }
 
 int32_t chameleon_determine_base_addresses(void * main_ptr) {
+    //printf("got address %p\n", main_ptr);
     Dl_info info;
     int rc;
     link_map * map = (link_map *)malloc(1000*sizeof(link_map));
@@ -467,6 +506,11 @@ int32_t chameleon_determine_base_addresses(void * main_ptr) {
     // TODO: keep it simply for now and assume that target function is in main binary
     // If it is necessary to apply different behavior each loaded library has to be covered and analyzed
 
+    // link_map * cur_entry = &map[0];
+    // while(cur_entry) {
+    //     printf("l_name = %s; l_addr=%ld; l_ld=%p\n", cur_entry->l_name, cur_entry->l_addr, (void*)cur_entry->l_ld);
+    //     cur_entry = cur_entry->l_next;
+    // }
     free(start_ptr);
     return CHAM_SUCCESS;
 }
@@ -478,10 +522,6 @@ void chameleon_set_tracing_enabled(int enabled) {
 }
 #pragma endregion Init / Finalize / Helper
 
-
-// ================================================================================
-// Distributed Taskwait + Taskield
-// ================================================================================
 #pragma region Distributed Taskwait + Taskyield
 /*
  * Taskyield will execute either a "offloadable" target task or a regular OpenMP task
@@ -493,11 +533,7 @@ void chameleon_set_tracing_enabled(int enabled) {
 int32_t chameleon_taskyield() {
     int32_t res = CHAM_FAILURE;
 
-    // ========== Prio 1: try to execute a standard OpenMP task because that might create new target tasks
-    // DBP("Trying to run OpenMP Task\n");
-    #pragma omp taskyield
-
-    // ========== Prio 2: try to execute stolen tasks to overlap computation and communication
+    // ========== Prio 1: try to execute stolen tasks to overlap computation and communication
     if(!_stolen_remote_tasks.empty()) {
         res = process_remote_task();
         // if task has been executed successfully start from beginning
@@ -505,12 +541,17 @@ int32_t chameleon_taskyield() {
             return CHAM_REMOTE_TASK_SUCCESS;
     }
     
-    // ========== Prio 3: work on local tasks
+    // ========== Prio 2: work on local tasks
     if(!_local_tasks.empty()) {
         res = process_local_task();
         if(res == CHAM_LOCAL_TASK_SUCCESS)
             return CHAM_LOCAL_TASK_SUCCESS;
     }
+
+    // ========== Prio 3: try to execute a standard OpenMP task because that might create new target or Chameleon tasks
+    // DBP("Trying to run OpenMP Task\n");
+    #pragma omp taskyield
+
     return CHAM_FAILURE;
 }
 
@@ -541,17 +582,22 @@ void dtw_startup() {
     //DBP("chameleon_distributed_taskwait - startup, resetting counters\n");
     _num_threads_involved_in_taskwait   = omp_get_num_threads();
     _session_data.num_threads_in_tw     = omp_get_num_threads();
+    
+    request_manager_send._num_threads_in_dtw    = omp_get_num_threads();
+    request_manager_receive._num_threads_in_dtw = omp_get_num_threads();
+    request_manager_cancel._num_threads_in_dtw  = omp_get_num_threads();
+
     _num_threads_idle                   = 0;
     _num_threads_finished_dtw           = 0;
 
-    #if ENABLE_COMM_THREAD || ENABLE_TASK_MIGRATION
+    #if ENABLE_COMM_THREAD //|| ENABLE_TASK_MIGRATION || CHAM_REPLICATION_MODE>0
     // indicating that this has not happend yet for the current sync cycle
     _comm_thread_load_exchange_happend  = 0;
     #else
     // need to set flags to ensure that exit condition is working with deactivated comm thread and migration
     _comm_thread_load_exchange_happend  = 1; 
     _num_ranks_not_completely_idle      = 0;
-    #endif /* ENABLE_COMM_THREAD */
+    #endif /* ENABLE_COMM_THREAD || ENABLE_TASK_MIGRATION */
 
     _flag_dtw_active = 1;
     _mtx_taskwait.unlock();
@@ -563,12 +609,14 @@ void dtw_teardown() {
     //DBP("chameleon_distributed_taskwait - attempt teardown, finished: %d, involved: %d\n", tmp_num, _num_threads_involved_in_taskwait.load());
     if(tmp_num >= _num_threads_involved_in_taskwait.load()) {
         _mtx_taskwait.lock();
+        //DBP("chameleon_distributed_taskwait - teardown, resetting counters\n");
         _comm_thread_load_exchange_happend      = 0;
         _num_threads_involved_in_taskwait       = INT_MAX;
         _session_data.num_threads_in_tw         = INT_MAX;
         _num_threads_idle                       = 0;
         _task_id_counter                        = 0;
         _num_ranks_not_completely_idle          = INT_MAX;
+        _total_created_tasks_per_rank           = 0;
 
         #if CHAM_STATS_RECORD && CHAM_STATS_PRINT && CHAM_STATS_PER_SYNC_INTERVAL
         cham_stats_print_stats();
@@ -602,6 +650,7 @@ int32_t chameleon_distributed_taskwait(int nowait) {
     std::string event_taskwait_name = "taskwait";
     if(event_taskwait == -1) 
         int ierr = VT_funcdef(event_taskwait_name.c_str(), VT_NOCLASS, &event_taskwait);
+
     VT_BEGIN_CONSTRAINED(event_taskwait);
 #endif
 
@@ -618,18 +667,18 @@ int32_t chameleon_distributed_taskwait(int nowait) {
 
     #if ENABLE_COMM_THREAD
     #if THREAD_ACTIVATION
-        chameleon_wake_up_comm_threads();   // need to wake threads up if not already done
+    // need to wake threads up if not already done
+    chameleon_wake_up_comm_threads();
     #else
-        start_communication_threads();  // start communication threads here
+    // start communication threads here
+    start_communication_threads();
     #endif /* THREAD_ACTIVATION */
     #endif /* ENABLE_COMM_THREAD */
 
     bool this_thread_idle = false;
-    int my_idle_order = -1; 
-
-    // at least try to execute this amout of normal tasks after rank runs out of offloadable tasks before assuming idle state
-    // TODO: i guess a more stable way would be to have an OMP API call to get the number of outstanding tasks (with and without dependencies)
-    int MAX_ATTEMPS_FOR_STANDARD_OPENMP_TASK = 0;
+    int my_idle_order = -1;
+    // at least try to execute this amout of normal OpenMP tasks after rank runs out of offloadable tasks before assuming idle state
+    // TODO: I guess a more stable way would be to have an OMP API call to get the number of outstanding tasks (with and without dependencies)
     int this_thread_num_attemps_standard_task = 0;
 
 #if CHAMELEON_TOOL_SUPPORT
@@ -649,7 +698,6 @@ int32_t chameleon_distributed_taskwait(int nowait) {
     // as long as there are local tasks run this loop
     int32_t res = CHAM_SUCCESS;
 
-    // main loop for chameleon taskwait
     while(true) {
         res = CHAM_SUCCESS;
 
@@ -667,28 +715,37 @@ int32_t chameleon_distributed_taskwait(int nowait) {
         }
         #endif /* SHOW_WARNING_DEADLOCK */
 
-        /* ////////// COMMUNICATION_MODE = 1 /////////////// */
         #if COMMUNICATION_MODE == 1
         if (_mtx_comm_progression.try_lock()) {
+        #endif /* COMMUNICATION_MODE */
+            //for (int rep = 0; rep < 2; rep++) {
             // need to check whether exit condition already met
-            action_communication_progression();
+            //if (!exit_condition_met(1,0))
+            #if COMMUNICATION_MODE > 0
+            action_communication_progression(0);
+            #endif /* COMMUNICATION_MODE */
+            //}
+        #if COMMUNICATION_MODE == 1
             _mtx_comm_progression.unlock();
+            
         }
         #endif /* COMMUNICATION_MODE */
 
-        /* ////////// ENABLE_TASK_MIGRATION = 1 /////////////// */
         #if ENABLE_TASK_MIGRATION
         // ========== Prio 1: try to execute stolen tasks to overlap computation and communication
         if(!_stolen_remote_tasks.empty()) {
+     
             #if SHOW_WARNING_DEADLOCK
             last_time_doing_sth_useful = omp_get_wtime();
             #endif
 
             if(this_thread_idle) {
-                my_idle_order = --_num_threads_idle;    // decrement counter again
+                // decrement counter again
+                my_idle_order = --_num_threads_idle;
                 DBP("chameleon_distributed_taskwait - _num_threads_idle decr: %d\n", my_idle_order);
                 this_thread_idle = false;
             }
+            // this_thread_num_attemps_standard_task = 0;
 
             res = process_remote_task();
 
@@ -698,19 +755,21 @@ int32_t chameleon_distributed_taskwait(int nowait) {
         }
         #endif /* ENABLE_TASK_MIGRATION */
 
-        /* ////////// !FORCE_MIGRATION /////////////// */
         #if !FORCE_MIGRATION
         // ========== Prio 2: work on local tasks
         if(!_local_tasks.empty()) {
+   
             #if SHOW_WARNING_DEADLOCK
             last_time_doing_sth_useful = omp_get_wtime();
             #endif
             
             if(this_thread_idle) {
-                my_idle_order = --_num_threads_idle;    // decrement counter again
+                // decrement counter again
+                my_idle_order = --_num_threads_idle;
                 DBP("chameleon_distributed_taskwait - _num_threads_idle decr: %d\n", my_idle_order);
                 this_thread_idle = false;
             }
+            // this_thread_num_attemps_standard_task = 0;
 
             // try to execute a local task
             res = process_local_task();
@@ -721,19 +780,21 @@ int32_t chameleon_distributed_taskwait(int nowait) {
         }
         #endif /* !FORCE_MIGRATION */
 
-        /* ////////// ENABLE_TASK_MIGRATION=1 & CHAM_REPLICATION_MODE>0 /////////////// */
-        #if ENABLE_TASK_MIGRATION && CHAM_REPLICATION_MODE>0
+        #if ENABLE_TASK_MIGRATION || CHAM_REPLICATION_MODE>0
         // ========== Prio 3: work on replicated local tasks
         if(!_replicated_local_tasks.empty()) {
+            
             #if SHOW_WARNING_DEADLOCK
             last_time_doing_sth_useful = omp_get_wtime();
             #endif
             
             if(this_thread_idle) {
-                my_idle_order = --_num_threads_idle;    // decrement counter again
+                // decrement counter again
+                my_idle_order = --_num_threads_idle;
                 DBP("chameleon_distributed_taskwait - _num_threads_idle decr: %d\n", my_idle_order);
                 this_thread_idle = false;
             }
+            // this_thread_num_attemps_standard_task = 0;
 
             // try to execute a local task
             res = process_replicated_local_task();
@@ -741,19 +802,44 @@ int32_t chameleon_distributed_taskwait(int nowait) {
             if(res != CHAM_REPLICATED_TASK_NONE)
                 continue;
         }
-        /* ////////// CHAM_REPLICATION_MODE<4 /////////////// */
+
         #if CHAM_REPLICATION_MODE<4
-        // ========== Prio 4: work on replicated remote tasks
+        // ========== Prio 5: work on replicated migrated tasks
+		if(!_replicated_migrated_tasks.empty()) {
+
+			#if SHOW_WARNING_DEADLOCK
+			last_time_doing_sth_useful = omp_get_wtime();
+			#endif
+
+			if(this_thread_idle) {
+				// decrement counter again
+				my_idle_order = --_num_threads_idle;
+				DBP("chameleon_distributed_taskwait - _num_threads_idle decr: %d\n", my_idle_order);
+				this_thread_idle = false;
+			}
+			// this_thread_num_attemps_standard_task = 0;
+
+			// try to execute a local task
+			res = process_replicated_migrated_task();
+
+			if(res != CHAM_REPLICATED_TASK_NONE)
+				continue;
+		}
+
+        // ========== Prio 6: work on replicated remote tasks
         if(!_replicated_remote_tasks.empty()) {
+
             #if SHOW_WARNING_DEADLOCK
             last_time_doing_sth_useful = omp_get_wtime();
             #endif
 
             if(this_thread_idle) {
-                my_idle_order = --_num_threads_idle;    // decrement counter again
+                // decrement counter again
+                my_idle_order = --_num_threads_idle;
                 DBP("chameleon_distributed_taskwait - _num_threads_idle decr: %d\n", my_idle_order);
                 this_thread_idle = false;
             }
+            // this_thread_num_attemps_standard_task = 0;
 
             // try to execute a local task
             res = process_replicated_remote_task();
@@ -767,12 +853,21 @@ int32_t chameleon_distributed_taskwait(int nowait) {
         // ========== Prio 4: work on a regular OpenMP task
         // make sure that we get info about outstanding tasks with dependences
         // to avoid that we miss some tasks
-        // of course only do that once for the thread :)
+        // if(this_thread_num_attemps_standard_task >= MAX_ATTEMPS_FOR_STANDARD_OPENMP_TASK)
+        // {
+            // of course only do that once for the thread :)
             if(!this_thread_idle) {
-                my_idle_order = ++_num_threads_idle;    // increment idle counter again
+                // increment idle counter again
+                my_idle_order = ++_num_threads_idle;
                 //DBP("chameleon_distributed_taskwait - _num_threads_idle incre: %d\n", my_idle_order);
                 this_thread_idle = true;
             }
+        // } else {
+        //     // increment attemps that might result in more target tasks
+        //     this_thread_num_attemps_standard_task++;
+        //     chameleon_taskyield(); // probably necessary to extract dtw core and call that in taskyield as well to ensure proper handling of variable that control exit condition
+        //     continue;
+        // }
 
         // ========== Prio 5: check whether to abort procedure
         // only abort if 
@@ -782,7 +877,6 @@ int32_t chameleon_distributed_taskwait(int nowait) {
 
         if(_num_threads_idle >= num_threads_in_tw) {
             if(exit_condition_met(1,0)) {
-                // DBP("chameleon_distributed_taskwait - break - exchange_happend: %d oustanding: %d _num_ranks_not_completely_idle: %d\n", _comm_thread_load_exchange_happend, _outstanding_jobs_sum.load(), cp_ranks_not_completely_idle);
                 break;
             }
         }
@@ -807,11 +901,13 @@ int32_t chameleon_distributed_taskwait(int nowait) {
     #endif /* CHAM_STATS_RECORD */
 
     #if ENABLE_COMM_THREAD
-        #if THREAD_ACTIVATION
-            put_comm_threads_to_sleep();    // put threads to sleep again after sync cycle
-        #else
-            stop_communication_threads();   // stop threads here - actually the last thread will do that
-        #endif
+    #if THREAD_ACTIVATION
+    // put threads to sleep again after sync cycle
+    put_comm_threads_to_sleep();
+    #else
+    // stop threads here - actually the last thread will do that
+    stop_communication_threads();
+    #endif
     #endif /* ENABLE_COMM_THREAD */
 
 #ifdef TRACE
@@ -849,7 +945,6 @@ int32_t chameleon_submit_data(void *tgt_ptr, void *hst_ptr, int64_t size) {
         _data_entries.insert(std::make_pair(tgt_ptr, new_entry));
     }
     _mtx_data_entry.unlock();
-
 #if CHAM_STATS_RECORD
     cur_time = omp_get_wtime()-cur_time;
     if(cur_time > 0) {
@@ -869,7 +964,6 @@ void chameleon_free_data(void *tgt_ptr) {
     _data_entries.erase(tgt_ptr);
     _mtx_data_entry.unlock();
     free(tgt_ptr);
-    
 #if CHAM_STATS_RECORD
     cur_time = omp_get_wtime()-cur_time;
     if(cur_time > 0) {
@@ -922,6 +1016,11 @@ void* chameleon_create_task_fortran(void * entry_point, int num_args, void* args
     return (void*)tmp_task;
 }
 
+void chameleon_set_callback_task_finish(cham_migratable_task_t *task, chameleon_external_callback_t func_ptr, void *func_param) {
+    task->cb_task_finish_func_ptr = func_ptr;
+    task->cb_task_finish_func_param = func_param;
+}
+
 int32_t chameleon_add_task(cham_migratable_task_t *task) {
     DBP("chameleon_add_task (enter) - task_entry (task_id=%ld): " DPxMOD "(idx:%d;offset:%d) with arg_num: %d\n", task->task_id, DPxPTR(task->tgt_entry_ptr), task->idx_image, (int)task->entry_image_offset, task->arg_num);
     verify_initialized();
@@ -940,8 +1039,8 @@ int32_t chameleon_add_task(cham_migratable_task_t *task) {
 
 #if CHAMELEON_TOOL_SUPPORT
     if(cham_t_status.enabled && cham_t_status.cham_t_callback_task_create) {
-        intptr_t codeptr_ra = task->tgt_entry_ptr;
-        cham_t_status.cham_t_callback_task_create(task, task->arg_sizes, codeptr_ra);
+        void *codeptr_ra = __builtin_return_address(0);
+        cham_t_status.cham_t_callback_task_create(task, &(task->task_tool_data), codeptr_ra);
     }
 #endif
     assert(task->num_outstanding_recvbacks==0);
@@ -952,8 +1051,19 @@ int32_t chameleon_add_task(cham_migratable_task_t *task) {
     _local_tasks.push_back(task);
 
     // update value total tasks created per rank
-    total_created_taksed_per_rank++;
+    _total_created_tasks_per_rank++;
 
+    // add to queue
+/*#if CHAM_REPLICATION_MODE>0
+    if(!task->is_replicated_task) 
+#endif
+      _local_tasks.push_back(task);
+#if CHAM_REPLICATION_MODE>0
+    else {
+      _replicated_local_tasks.push_back(task);
+      _replicated_tasks_to_transfer.push_back(task);
+    }
+#endif */
     // set id of last task added
     __last_task_id_added = task->task_id;
 
@@ -1038,12 +1148,40 @@ int32_t lookup_hst_pointers(cham_migratable_task_t *task) {
             }
 #endif
             if(!found) {
+                // something went wrong here
+                /*RELP("Error: lookup_hst_pointers - Cannot find mapping for arg_tgt: " DPxMOD ", type: %ld, literal: %d, from: %d\n", 
+                    DPxPTR(tmp_tgt_ptr),
+                    tmp_type,
+                    is_lit,
+                    is_from);*/
                 return CHAM_FAILURE;
             } else {
                 print_arg_info_w_tgt("lookup_hst_pointers", task, i);
             }
         }
     }
+
+    // // clean up data entries again to avoid problems
+    // _mtx_data_entry.lock();
+    // for(int i = 0; i < task->arg_num; i++) {
+    //     // get type and pointer
+    //     int64_t tmp_type    = task->arg_types[i];
+    //     void * tmp_tgt_ptr  = task->arg_tgt_pointers[i];
+    //     int is_lit          = tmp_type & CHAM_OMP_TGT_MAPTYPE_LITERAL;
+
+    //     if(!(tmp_type & CHAM_OMP_TGT_MAPTYPE_LITERAL)) {
+    //         for(auto &entry : _data_entries) {
+    //             if(entry->tgt_ptr == tmp_tgt_ptr) {
+    //                     // remove it if found
+    //                     free(entry->tgt_ptr);
+    //                     mem_allocated -= entry->size;
+    //                     _data_entries.remove(entry);
+    //                 break;
+    //             }
+    //         }   
+    //     }
+    // }
+    // _mtx_data_entry.unlock();
 
     DBP("lookup_hst_pointers (exit)\n");
     return CHAM_SUCCESS;
@@ -1055,19 +1193,12 @@ int32_t execute_target_task(cham_migratable_task_t *task) {
     // Use libffi to launch execution.
     ffi_cif cif;
 
-    // callback get start_time at local
-#if CHAMELEON_TOOL_SUPPORT
-    if(cham_t_status.enabled && cham_t_status.cham_t_callback_task_processed){
-        cham_t_status.cham_t_callback_task_processed(task);
-    }
-#endif
-
     // Add some noise here when executing the task
 #if CHAMELEON_TOOL_SUPPORT
-    if(cham_t_status.enabled && cham_t_status.cham_t_callback_change_freq_for_execution && chameleon_comm_rank != 0) {
-        int32_t noise_time = cham_t_status.cham_t_callback_change_freq_for_execution(task, _load_info_ranks[chameleon_comm_rank], total_created_taksed_per_rank);
+    if(cham_t_status.enabled && cham_t_status.cham_t_callback_change_freq_for_execution) {
+        int32_t noise_time = cham_t_status.cham_t_callback_change_freq_for_execution(task, _load_info_ranks[chameleon_comm_rank], _total_created_tasks_per_rank);
         // make the process slower by sleep
-        // DBP("execute_target_task - noise_time = %d\n", noise_time);
+        DBP("execute_target_task - noise_time = %d\n", noise_time);
         if (noise_time != 0)
             usleep(noise_time);
     }
@@ -1075,13 +1206,22 @@ int32_t execute_target_task(cham_migratable_task_t *task) {
 
     // All args are references.
     std::vector<ffi_type *> args_types(task->arg_num, &ffi_type_pointer);
+
     std::vector<void *> args(task->arg_num);
     std::vector<void *> ptrs(task->arg_num);
 
     for (int32_t i = 0; i < task->arg_num; ++i) {
+        // int64_t tmp_type        = task->arg_types[i];
+        // int64_t is_literal      = (tmp_type & CHAM_OMP_TGT_MAPTYPE_LITERAL);
+        // int64_t is_implicit     = (tmp_type & CHAM_OMP_TGT_MAPTYPE_IMPLICIT);
+        // int64_t is_to           = (tmp_type & CHAM_OMP_TGT_MAPTYPE_TO);
+        // int64_t is_from         = (tmp_type & CHAM_OMP_TGT_MAPTYPE_FROM);
+        // int64_t is_prt_obj      = (tmp_type & CHAM_OMP_TGT_MAPTYPE_PTR_AND_OBJ);
+        
         // always apply offset in case of array sections
         ptrs[i] = (void *)((intptr_t)task->arg_hst_pointers[i] + task->arg_tgt_offsets[i]);
         args[i] = &ptrs[i];
+
         print_arg_info("execute_target_task", task, i);
     }
     
@@ -1147,7 +1287,6 @@ int32_t execute_target_task(cham_migratable_task_t *task) {
         }
     }
 #endif
-
     // switch back to prior task or null
     __thread_data[gtid].current_task = prior_task;
 
@@ -1169,7 +1308,11 @@ inline int32_t process_replicated_local_task() {
     bool expected = false;
     bool desired = true;
 
-    // DBP("process_replicated_local_task - task %d was reserved for local execution\n", replicated_task->task_id);
+    //atomic CAS
+    //if(replicated_task->result_in_progress.compare_exchange_strong(expected, desired)) {
+        DBP("process_replicated_local_task - task %d was reserved for local execution\n", replicated_task->task_id);
+    //if(true) {
+        //now we can actually safely execute the replicated task (we have reserved it and a future recv back will be ignored)
 
 #ifdef TRACE
         static int event_process_replicated_local = -1;
@@ -1191,7 +1334,6 @@ inline int32_t process_replicated_local_task() {
         int32_t res = execute_target_task(replicated_task);
         if(res != CHAM_SUCCESS)
             handle_error_en(1, "execute_target_task - remote");
-
 #if CHAM_STATS_RECORD
         cur_time = omp_get_wtime()-cur_time;
         atomic_add_dbl(_time_task_execution_replicated_sum, cur_time);
@@ -1199,10 +1341,9 @@ inline int32_t process_replicated_local_task() {
 #endif
 
         if(!replicated_task->is_migrated_task) {
-            int tmp = _num_replicated_local_tasks_outstanding_compute-1;
-            _num_replicated_local_tasks_outstanding_compute = std::max(0, tmp);
+          int tmp = _num_replicated_local_tasks_outstanding_compute-1;
+          _num_replicated_local_tasks_outstanding_compute = std::max(0, tmp);
         }
-
 #if CHAM_STATS_RECORD
         _num_executed_tasks_replicated_local++;
 #endif
@@ -1213,9 +1354,15 @@ inline int32_t process_replicated_local_task() {
         #endif
         _map_overall_tasks.erase(replicated_task->task_id);
 
+//#if CHAM_REPLICATION_MODE==2
         _num_local_tasks_outstanding--;
         assert(_num_local_tasks_outstanding>=0);
         DBP("process_replicated_task - decrement local outstanding count for task %ld new count %ld\n", replicated_task->task_id, _num_local_tasks_outstanding.load());
+//#endif
+        // handle external finish callback
+        if(replicated_task->cb_task_finish_func_ptr) {
+            replicated_task->cb_task_finish_func_ptr(replicated_task->cb_task_finish_func_param);
+        }
 
 #ifdef TRACE
         VT_END_W_CONSTRAINED(event_process_replicated_local);
@@ -1223,8 +1370,13 @@ inline int32_t process_replicated_local_task() {
         //Do not free replicated task here, as the communication thread may later receive back
         //this task and needs to access the task (check flag + post receive requests to trash buffer)
         //The replicated task should be deallocated in recv back handlers
+    //}
+    //else {
+    //    return CHAM_REPLICATED_TASK_ALREADY_AVAILABLE;
+   // }
 
     return CHAM_REPLICATED_TASK_SUCCESS;
+
     DBP("process_replicated_local_task (exit)\n");
 }
 
@@ -1240,6 +1392,7 @@ inline int32_t process_replicated_remote_task() {
     if(replicated_task==nullptr)
         return CHAM_REPLICATED_TASK_NONE;
 
+
 #ifdef TRACE
         static int event_process_replicated_remote = -1;
         static const std::string event_process_replicated_name = "process_replicated_remote";
@@ -1252,10 +1405,14 @@ inline int32_t process_replicated_remote_task() {
         double cur_time = omp_get_wtime();
 #endif 
 
+//#if CHAM_REPLICATION_MODE==2
+        //cancel task on remote ranks
+//        cancel_offloaded_task(replicated_task);
+//#endif
+
         int32_t res = execute_target_task(replicated_task);
         if(res != CHAM_SUCCESS)
             handle_error_en(1, "execute_target_task - remote");
-
 #if CHAM_STATS_RECORD
         cur_time = omp_get_wtime()-cur_time;
         atomic_add_dbl(_time_task_execution_replicated_sum, cur_time);
@@ -1282,8 +1439,73 @@ inline int32_t process_replicated_remote_task() {
 #endif
 
     return CHAM_REPLICATED_TASK_SUCCESS;
+  
     DBP("process_replicated_remote_task (exit)\n");
 }
+
+inline int32_t process_replicated_migrated_task() {
+    DBP("process_replicated_remote_task (enter)\n");
+    cham_migratable_task_t *replicated_task = nullptr;
+
+    if(_replicated_migrated_tasks.empty())
+        return CHAM_REPLICATED_TASK_NONE;
+
+    replicated_task = _replicated_migrated_tasks.pop_front();
+
+    if(replicated_task==nullptr)
+        return CHAM_REPLICATED_TASK_NONE;
+
+
+#ifdef TRACE
+        static int event_process_replicated_migrated = -1;
+        static const std::string event_process_replicated_name = "process_replicated_migrated";
+        if( event_process_replicated_migrated == -1)
+            int ierr = VT_funcdef(event_process_replicated_name.c_str(), VT_NOCLASS, &event_process_replicated_migrated);
+        VT_BEGIN_CONSTRAINED(event_process_replicated_migrated);
+#endif
+
+#if CHAM_STATS_RECORD
+        double cur_time = omp_get_wtime();
+#endif
+
+//#if CHAM_REPLICATION_MODE==2
+        //cancel task on remote ranks
+//        cancel_offloaded_task(replicated_task);
+//#endif
+
+        int32_t res = execute_target_task(replicated_task);
+        if(res != CHAM_SUCCESS)
+            handle_error_en(1, "execute_target_task - remote");
+#if CHAM_STATS_RECORD
+        cur_time = omp_get_wtime()-cur_time;
+        atomic_add_dbl(_time_task_execution_replicated_sum, cur_time);
+        _time_task_execution_replicated_count++;
+#endif
+
+#if CHAM_STATS_RECORD
+        _num_executed_tasks_replicated_remote++;
+#endif
+
+        //_map_tag_to_remote_task.erase(replicated_task->task_id);
+        _map_overall_tasks.erase(replicated_task->task_id);
+
+        if(replicated_task->HasAtLeastOneOutput()) {
+            // just schedule it for sending back results if there is at least 1 output
+            _remote_tasks_send_back.push_back(replicated_task);
+        }
+        else {
+            _num_remote_tasks_outstanding--;
+            DBP("process_replicated_task - decrement remote outstanding count for task %ld\n", replicated_task->task_id);
+        }
+#ifdef TRACE
+        VT_END_W_CONSTRAINED(event_process_replicated_migrated);
+#endif
+
+    return CHAM_REPLICATED_TASK_SUCCESS;
+
+    DBP("process_replicated_migrated_task (exit)\n");
+}
+
 
 inline int32_t process_remote_task() {
     DBP("process_remote_task (enter)\n");
@@ -1298,8 +1520,9 @@ inline int32_t process_remote_task() {
     if(!task)
         return CHAM_REMOTE_TASK_NONE;
 
-    int is_migrated= task->is_migrated_task;
+    DBP("process_remote_task - task_id: %ld\n", task->task_id);
 
+    int is_migrated= task->is_migrated_task;
 #ifdef TRACE
     static int event_process_remote = -1;
     static const std::string event_process_remote_name = "process_remote";
@@ -1348,7 +1571,7 @@ inline int32_t process_remote_task() {
         // we can now decrement outstanding counter because there is nothing to send back
         _num_remote_tasks_outstanding--;
         DBP("process_remote_task - decrement stolen outstanding count for task %ld\n", task->task_id);
-
+        // TODO: how to handle external finish callback? maybe handshake with owner?
         free_migratable_task(task, true);
     }
 
@@ -1358,7 +1581,6 @@ inline int32_t process_remote_task() {
     else
     	_num_executed_tasks_replicated_remote++;
 #endif
-
 #ifdef TRACE
     if(is_migrated) {
         VT_END_W_CONSTRAINED(event_process_replicated_remote_hp);
@@ -1383,12 +1605,10 @@ inline int32_t process_local_task() {
 #endif
 
     // execute region now
-    DBP("process_local_task - local task execution\n");
-
+    DBP("process_local_task - task_id: %ld\n", task->task_id);
 #if CHAM_STATS_RECORD
     double cur_time = omp_get_wtime();
 #endif
-
 #ifdef TRACE
     VT_BEGIN_CONSTRAINED(event_process_local);
 #endif
@@ -1398,20 +1618,11 @@ inline int32_t process_local_task() {
 #ifdef TRACE
     VT_END_W_CONSTRAINED(event_process_local);
 #endif
-
 #if CHAM_STATS_RECORD
     cur_time = omp_get_wtime()-cur_time;
     atomic_add_dbl(_time_task_execution_local_sum, cur_time);
     _time_task_execution_local_count++;
 #endif
-
-    // callback get end_time of each task
-#if CHAMELEON_TOOL_SUPPORT
-    if(cham_t_status.enabled && cham_t_status.cham_t_callback_task_end) {
-        cham_t_status.cham_t_callback_task_end(task);
-    }
-#endif
-
     // mark locally created task finished
     #if CHAMELEON_ENABLE_FINISHED_TASK_TRACKING
     _unfinished_locally_created_tasks.remove(task->task_id);
@@ -1422,6 +1633,11 @@ inline int32_t process_local_task() {
     _num_local_tasks_outstanding--;
     assert(_num_local_tasks_outstanding>=0);
     DBP("process_local_task - decrement local outstanding count for task %ld new %d\n", task->task_id, _num_local_tasks_outstanding.load());
+
+    // handle external finish callback
+    if(task->cb_task_finish_func_ptr) {
+        task->cb_task_finish_func_ptr(task->cb_task_finish_func_param);
+    }
 
 #if CHAM_STATS_RECORD
     _num_executed_tasks_local++;
