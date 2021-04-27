@@ -34,12 +34,6 @@ int main(int argc, char** argv) {
             // bulk object b and the local bulk object. 
             b.on(ep) >> local;
 
-            // Record end time at the server side
-            clock_t end = clock();
-            double db_end = double(end);
-            // req.respond(db_end);
-            std::cout << "[SERVER] end_time: " << db_end << std::endl;
-
             std::cout << "[SERVER] received bulk: ";
             for(auto c : v) std::cout << c;
             std::cout << std::endl;
