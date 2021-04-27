@@ -28,7 +28,7 @@ module load mochi-thallium-0.7-gcc-7.5.0-nbeiina
 
 ## -----------------------------------------
 ## -------- Export for libfabric -----------
-export MPICH_GNI_NDREG_ENTRIES=1024
+## export MPICH_GNI_NDREG_ENTRIES=1024
 
 ## -----------------------------------------
 ## -------- Checking Allocated Nodes -------
