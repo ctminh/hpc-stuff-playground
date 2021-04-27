@@ -25,9 +25,13 @@ int main(int argc, char** argv) {
             // create a buffer of size 6. We initialize segments
             // and expose the buffer to get a bulk object from it.
             std::vector<char> v(6);
+            // create a point object to receive data
+            point P();
             std::vector<std::pair<void*, std::size_t>> segments(1);
-            segments[0].first  = (void*)(&v[0]);
-            segments[0].second = v.size();
+            // segments[0].first  = (void*)(&v[0]);
+            // segments[0].second = v.size();
+            segments[0].first = (void*)(&P);
+            segments[1].second = point::size();
             tl::bulk local = myEngine.expose(segments, tl::bulk_mode::write_only);
 
             // The call to the >> operator pulls data from the remote
@@ -35,8 +39,9 @@ int main(int argc, char** argv) {
             b.on(ep) >> local;
 
             std::cout << "[SERVER] received bulk: ";
-            for(auto c : v) std::cout << c;
-            std::cout << std::endl;
+            // for(auto c : v) std::cout << c;
+            // std::cout << std::endl;
+
 
             // Since the local bulk is smaller (6 bytes) than the remote
             // one (9 bytes), only 6 bytes are pulled. Hence the loop will

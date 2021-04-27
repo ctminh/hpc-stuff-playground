@@ -1,4 +1,3 @@
-#include <iostream>
 #include <thallium.hpp>
 #include <chrono>
 #include <bits/stdc++.h>
@@ -33,7 +32,7 @@ int main(int argc, char** argv) {
 
     // Try the custom class - Point
     segments[0].first = (void*)(&P1);
-    segments[1].second = P1.size();
+    segments[1].second = point::size();
 
     // We call engine::expose to expose the buffer and get a bulk instance from it.
     // We specify tl::bulk_mode::read_only to indicate that the memory will only be
