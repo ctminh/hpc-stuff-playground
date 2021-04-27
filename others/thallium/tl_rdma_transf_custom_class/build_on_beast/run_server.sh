@@ -1,4 +1,6 @@
 echo "1. Loading dependencies (on BEAST)..."
+module load intel/19.1.1 # just to use mpirun
+
 module use ~/.module
 module use ~/loc-libs/spack/share/spack/modules/linux-sles15-zen2
 

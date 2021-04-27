@@ -1,4 +1,6 @@
 echo "1. Loading dependencies (on BEAST)..."
+module load intel/19.1.1 # just to use mpirun
+
 module use ~/.module
 module use ~/loc-libs/spack/share/spack/modules/linux-sles15-zen2
 
@@ -42,3 +44,8 @@ echo "-----[BASH-SCRIPT] Server_IP_Addr=${sepa_addr[0]} | Port=${sepa_addr[1]}"
 echo "2. Init the client on ROME2..."
 echo "   mpirun -n 1 ./tl_rdma_customclass_client ${server_addr}"
 mpirun -n 1 ./tl_rdma_customclass_client ${server_addr}
+
+
+## -----------------------------------------
+## -------- Remove tmp-stuff ---------------
+rm ./f_server_addr.txt

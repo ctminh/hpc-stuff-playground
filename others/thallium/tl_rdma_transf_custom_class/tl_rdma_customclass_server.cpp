@@ -9,7 +9,7 @@ namespace tl = thallium;
 int main(int argc, char** argv) {
 
     // Init thallium engine
-    tl::engine myEngine("tcp", THALLIUM_SERVER_MODE);
+    tl::engine myEngine("verbs", THALLIUM_SERVER_MODE);
 
     // Try to write the server addr to file
     std::ofstream ser_addr_file;
@@ -49,6 +49,9 @@ int main(int argc, char** argv) {
             // print Matthi. It is worth noting that an endpoint is needed
             // for Thallium to know in which process to find the memory
             // we are pulling. That’s what bulk::on(endpoint) does.
+
+            // Finalize the engine after the 1st rpc-call from the client
+            myEngine.finalize();
         };
     
     /** Understanding local and remote bulk objects

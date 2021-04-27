@@ -8,7 +8,7 @@ namespace tl = thallium;
 
 int main(int argc, char** argv) {
     // init the tl-client mode
-    tl::engine myEngine("tcp", MARGO_CLIENT_MODE);
+    tl::engine myEngine("verbs", MARGO_CLIENT_MODE);
     tl::remote_procedure remote_do_rdma = myEngine.define("do_rdma").disable_response();
     tl::endpoint server_endpoint = myEngine.lookup(argv[1]);
 
