@@ -12,6 +12,11 @@ class point {
         point(double a=0.0, double b=0.0, double c=0.0)
             : x(a), y(b), z(c) {}
 
+        static size_t size(){
+            size_t ret = sizeof(double) * 3;
+            return ret;
+        }
+
         template<typename A>
         void serialize(A& ar) {
             ar & x;
