@@ -129,6 +129,11 @@ int main(int argc, char **argv){
             des_Ms.A = new double[mat_size * mat_size];
             des_Ms.B = new double[mat_size * mat_size];
             des_Ms.C = new double[mat_size * mat_size];
+            // initialize
+            initialize_matrix_zeros(des_Ms.A, mat_size);
+            initialize_matrix_zeros(des_Ms.B, mat_size);
+            initialize_matrix_zeros(des_Ms.C, mat_size);
+            // serialize
             std::string des_matrices_to_str << des_Ms;
             std::vector<std::pair<void*, std::size_t>> segments(1);
             segments[0].first  = (void*)(&des_matrices_to_str[0]);
@@ -194,7 +199,8 @@ int main(int argc, char **argv){
         std::cout << "[R1] CLIENT serializes the matrices-objects:" << std::endl;
         // boost::archive::text_oarchive oa_matrices{ss_matrices};
         // oa_matrices << Ms;
-        std::string conv_ss_matrices_to_str << Ms;
+        std::string conv_ss_matrices_to_str;
+        conv_ss_matrices_to_str << Ms;
         std::vector<std::pair<void*, std::size_t>> segments(1);
         segments[0].first  = (void*)(&conv_ss_matrices_to_str[0]);
         segments[0].second = conv_ss_matrices_to_str.size()+1;
