@@ -11,11 +11,6 @@ int main(int argc, char** argv) {
     tl::remote_procedure remote_do_rdma = myEngine.define("do_rdma").disable_response();
     tl::endpoint server_endpoint = myEngine.lookup(argv[1]);
 
-    // create an object of the class point in types.h
-    point P1(); // P1(0.0, 0.0, 0.0)
-    point P2(1.0, 1.0, 1.0); // P2(1.0, 1.0, 1.0)
-    point P3(2.0, 2.0, 2.0); // P3(2.0, 2.0, 2.0)
-
     // we define a buffer with the content “Matthieu” (because it’s a string,
     // there is actually a null-terminating character). We then define
     // segments as a vector of pairs of void* and std::size_t
@@ -24,15 +19,11 @@ int main(int argc, char** argv) {
 
     // Each segment (here only one) is characterized by its starting
     // address in local memory and its size. 
-    // segments[0].first  = (void*)(&buffer[0]);
-    // segments[0].second = buffer.size()+1;
-    // std::cout << "[CLIENT] num_characters = " << buffer.size()+1
-    //           << ", size = " << sizeof(buffer)
-    //           << std::endl;
-
-    // Try the custom class - Point
-    segments[0].first = (void*)(&P1);
-    segments[1].second = point::size();
+    segments[0].first  = (void*)(&buffer[0]);
+    segments[0].second = buffer.size()+1;
+    std::cout << "[CLIENT] num_characters = " << buffer.size()+1
+              << ", size = " << sizeof(buffer)
+              << std::endl;
 
     // We call engine::expose to expose the buffer and get a bulk instance from it.
     // We specify tl::bulk_mode::read_only to indicate that the memory will only be

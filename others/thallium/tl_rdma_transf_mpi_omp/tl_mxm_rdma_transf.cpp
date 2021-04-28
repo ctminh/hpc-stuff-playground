@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <random>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -20,6 +21,11 @@
 
 // for boost-serialize data
 #include <boost/serialization/string.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+
+// for the custom class
+#include "types.h"
 
 // declare some namespaces
 namespace tl = thallium;
@@ -29,16 +35,9 @@ namespace tl = thallium;
 // Global Variables
 // ================================================================================
 const int DEFAULT_NUM_TASKS = 10;
+std::stringstream ss_matrices;
+int mat_size = 100;
 
-// ================================================================================
-// Struct Definition
-// ================================================================================
-struct mat_task {
-    int size;
-    double *A;  // ptr to the allocated matrix A
-    double *B;  // ptr to the allocated matrix B
-    double *C;  // ptr to the allocated matrix C - result
-};
 
 // ================================================================================
 // Util-functions
@@ -60,7 +59,6 @@ void initialize_matrix_zeros(double *mat_ptr, int size){
 }
 
 void compute_mxm(double *a, double *b, double *c, int size){
-    
     // main loop to compute as a serial way
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
@@ -73,7 +71,6 @@ void compute_mxm(double *a, double *b, double *c, int size){
 }
 
 void mxm_kernel(double *A, double *B, double *C, int size){
-
     // call the compute entry
     compute_mxm(A, B, C, size);
 }
@@ -124,10 +121,18 @@ int main(int argc, char **argv){
 
             // create a buffer of size 6. We initialize segments
             // and expose the buffer to get a bulk object from it.
-            std::vector<char> v(6);
+            // std::vector<char> v(6);
+
+            // prepare the buffer for receiving data from the client
+            Matrices des_Ms;
+            des_Ms.size = mat_size*mat_size;
+            des_Ms.A = new double[mat_size * mat_size];
+            des_Ms.B = new double[mat_size * mat_size];
+            des_Ms.C = new double[mat_size * mat_size];
+            std::string des_matrices_to_str << des_Ms;
             std::vector<std::pair<void*, std::size_t>> segments(1);
-            segments[0].first  = (void*)(&v[0]);
-            segments[0].second = v.size();
+            segments[0].first  = (void*)(&des_matrices_to_str[0]);
+            segments[0].second = des_matrices_to_str.size();
             tl::bulk local = ser_engine.expose(segments, tl::bulk_mode::write_only);
 
             // The call to the >> operator pulls data from the remote
@@ -135,7 +140,7 @@ int main(int argc, char **argv){
             b.on(ep) >> local;
 
             std::cout << "[R0] SERVER received bulk: ";
-            for(auto c : v) std::cout << c;
+            for(auto c : des_matrices_to_str) std::cout << c;
             std::cout << std::endl;
 
             // Since the local bulk is smaller (6 bytes) than the remote
@@ -175,19 +180,38 @@ int main(int argc, char **argv){
         tl::remote_procedure remote_do_rdma = cli_engine.define("do_rdma").disable_response();
         tl::endpoint ser_endpoint = cli_engine.lookup(ser_addr);
 
+        // prepare data here for transfering
+        Matrices Ms;
+        Ms.size = mat_size*mat_size;
+        Ms.A = new double[mat_size * mat_size]; // Ms.A is a pointer which is pointing to
+        Ms.B = new double[mat_size * mat_size]; // this new allocated mem
+        Ms.C = new double[mat_size * mat_size]; // and similar to Ms.B, Ms.C, ...
+        // initialize values for the matrices
+        initialize_matrix_rando(Ms.A, mat_size);
+        initialize_matrix_rando(Ms.B, mat_size);
+        initialize_matrix_zeros(Ms.C, mat_size);
+        // serialize the matrices
+        std::cout << "[R1] CLIENT serializes the matrices-objects:" << std::endl;
+        // boost::archive::text_oarchive oa_matrices{ss_matrices};
+        // oa_matrices << Ms;
+        std::string conv_ss_matrices_to_str << Ms;
+        std::vector<std::pair<void*, std::size_t>> segments(1);
+        segments[0].first  = (void*)(&conv_ss_matrices_to_str[0]);
+        segments[0].second = conv_ss_matrices_to_str.size()+1;
+        std::cout << "[R1] CLIENT size = " << conv_ss_matrices_to_str.size()+1 << std::endl;
+
         // we define a buffer with the content “Matthieu” (because it’s a string,
         // there is actually a null-terminating character). We then define
         // segments as a vector of pairs of void* and std::size_t
-        std::string buffer = "Matthieu";
-        std::vector<std::pair<void*, std::size_t>> segments(1);
-
+        // std::string buffer = "Matthieu";
+        // std::vector<std::pair<void*, std::size_t>> segments(1);
         // Each segment (here only one) is characterized by its starting
         // address in local memory and its size. 
-        segments[0].first  = (void*)(&buffer[0]);
-        segments[0].second = buffer.size()+1;
-        std::cout << "[R1] CLIENT num_characters = " << buffer.size()+1
-                << ", size = " << sizeof(buffer)
-                << std::endl;
+        // segments[0].first  = (void*)(&buffer[0]);
+        // segments[0].second = buffer.size()+1;
+        // std::cout << "[R1] CLIENT num_characters = " << buffer.size()+1
+        //         << ", size = " << sizeof(buffer)
+        //         << std::endl;
 
         // We call engine::expose to expose the buffer and get a bulk instance from it.
         // We specify tl::bulk_mode::read_only to indicate that the memory will only be

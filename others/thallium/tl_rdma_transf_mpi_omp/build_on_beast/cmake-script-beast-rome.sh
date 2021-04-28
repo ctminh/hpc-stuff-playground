@@ -4,7 +4,7 @@ rm -r CMakeCache.txt ./CMakeFiles cmake_install.cmake  Makefile
 echo "2. Exporting Intel-MPI on BEAST system, etc, ..."
 
 
-echo "3. Loading local-spack (on CoolMUC)..."
+echo "3. Loading local-spack (on BEAST)..."
 module use ~/.module/
 module load local-spack
 module use ~/loc-libs/spack/share/spack/modules/linux-sles15-zen2
