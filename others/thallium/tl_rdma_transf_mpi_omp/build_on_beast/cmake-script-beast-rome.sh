@@ -2,7 +2,8 @@ echo "1. Removing old-cmake-files..."
 rm -r CMakeCache.txt ./CMakeFiles cmake_install.cmake  Makefile
 
 echo "2. Exporting Intel-MPI on BEAST system, etc, ..."
-module load intel/19.1.1
+# module load intel/19.1.1
+module load openmpi/4.0.4-gcc10
 
 # load dependencies
 echo "3. Loading local-spack (on BEAST)..."
@@ -24,8 +25,8 @@ module load mochi-thallium-0.7-gcc-10.2.1-hhkhxqk
 
 # indicate which compiler for C/C++
 echo "5. Setting which C/C++ compiler is used..."
-export C_COMPILER=icc # mpiicc
-export CXX_COMPILER=icpc # mpiicpc
+export C_COMPILER=mpicc # mpiicc
+export CXX_COMPILER=mpicxx # mpiicpc
 
 # run cmake
 echo "6. Running cmake to config..."
