@@ -2,25 +2,24 @@ echo "1. Removing old-cmake-files..."
 rm -r CMakeCache.txt ./CMakeFiles cmake_install.cmake  Makefile
 
 echo "2. Exporting Intel-MPI on BEAST system, etc, ..."
+module load intel/19.1.1
 
-
+# load dependencies
 echo "3. Loading local-spack (on BEAST)..."
-module use ~/.module/
-module load local-spack
+module use ~/.module
 module use ~/loc-libs/spack/share/spack/modules/linux-sles15-zen2
 
 # load dependencies
-echo "4. Loading margo, thallium, ..."
+echo "4. Loading margo (on BEAST)..."
 module load cmake-3.20.1-gcc-10.2.1-7cjd5mz
-module load mpich-3.3.2-gcc-10.2.1-savlhag
 module load argobots-1.1-gcc-10.2.1-s3e2vao
 module load boost-1.76.0-gcc-10.2.1-h37ct6b
 module load cereal-1.3.0-gcc-10.2.1-vd6dtp3
-module load libfabric-1.11.1-gcc-10.2.1-v445hrw # installed with protocols=tcp, verbs, ofi, ...
-module load mercury-2.0.1rc3-gcc-10.2.1-cry2j3j
-module load mochi-abt-io-0.5.1-gcc-7.5.0-w7nm5r2
-module load mochi-margo-0.9.4-gcc-10.2.1-zumnhzm
-module load mochi-thallium-0.8.4-gcc-10.2.1-wcuyshn
+module load libfabric-1.11.1-gcc-10.2.1-7rkzvhv # this one is built with an updated name of rdma-core on beast
+module load mercury-2.0.1rc3-gcc-10.2.1-565ptkn # this one is built with an updated name of rdma-core on beast
+module load mochi-abt-io-0.5.1-gcc-10.2.1-rghdmos
+module load mochi-margo-0.9.4-gcc-10.2.1-7sqzydv
+module load mochi-thallium-0.7-gcc-10.2.1-hhkhxqk
 
 
 # indicate which compiler for C/C++
