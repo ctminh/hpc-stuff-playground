@@ -24,8 +24,8 @@ module load mochi-thallium-0.7-gcc-10.2.1-hhkhxqk
 
 # indicate which compiler for C/C++
 echo "5. Setting which C/C++ compiler is used..."
-export C_COMPILER=mpiicc
-export CXX_COMPILER=mpiicpc
+export C_COMPILER=icc # mpiicc
+export CXX_COMPILER=icpc # mpiicpc
 
 # run cmake
 echo "6. Running cmake to config..."
