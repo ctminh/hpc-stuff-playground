@@ -9,7 +9,7 @@ find_package(MPI REQUIRED COMPONENTS CXX)
 message(STATUS "found mpi.h at ${MPI_CXX_INCLUDE_DIRS}")
 
 # set mpicxx flags
-set(MPI_FLAGS -lmpicxx -lpthread -lrt)
+set(MPI_FLAGS -lpthread -lrt) # -lmpicxx
 
 # compile the code
 add_executable(tl_mxm_rdma_transf tl_mxm_rdma_transf.cpp)
