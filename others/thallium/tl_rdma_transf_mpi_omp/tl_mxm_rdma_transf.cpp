@@ -136,7 +136,7 @@ int main(int argc, char **argv){
             // serialize
             boost::archive::text_oarchive r0_matrices{ss_matrices};
             r0_matrices << des_Ms;
-            std::string des_matrices_to_str << ss_matrices.str();
+            std::string des_matrices_to_str = ss_matrices.str();
             const int des_Ms_size = des_matrices_to_str.size();
             std::vector<char> v(des_Ms_size);
             std::vector<std::pair<void*, std::size_t>> segments(1);
