@@ -13,4 +13,4 @@ set(MPI_FLAGS -lpthread -lrt) # -lmpicxx
 
 # compile the code
 add_executable(tl_string_rdma_transf tl_string_rdma_transf.cpp)
-target_link_libraries(tl_mxm_rdma_transf -lboost_serialization -lthallium -lmargo -lmercury -labt ${MPI_FLAGS})
+target_link_libraries(tl_string_rdma_transf -lboost_serialization -lthallium -lmargo -lmercury -labt ${MPI_FLAGS})
