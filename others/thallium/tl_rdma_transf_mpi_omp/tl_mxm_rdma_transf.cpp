@@ -135,9 +135,11 @@ int main(int argc, char **argv){
             initialize_matrix_zeros(des_Ms.C, mat_size);
             // serialize
             std::string des_matrices_to_str << des_Ms;
+            const int des_Ms_size = des_matrices_to_str.size();
+            std::vector<char> v(des_Ms_size);
             std::vector<std::pair<void*, std::size_t>> segments(1);
-            segments[0].first  = (void*)(&des_matrices_to_str[0]);
-            segments[0].second = des_matrices_to_str.size();
+            segments[0].first  = (void*)(&v[0]);
+            segments[0].second = v.size();
             tl::bulk local = ser_engine.expose(segments, tl::bulk_mode::write_only);
 
             // The call to the >> operator pulls data from the remote
@@ -145,8 +147,14 @@ int main(int argc, char **argv){
             b.on(ep) >> local;
 
             std::cout << "[R0] SERVER received bulk: ";
-            for(auto c : des_matrices_to_str) std::cout << c;
+            for(auto c : v) std::cout << c;
             std::cout << std::endl;
+
+
+            // free the memory we just allocated
+            delete[] des_Ms.A;
+            delete[] des_Ms.B;
+            delete[] des_Ms.C;
 
             // Since the local bulk is smaller (6 bytes) than the remote
             // one (9 bytes), only 6 bytes are pulled. Hence the loop will
@@ -197,10 +205,9 @@ int main(int argc, char **argv){
         initialize_matrix_zeros(Ms.C, mat_size);
         // serialize the matrices
         std::cout << "[R1] CLIENT serializes the matrices-objects:" << std::endl;
-        // boost::archive::text_oarchive oa_matrices{ss_matrices};
-        // oa_matrices << Ms;
-        std::string conv_ss_matrices_to_str;
-        conv_ss_matrices_to_str << Ms;
+        boost::archive::text_oarchive oa_matrices{ss_matrices};
+        oa_matrices << Ms;
+        std::string conv_ss_matrices_to_str = ss_matrices.str();
         std::vector<std::pair<void*, std::size_t>> segments(1);
         segments[0].first  = (void*)(&conv_ss_matrices_to_str[0]);
         segments[0].second = conv_ss_matrices_to_str.size()+1;
@@ -231,6 +238,9 @@ int main(int argc, char **argv){
 
         // free the memory allocated by new
         delete[] rec_buf; // because having [size] after new
+        delete[] Ms.A;
+        delete[] Ms.B;
+        delete[] Ms.C;
     }
     
     /*
