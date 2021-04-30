@@ -7,7 +7,7 @@
 #SBATCH --clusters=cm2
 #SBATCH --partition=cm2_std
 #SBATCH --qos=cm2_std
-#SBATCH --nodes=2
+#SBATCH --nodes=4
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=2
 #SBATCH --export=NONE

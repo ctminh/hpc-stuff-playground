@@ -60,7 +60,7 @@ int main(int argc, char **argv){
         std::cout << "[R0] is initializing the tl-server at " << server_addr_str << std::endl;
 
         // init the tl-server mode
-        tl::engine ser_engine("mpi+static", THALLIUM_SERVER_MODE);
+        tl::engine ser_engine("verbs", THALLIUM_SERVER_MODE);
         std::cout << "[R0] inits tl-server at " << ser_engine.self() << std::endl;
         std::string str_serveraddr = ser_engine.self();
         std::cout << "[R0] casts the addr to string-type: " << str_serveraddr << std::endl;
@@ -123,7 +123,7 @@ int main(int argc, char **argv){
         std::cout << "[R1] got the serv-addr: " << ser_addr << std::endl;
 
         // init the tl-client mode
-        tl::engine cli_engine("mpi+static", MARGO_CLIENT_MODE);
+        tl::engine cli_engine("verbs", MARGO_CLIENT_MODE);
         tl::remote_procedure remote_do_rdma = cli_engine.define("do_rdma").disable_response();
         tl::endpoint ser_endpoint = cli_engine.lookup(ser_addr);
 
@@ -153,6 +153,11 @@ int main(int argc, char **argv){
 
         // free the memory allocated by new
         delete[] rec_buf; // because having [size] after new
+
+    } else {
+
+        // do nothing, just wait
+        std::cout << "R" << my_rank << ": do nothing, just wait..." << std::endl;
     }
     /*
      * ****************************************************************************
