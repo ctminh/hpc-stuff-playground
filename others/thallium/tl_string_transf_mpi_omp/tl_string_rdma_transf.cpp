@@ -94,7 +94,7 @@ int main(int argc, char **argv){
             // we are pulling. That’s what bulk::on(endpoint) does.
 
             // finalize the server after the first transfer
-            ser_engine.finalize();
+            // ser_engine.finalize();
         };
 
         // define the procedure
