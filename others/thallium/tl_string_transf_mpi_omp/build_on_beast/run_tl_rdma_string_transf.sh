@@ -6,7 +6,8 @@ module use ~/.module
 module use ~/loc-libs/spack/share/spack/modules/linux-sles15-zen2
 
 module load hwloc-2.4.1-gcc-10.2.1-7svevzl
-module load mpich-3.3.2-gcc-10.2.1-xoqrrzh
+# module load mpich-3.3.2-gcc-10.2.1-xoqrrzh  # linking fortran but got error on beast
+module load mpich-3.3.2-gcc-10.2.1-fyao74s  # without linking fortran
 module load cmake-3.20.1-gcc-10.2.1-7cjd5mz
 module load argobots-1.1-gcc-10.2.1-s3e2vao
 module load boost-1.76.0-gcc-10.2.1-h37ct6b
