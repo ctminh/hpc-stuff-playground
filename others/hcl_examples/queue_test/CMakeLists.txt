@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gdwarf-2 -g3")
 
 option(HCL_ENABLE_RPCLIB "allow hcl to use RPCLIB" OFF)
-option(HCL_ENABLE_THALLIUM_ROCE "allow hcl to use THALLIUM_ROCE" OFF)
+option(HCL_ENABLE_THALLIUM_ROCE "allow hcl to use THALLIUM_ROCE" ON)
 
 if(HCL_ENABLE_RPCLIB)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHCL_ENABLE_RPCLIB")
@@ -33,20 +33,13 @@ if(HCL_ENABLE_THALLIUM_ROCE OR HCL_ENABLE_THALLIUM_TCP)
     set(RPC_LIB_FLAGS -lthallium -lmercury -lmercury_util -lmargo -labt ${RPC_LIB_FLAGS})
 endif()
 
-# find HCL
-# find_library(HCL_LIB NAMES hcl PATHS /dss/dsshome1/0A/di49mew/hcl/install/lib64)
-# find_library(RPC_LIB NAMES rpc PATHS /dss/dsshome1/0A/di49mew/loc-libs/rpclib-master/install/lib)
+set(LIB_FLAGS ${RPC_LIB_FLAGS} -lmpicxx -lpthread -lrt -lhcl)
 
-set(LIB_FLAGS ${RPC_LIB_FLAGS} -lmpicxx -lpthread -lrt)
-
-# Compile the example
-# because libhcl.so is linked by LD_PRELOAD, so don't need to link it in target_link_libs
+# Compile the example with linking hcl
 add_executable(${example} ${example}.cpp util.h)
-set_target_properties(${example} PROPERTIES ENVIRONMENT LD_PRELOAD=/dss/dsshome1/0A/di49mew/hcl/install/lib64/libhcl.so)
 target_compile_options(${example} PRIVATE -Wall -Wextra)
 target_link_libraries(${example} "${LIB_FLAGS}") # MPI::MPI_CXX
-# target_link_libraries(${example} "${RPC_LIB}")
-# target_link_libraries(${example} ${RPC_LIB_FLAGS})
-# set_target_properties (${example} PROPERTIES FOLDER ./)
 
-# message(INFO /dss/dsshome1/0A/di49mew/hcl/install/lib64/libhcl.so)
+# Load hcl directly
+# because libhcl.so is linked by LD_PRELOAD, so don't need to link it in target_link_libs
+# set_target_properties(${example} PROPERTIES ENVIRONMENT LD_PRELOAD=/dss/dsshome1/0A/di49mew/hcl/install/lib64/libhcl.so)
