@@ -90,6 +90,7 @@ int main(int argc, char **argv){
 
             // Measure the recv-time here
             double recv_time = omp_get_wtime();
+            double mpi_recv_time = MPI_Wtime();
 
             std::cout << "[R0] SERVER received bulk: ";
             for(auto c : v) std::cout << c;
@@ -109,7 +110,7 @@ int main(int argc, char **argv){
 
             // Wait for gathering to complete before printing the values received
             MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
-            std::cout << "[R0] recv_time: " << recv_time << std::endl;
+            std::cout << "[R0] recv_time: " << recv_time << " | " << mpi_recv_time << std::endl;
             std::cout << "[R1] Elapsed-time: " << iallgather_time_buffer[1] << " - " << iallgather_time_buffer[0] << " = "
                       << (iallgather_time_buffer[1]-iallgather_time_buffer[0]) << std::endl;
         };
@@ -167,6 +168,7 @@ int main(int argc, char **argv){
         // Finally we send an RPC to the server, passing the bulk object as an argument.
         // Measure the send-time at the sender (client)
         double send_time = omp_get_wtime();
+        double mpi_send_time = MPI_Wtime();
 
         // Do the calling action
         remote_do_rdma.on(ser_endpoint)(myBulk);
@@ -177,7 +179,7 @@ int main(int argc, char **argv){
         // Wait for gathering to complete before printing the values received
         MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // sleep for 1s
-        std::cout << "[R1] send_time: " << send_time << std::endl;
+        std::cout << "[R1] send_time: " << send_time << " | " << mpi_send_time << std::endl;
         std::cout << "[R1] Elapsed-time: " << iallgather_time_buffer[1] << " - " << iallgather_time_buffer[0] << " = "
                   << (iallgather_time_buffer[1]-iallgather_time_buffer[0]) << std::endl;
 
