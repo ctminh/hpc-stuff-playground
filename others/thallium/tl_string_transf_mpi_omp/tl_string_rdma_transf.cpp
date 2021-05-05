@@ -106,6 +106,10 @@ int main(int argc, char **argv){
 
             // Gather the measured time at server-side
             MPI_Iallgather(&recv_time, 1, MPI_DOUBLE, iallgather_time_buffer, 1, MPI_DOUBLE, MPI_COMM_WORLD, &gath_request);
+
+            // Wait for gathering to complete before printing the values received
+            MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
+            printf("[R%d] Elapsed-time: %f (s)\n", my_rank, (iallgather_time_buffer[1]-iallgather_time_buffer[0]));
         };
 
         // define the procedure
@@ -115,9 +119,6 @@ int main(int argc, char **argv){
         int reciever = 1; // rank 1, send_tag = 0
         MPI_Send(str_serveraddr.c_str(), str_serveraddr.length(), MPI_CHAR, reciever, 0, MPI_COMM_WORLD);
 
-        // Wait for gathering to complete before printing the values received
-        MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
-        printf("[R%d] Elapsed-time: %f (s)\n", my_rank, (iallgather_time_buffer[1]-iallgather_time_buffer[0]));
 
     } else if (my_rank == 1) {
         // check the client
