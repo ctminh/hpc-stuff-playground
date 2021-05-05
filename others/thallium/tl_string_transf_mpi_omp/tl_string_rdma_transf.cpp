@@ -31,7 +31,7 @@ namespace tl = thallium;
 // Global variables
 // ================================================================================
 const int MAX = 26;
-const int NUM_DEFAULT_CHAR = 1024;
+const int NUM_DEFAULT_CHAR = 1024*1024*1024;
 MPI_Request gath_request;
 double iallgather_time_buffer[2];
 
@@ -112,9 +112,10 @@ int main(int argc, char **argv){
             double recv_time = omp_get_wtime();
             double mpi_recv_time = MPI_Wtime();
 
-            std::cout << "[R0] SERVER received bulk: ";
-            for(auto c : v) std::cout << c;
-            std::cout << std::endl;
+            std::cout << "[R0] SERVER received bulk (10 first-characters): ";
+            for (int i = 0; i < 10; i++)
+                std::cout << v[i];
+            std::cout << "..." << std::endl;
 
             // Since the local bulk is smaller (6 bytes) than the remote
             // one (9 bytes), only 6 bytes are pulled. Hence the loop will
