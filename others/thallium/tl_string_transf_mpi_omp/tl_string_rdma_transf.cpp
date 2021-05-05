@@ -176,6 +176,7 @@ int main(int argc, char **argv){
 
         // Wait for gathering to complete before printing the values received
         MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // sleep for 1s
         std::cout << "[R1] send_time: " << send_time << std::endl;
         std::cout << "[R1] Elapsed-time: " << iallgather_time_buffer[1] << " - " << iallgather_time_buffer[0] << " = "
                   << (iallgather_time_buffer[1]-iallgather_time_buffer[0]) << std::endl;
