@@ -109,7 +109,7 @@ int main(int argc, char **argv){
 
             // Wait for gathering to complete before printing the values received
             MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
-            printf("[R%d] Elapsed-time: %f (s)\n", my_rank, (iallgather_time_buffer[1]-iallgather_time_buffer[0]));
+            printf("[R%d] Elapsed-time: %f (s)\n", 0, (iallgather_time_buffer[1]-iallgather_time_buffer[0]));
         };
 
         // define the procedure
