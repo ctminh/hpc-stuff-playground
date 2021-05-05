@@ -112,7 +112,7 @@ int main(int argc, char **argv){
             MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
 
             // For summarizing the benchmark
-            double bw_server = (iallgather_time_buffer[0]-iallgather_time_buffer[1]) / v.size();
+            double bw_server = v.size() / (iallgather_time_buffer[0]-iallgather_time_buffer[1]);
             std::cout << "[R0] recv_time: " << recv_time << " | " << mpi_recv_time << std::endl;
             std::cout << "[R1] Elapsed-time: " << iallgather_time_buffer[0] << " - " << iallgather_time_buffer[1] << " = "
                       << (iallgather_time_buffer[0]-iallgather_time_buffer[1]) << " | " << bw_server << "(bytes/s)" << std::endl;
@@ -182,7 +182,7 @@ int main(int argc, char **argv){
         // Wait for gathering to complete before printing the values received
         MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // sleep for 1s
-        double bw_client = (iallgather_time_buffer[0]-iallgather_time_buffer[1]) / sizeof(buffer);
+        double bw_client = (buffer.size()+1) / (iallgather_time_buffer[0]-iallgather_time_buffer[1]);
         std::cout << "[R1] send_time: " << send_time << " | " << mpi_send_time << std::endl;
         std::cout << "[R1] Elapsed-time: " << iallgather_time_buffer[0] << " - " << iallgather_time_buffer[1] << " = "
                       << (iallgather_time_buffer[0]-iallgather_time_buffer[1]) << " | " << bw_client << "(bytes/s)" << std::endl;
