@@ -30,8 +30,27 @@ namespace tl = thallium;
 // ================================================================================
 // Global variables
 // ================================================================================
+const int MAX = 26;
+const int NUM_DEFAULT_CHAR = 1024;
 MPI_Request gath_request;
 double iallgather_time_buffer[2];
+
+// ================================================================================
+// Util-functions
+// ================================================================================
+std::string generate_random_string(int n) {
+    char alphabet[MAX] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+                          'h', 'i', 'j', 'k', 'l', 'm', 'n', 
+                          'o', 'p', 'q', 'r', 's', 't', 'u',
+                          'v', 'w', 'x', 'y', 'z' };
+  
+    std::string res = "";
+    for (int i = 0; i < n; i++) 
+        res = res + alphabet[rand() % MAX];
+      
+    return res;
+}
+
 
 // ================================================================================
 // Main function
@@ -78,7 +97,8 @@ int main(int argc, char **argv){
 
             // create a buffer of size 6. We initialize segments
             // and expose the buffer to get a bulk object from it.
-            std::vector<char> v(6);
+            int n_char = NUM_DEFAULT_CHAR;
+            std::vector<char> v(n_char);
             std::vector<std::pair<void*, std::size_t>> segments(1);
             segments[0].first  = (void*)(&v[0]);
             segments[0].second = v.size();
@@ -151,7 +171,9 @@ int main(int argc, char **argv){
         // we define a buffer with the content “Matthieu” (because it’s a string,
         // there is actually a null-terminating character). We then define
         // segments as a vector of pairs of void* and std::size_t
-        std::string buffer = "Matthieu";
+        // std::string buffer = "Matthieu";
+        int n_characters = NUM_DEFAULT_CHAR;
+        std::string buffer = generate_random_string(n_characters);
         std::vector<std::pair<void*, std::size_t>> segments(1);
 
         // Each segment (here only one) is characterized by its starting
