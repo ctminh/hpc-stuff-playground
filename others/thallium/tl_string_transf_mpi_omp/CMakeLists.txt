@@ -11,7 +11,7 @@ message(STATUS "found mpi.h at ${MPI_CXX_INCLUDE_DIRS}")
 # find OpenMP package
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(OPENMP_FLAGS PUBLIC OpenMP::OpenMP_CXX)
+    set(OPENMP_FLAGS PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
 # set mpicxx flags
