@@ -43,6 +43,11 @@ int main(int argc, char **argv){
     MPI_Comm_size(MPI_COMM_WORLD, &num_ranks);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
+    // declare a buffer for gathering time-measurement of ranks
+    const int buf_size = num_ranks;
+    double iallgather_time_buffer[buf_size];
+    MPI_Request gath_request;
+
 
     /*
      * **************************************************************************** 
@@ -79,9 +84,15 @@ int main(int argc, char **argv){
             segments[0].second = v.size();
             tl::bulk local = ser_engine.expose(segments, tl::bulk_mode::write_only);
 
+            // Measure the recv-time at the reciever (server)
+            double recv_time = omp_get_wtime();
+
             // The call to the >> operator pulls data from the remote
             // bulk object b and the local bulk object. 
             b.on(ep) >> local;
+
+            // Measure the recv-time here
+            double recv_time = omp_get_wtime();
 
             std::cout << "[R0] SERVER received bulk: ";
             for(auto c : v) std::cout << c;
@@ -95,6 +106,9 @@ int main(int argc, char **argv){
 
             // finalize the server after the first transfer
             // ser_engine.finalize();
+
+            // Gather the measured time at server-side
+            MPI_Iallgather(&recv_time, 1, MPI_DOUBLE, iallgather_time_buffer, 1, MPI_DOUBLE, MPI_COMM_WORLD, &gath_request);
         };
 
         // define the procedure
@@ -104,6 +118,9 @@ int main(int argc, char **argv){
         int reciever = 1; // rank 1, send_tag = 0
         MPI_Send(str_serveraddr.c_str(), str_serveraddr.length(), MPI_CHAR, reciever, 0, MPI_COMM_WORLD);
 
+        // Wait for gathering to complete before printing the values received
+        MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
+        printf("[R%d] Elapsed-time: %f (s)\n", my_rank, (iallgather_time_buffer[1]-iallgather_time_buffer[0]));
 
     } else if (my_rank == 1) {
         // check the client
@@ -148,8 +165,18 @@ int main(int argc, char **argv){
         tl::bulk myBulk = cli_engine.expose(segments, tl::bulk_mode::read_only);
 
         // Finally we send an RPC to the server, passing the bulk object as an argument.
-        // Get back the arrival time at server
+        // Measure the send-time at the sender (client)
+        double send_time = omp_get_wtime();
+
+        // Do the calling action
         remote_do_rdma.on(ser_endpoint)(myBulk);
+
+        // Gather the measured time at client-side
+        MPI_Iallgather(&send_time, 1, MPI_DOUBLE, iallgather_time_buffer, 1, MPI_DOUBLE, MPI_COMM_WORLD, &gath_request);
+
+        // Wait for gathering to complete before printing the values received
+        MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
+        printf("[R%d] Elapsed-time: %f (s)\n", my_rank, (iallgather_time_buffer[1]-iallgather_time_buffer[0]));
 
         // free the memory allocated by new
         delete[] rec_buf; // because having [size] after new

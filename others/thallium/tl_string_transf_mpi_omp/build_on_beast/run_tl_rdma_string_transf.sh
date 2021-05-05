@@ -20,6 +20,8 @@ module load mochi-thallium-0.7-gcc-10.2.1-hhkhxqk
 
 ## -----------------------------------------
 ## -------- Running server -----------------
+export OMP_NUM_THREADS=1
 echo "Run the server on ROME1..."
+echo "   export OMP_NUM_THREADS=${OMP_NUM_THREADS}"
 echo "   mpirun -n 2 -ppn 1 --host rome1,rome2 ./tl_string_rdma_transf"
 mpirun -n 2 -ppn 1 --host rome1,rome2 ./tl_string_rdma_transf

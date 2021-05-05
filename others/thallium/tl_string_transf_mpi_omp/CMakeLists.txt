@@ -8,8 +8,14 @@ project(tl_mxm_rpc_rdma_mpiomp)
 find_package(MPI REQUIRED COMPONENTS CXX)
 message(STATUS "found mpi.h at ${MPI_CXX_INCLUDE_DIRS}")
 
+# find OpenMP package
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(OPENMP_FLAGS PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 # set mpicxx flags
-set(MPI_FLAGS -lpthread -lrt) # -lmpicxx
+set(MPI_FLAGS -lpthread -lrt ${OPENMP_FLAGS}) # -lmpicxx
 
 # compile the code
 add_executable(tl_string_rdma_transf tl_string_rdma_transf.cpp)
