@@ -84,9 +84,6 @@ int main(int argc, char **argv){
             segments[0].second = v.size();
             tl::bulk local = ser_engine.expose(segments, tl::bulk_mode::write_only);
 
-            // Measure the recv-time at the reciever (server)
-            double recv_time = omp_get_wtime();
-
             // The call to the >> operator pulls data from the remote
             // bulk object b and the local bulk object. 
             b.on(ep) >> local;
