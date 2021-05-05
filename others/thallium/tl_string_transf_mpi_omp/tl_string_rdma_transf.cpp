@@ -28,6 +28,12 @@
 namespace tl = thallium;
 
 // ================================================================================
+// Global variables
+// ================================================================================
+MPI_Request gath_request;
+double iallgather_time_buffer[2];
+
+// ================================================================================
 // Main function
 // ================================================================================
 int main(int argc, char **argv){
@@ -42,12 +48,6 @@ int main(int argc, char **argv){
     MPI_Init_thread(&argc, &argv, requested, &provided);
     MPI_Comm_size(MPI_COMM_WORLD, &num_ranks);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-
-    // declare a buffer for gathering time-measurement of ranks
-    const int buf_size = num_ranks;
-    double iallgather_time_buffer[buf_size];
-    MPI_Request gath_request;
-
 
     /*
      * **************************************************************************** 
