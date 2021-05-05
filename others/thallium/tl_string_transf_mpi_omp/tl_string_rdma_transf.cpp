@@ -106,7 +106,7 @@ int main(int argc, char **argv){
             // ser_engine.finalize();
 
             // Gather the measured time at server-side
-            MPI_Iallgather(&recv_time, 1, MPI_DOUBLE, iallgather_time_buffer, 1, MPI_DOUBLE, MPI_COMM_WORLD, &gath_request);
+            MPI_Iallgather(&mpi_recv_time, 1, MPI_DOUBLE, iallgather_time_buffer, 1, MPI_DOUBLE, MPI_COMM_WORLD, &gath_request);
 
             // Wait for gathering to complete before printing the values received
             MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
@@ -174,7 +174,7 @@ int main(int argc, char **argv){
         remote_do_rdma.on(ser_endpoint)(myBulk);
 
         // Gather the measured time at client-side
-        MPI_Iallgather(&send_time, 1, MPI_DOUBLE, iallgather_time_buffer, 1, MPI_DOUBLE, MPI_COMM_WORLD, &gath_request);
+        MPI_Iallgather(&mpi_send_time, 1, MPI_DOUBLE, iallgather_time_buffer, 1, MPI_DOUBLE, MPI_COMM_WORLD, &gath_request);
 
         // Wait for gathering to complete before printing the values received
         MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
