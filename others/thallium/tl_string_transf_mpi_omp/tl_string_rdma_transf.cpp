@@ -31,7 +31,7 @@ namespace tl = thallium;
 // Global variables
 // ================================================================================
 const int MAX = 26;
-const int NUM_DEFAULT_CHAR = 1024*1024*1024;
+const int NUM_DEFAULT_CHAR = 1024*1024;
 MPI_Request gath_request;
 double iallgather_time_buffer[2];
 
@@ -123,9 +123,6 @@ int main(int argc, char **argv){
             // for Thallium to know in which process to find the memory
             // we are pulling. That’s what bulk::on(endpoint) does.
 
-            // finalize the server after the first transfer
-            // ser_engine.finalize();
-
             // Gather the measured time at server-side
             MPI_Iallgather(&mpi_recv_time, 1, MPI_DOUBLE, iallgather_time_buffer, 1, MPI_DOUBLE, MPI_COMM_WORLD, &gath_request);
 
@@ -137,6 +134,9 @@ int main(int argc, char **argv){
             std::cout << "[R0] recv_time: " << recv_time << " | " << mpi_recv_time << std::endl;
             std::cout << "[R1] Elapsed-time: " << iallgather_time_buffer[0] << " - " << iallgather_time_buffer[1] << " = "
                       << (iallgather_time_buffer[0]-iallgather_time_buffer[1]) << " | " << bw_server << "(bytes/s)" << std::endl;
+
+            // finalize the server after the first transfer
+            ser_engine.finalize();
         };
 
         // define the procedure
