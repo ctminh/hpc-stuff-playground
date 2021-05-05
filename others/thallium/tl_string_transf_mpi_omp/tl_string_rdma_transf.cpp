@@ -109,7 +109,8 @@ int main(int argc, char **argv){
 
             // Wait for gathering to complete before printing the values received
             MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
-            printf("[R%d] Elapsed-time: %f (s)\n", 0, (iallgather_time_buffer[1]-iallgather_time_buffer[0]));
+            std::cout << "[R0] recv_time: " << recv_time << std::endl;
+            std::cout << "[R0] Elapsed-time: " << (iallgather_time_buffer[1]-iallgather_time_buffer[0]) << std::endl;
         };
 
         // define the procedure
@@ -174,7 +175,8 @@ int main(int argc, char **argv){
 
         // Wait for gathering to complete before printing the values received
         MPI_Wait(&gath_request, MPI_STATUS_IGNORE);
-        printf("[R%d] Elapsed-time: %f (s)\n", my_rank, (iallgather_time_buffer[1]-iallgather_time_buffer[0]));
+        std::cout << "[R1] send_time: " << send_time << std::endl;
+        std::cout << "[R1] Elapsed-time: " << (iallgather_time_buffer[1]-iallgather_time_buffer[0]) << std::endl;
 
         // free the memory allocated by new
         delete[] rec_buf; // because having [size] after new
