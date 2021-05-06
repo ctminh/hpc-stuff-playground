@@ -180,7 +180,7 @@ int main(int argc, char **argv){
         // check mem-allocation of the string
         for (int i = 0;  i < 10; i++){
             std::cout << "[DBG-alloc-string] CLIENT string[" << i << "]: "
-                      << &buffer[i] << std::endl;
+                      << buffer[i] << std::endl;
         }
 
         // Each segment (here only one) is characterized by its starting
@@ -188,7 +188,7 @@ int main(int argc, char **argv){
         segments[0].first  = (void*)(&buffer[0]);
         segments[0].second = buffer.size()+1;
         std::cout << "[R1] CLIENT num_characters = " << buffer.size()+1
-                << ", size = " << sizeof(buffer)
+                << ", sizeof(bufer) = " << sizeof(buffer)
                 << std::endl;
 
         // We call engine::expose to expose the buffer and get a bulk instance from it.
