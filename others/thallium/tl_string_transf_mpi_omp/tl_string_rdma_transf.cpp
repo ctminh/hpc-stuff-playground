@@ -140,7 +140,7 @@ int main(int argc, char **argv){
         };
 
         // define the procedure
-        ser_engine.define("do_rdma",f).disable_response();
+        ser_engine.define("do_rdma", f).disable_response();
 
         // use mpi_send to let the client know the server address
         int reciever = 1; // rank 1, send_tag = 0
@@ -176,6 +176,12 @@ int main(int argc, char **argv){
         int n_characters = NUM_DEFAULT_CHAR;
         std::string buffer = generate_random_string(n_characters);
         std::vector<std::pair<void*, std::size_t>> segments(1);
+
+        // check mem-allocation of the string
+        for (int i = 0;  i < 10; i++){
+            std::cout << "[DBG-alloc-string] CLIENT string[" << i << "]: "
+                      << &buffer[i] << std::endl;
+        }
 
         // Each segment (here only one) is characterized by its starting
         // address in local memory and its size. 
