@@ -178,9 +178,11 @@ int main(int argc, char **argv){
         std::vector<std::pair<void*, std::size_t>> segments(1);
 
         // check mem-allocation of the string
+        char *pc;
         for (int i = 0;  i < 10; i++){
+            pc = &(buffer[i]);
             std::cout << "[DBG-alloc-string] CLIENT string[" << i << "]: "
-                      << buffer[i] << std::endl;
+                      << pc << std::endl;
         }
 
         // Each segment (here only one) is characterized by its starting
