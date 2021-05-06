@@ -107,10 +107,10 @@ int main (int argc,char* argv[])
     // The following is used to switch to 40g network on Ares.
     // This is necessary when we use RoCE on Ares.
     std::string proc_name = std::string(processor_name);
-    /*int split_loc = proc_name.find('.');
+    /* int split_loc = proc_name.find('.');
     std::string node_name = proc_name.substr(0, split_loc);
     std::string extra_info = proc_name.substr(split_loc+1, string::npos);
-    proc_name = node_name + "-40g." + extra_info;*/
+    proc_name = node_name + "-40g." + extra_info; */
 
     size_t size_of_elem = sizeof(int);
 
