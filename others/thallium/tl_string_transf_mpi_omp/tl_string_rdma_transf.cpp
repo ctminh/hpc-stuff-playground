@@ -178,9 +178,9 @@ int main(int argc, char **argv){
         std::vector<std::pair<void*, std::size_t>> segments(1);
 
         // check mem-allocation of the string
-        char *pc;
+        void *pc;
         for (int i = 0;  i < 10; i++){
-            pc = &(buffer[i]);
+            pc = (void*)(buffer.at(i));
             std::cout << "[DBG-alloc-string] CLIENT string[" << i << "]: "
                       << pc << std::endl;
         }
