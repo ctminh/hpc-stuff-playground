@@ -271,6 +271,9 @@ int main (int argc, char *argv[])
         double throughput_push_local = (num_tasks*task_size*1000) / (t_push_local.getElapsedTime()*1024*1024);
         std::cout << "[THROUGHPUT] R" << my_rank << ": local_push = " << throughput_push_local << " MB/s" << std::endl;
 
+        // Barrier here for the client_commm
+        MPI_Barrier(client_comm);
+
         // for deleting the local queue
         Timer t_pop_local = Timer();
         for (int i = 0;  i < num_tasks; i++){
