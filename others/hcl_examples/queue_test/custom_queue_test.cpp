@@ -35,7 +35,7 @@
 // ================================================================================
 // Global Variables
 // ================================================================================
-
+const int SIZE 10
 
 // ================================================================================
 // Util-functions
@@ -87,22 +87,20 @@ struct mat_task {
 };
 
 struct arr_mat_task {
-    int size;
-    double A[size*size];
-    double B[size*size];
-    double C[size*size];
+    double A[SIZE*SIZE];
+    double B[SIZE*SIZE];
+    double C[SIZE*SIZE];
 
     // Constructor 1
-    arr_mat_task(int s){
-        initialize_matrix_rando(&A, s);
-        initialize_matrix_rando(&B, s);
-        initialize_matrix_zeros(&C, s);
+    arr_mat_task(){
+        initialize_matrix_rando(&A, SIZE);
+        initialize_matrix_rando(&B, SIZE);
+        initialize_matrix_zeros(&C, SIZE);
     }
 
     template<typename A>
         void serialize(A& ar) {
-            ar & size;
-            for (int i = 0;  i < size*size; i++){
+            for (int i = 0;  i < SIZE*SIZE; i++){
                 ar & A[i];
                 ar & B[i];
                 ar & C[i];
@@ -219,13 +217,12 @@ int main (int argc, char *argv[])
      * /////////////////////////////////////////////////////////////////////////////  
      */
     int num_tasks = 10;
-    int mat_size = 10;
     if (!is_server) {
         // for pushing local
         Timer t_push_local = Timer();
         for(int i = 0; i < num_tasks; i++){
             // allocate an arr_mat task
-            struct arr_mat_task T(mat_size);
+            struct arr_mat_task T();
             
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
