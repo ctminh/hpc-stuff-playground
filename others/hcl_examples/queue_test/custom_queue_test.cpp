@@ -16,6 +16,12 @@
 #include <queue>
 #include <fstream>
 #include <atomic>
+#include <random>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <sys/syscall.h>
 
 // for mpi, omp
 #include <mpi.h>
