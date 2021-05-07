@@ -262,7 +262,7 @@ int main (int argc, char *argv[])
             
             // allocate an arr_mat task
             mat_task_t lT= mat_task_t(mat_size);
-            
+                       
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
             local_queue.push(lT);
@@ -303,6 +303,8 @@ int main (int argc, char *argv[])
         for(int i = 0; i < num_tasks; i++){
             // allocate the task
             mat_task_t gT = mat_task_t(mat_size);
+
+            printf("[DBG] R%d pushes task-%d into the global-hcl queue...\n", my_rank, i);
             
             // put tasks to the glob-queue and measure time
             t_push_remote.resumeTime();
