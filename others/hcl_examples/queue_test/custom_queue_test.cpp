@@ -279,8 +279,8 @@ int main (int argc, char *argv[])
             local_queue.pop();
             t_pop_local.resumeTime();
         }
-        double throughput_push_local = (num_tasks*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
-        std::cout << "[THROUGHPUT] R" << my_rank << ": local_pop = " << throughput_push_local << " MB/s" << std::endl;
+        double throughput_pop_local = (num_tasks*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
+        std::cout << "[THROUGHPUT] R" << my_rank << ": local_pop = " << throughput_pop_local << " MB/s" << std::endl;
     }
 
     /* /////////////////////////////////////////////////////////////////////////////
