@@ -247,7 +247,7 @@ int main (int argc, char *argv[])
     // check task size
     int mat_size = 10;
     mat_task_t tmp_T = mat_task_t(mat_size);
-    size_t task_size = sizeof(T);
+    size_t task_size = sizeof(tmp_T);
     std::cout << "[CHECK] matrix size = " << mat_size << " | task size = " << task_size << " bytes" << std::endl;
 
     /* /////////////////////////////////////////////////////////////////////////////
