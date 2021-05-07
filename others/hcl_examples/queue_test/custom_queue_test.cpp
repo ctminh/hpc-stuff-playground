@@ -261,24 +261,68 @@ int main (int argc, char *argv[])
         for(int i = 0; i < num_tasks; i++){
             
             // allocate an arr_mat task
-            mat_task_t T = mat_task_t(mat_size);
+            mat_task_t lT= mat_task_t(mat_size);
             
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
-            local_queue.push(T);
+            local_queue.push(lT);
             t_push_local.pauseTime();
         }
         double throughput_push_local = (num_tasks*task_size*1000) / (t_push_local.getElapsedTime()*1024*1024);
         std::cout << "[THROUGHPUT] R" << my_rank << ": local_push = " << throughput_push_local << " MB/s" << std::endl;
 
         // for deleting the local queue
+        Timer t_pop_local = Timer();
         for (int i = 0;  i < num_tasks; i++){
+            t_pop_local.resumeTime();
             auto loc_pop_res = local_queue.front();
             local_queue.pop();
+            t_pop_local.resumeTime();
+        }
+        double throughput_push_local = (num_tasks*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
+        std::cout << "[THROUGHPUT] R" << my_rank << ": local_pop = " << throughput_push_local << " MB/s" << std::endl;
+    }
+
+    /* /////////////////////////////////////////////////////////////////////////////
+     * Test throughput of the HCL QUEUES at client-side
+     * /////////////////////////////////////////////////////////////////////////////  
+     */
+    if (!is_server) {
+        
+        // set a key by rank id
+        uint16_t offset_key = my_rank;
+
+        // put tasks to the hcl-global-queue
+        Timer t_push_remote = Timer();
+        for(int i = 0; i < num_tasks; i++){
+            // allocate the task
+            mat_task_t gT = mat_task_t(mat_size);
+            
+            // put tasks to the glob-queue and measure time
+            t_push_remote.resumeTime();
+            mat_tasks_queue->Push(gT, offset_key);
+            t_push_remote.pauseTime();
         }
 
-    } else {
-        std::cout << "R" << my_rank << ": is waiting..." << std::endl;
+        // estimate the remote-push throughput
+        double throughput_push_remote = (num_tasks*task_size*1000) / (t_push_remote.getElapsedTime()*1024*1024);
+        std::cout << "[THROUGHPUT] R" << my_rank << " [offset_key=" << offset_key << "]" << ": remote_push = "
+                  << throughput_push_remote << " MB/s" << std::endl;
+        
+        // pop tasks from the hcl-global-queue
+        Timer t_pop_remote = Timer();
+        for(int i = 0; i < num_tasks; i++){
+            
+            // pop tasks and measure time
+            t_pop_remote.resumeTime();
+            auto loc_pop_res = mat_tasks_queue->Pop(offset_key);
+            t_pop_remote.resumeTime();
+        }
+
+        // estimate the remote-push throughput
+        double throughput_pop_remote = (num_tasks*task_size*1000) / (t_pop_remote.getElapsedTime()*1024*1024);
+        std::cout << "[THROUGHPUT] R" << my_rank << " [offset_key=" << offset_key << "]" << ": remote_pop = "
+                  << throughput_pop_remote << " MB/s" << std::endl;
     }
 
     // wait for make sure finalizing MPI safe
