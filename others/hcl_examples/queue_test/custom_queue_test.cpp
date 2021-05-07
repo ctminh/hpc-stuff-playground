@@ -40,7 +40,6 @@ const int SIZE = 10;
 // ================================================================================
 // Util-functions
 // ================================================================================
-
 void initialize_matrix_rando(double *mat_ptr, int size){
     double low_bnd = 0.0;
     double upp_bnd = 10.0;
@@ -97,11 +96,11 @@ typedef struct mat_task_t {
     }
 
     // Destructor 1
-    ~mat_task_t(){
-        delete[] A;
-        delete[] B;
-        delete[] C;
-    }
+    // ~mat_task_t(){
+    //     delete[] A;
+    //     delete[] B;
+    //     delete[] C;
+    // }
 
 }mat_task_t;
 
@@ -227,7 +226,7 @@ int main (int argc, char *argv[])
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::queue<mat_task_t> local_queue = std::queue<mat_task_t>();
+    std::queue<mat_task_t> local_queue;
 
     // split the mpi communicator from the server, here is just for client communicator
     MPI_Comm client_comm;
@@ -246,6 +245,7 @@ int main (int argc, char *argv[])
         // for pushing local
         Timer t_push_local = Timer();
         for(int i = 0; i < num_tasks; i++){
+            
             // allocate an arr_mat task
             mat_task_t T = mat_task_t(mat_size);
             
