@@ -278,8 +278,9 @@ int main (int argc, char *argv[])
         Timer t_pop_local = Timer();
         for (int i = 0;  i < num_tasks; i++){
             t_pop_local.resumeTime();
+            auto result = local_queue.front();
             local_queue.pop();
-            t_pop_local.resumeTime();
+            t_pop_local.pauseTime();
         }
         std::cout << "[DBG] check t_pop_local = " << t_pop_local.getElapsedTime() << std::endl;
         double throughput_pop_local = (num_tasks*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
@@ -322,7 +323,7 @@ int main (int argc, char *argv[])
             // pop tasks and measure time
             t_pop_remote.resumeTime();
             auto loc_pop_res = mat_tasks_queue->Pop(offset_key);
-            t_pop_remote.resumeTime();
+            t_pop_remote.pauseTime();
         }
 
         // estimate the remote-push throughput
