@@ -212,7 +212,7 @@ int main (int argc, char *argv[])
             
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
-            local_queue.push(task);
+            local_queue.push(T);
             t_push_local.pauseTime();
 
             std::cout << "[CHECK] R" << my_rank << ": size of each task T = " << sizeof(T) << " bytes" << std::endl; 
