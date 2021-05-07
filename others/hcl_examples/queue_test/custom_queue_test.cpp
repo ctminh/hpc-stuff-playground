@@ -104,8 +104,8 @@ struct arr_mat_task {
         }
     }
 
-    template<typename A>
-    void serialize(A& ar) {
+    template<typename Archive>
+    void serialize(Archive& ar) {
         // for (int i = 0;  i < SIZE*SIZE; i++){
         ar & A;
         ar & B;
