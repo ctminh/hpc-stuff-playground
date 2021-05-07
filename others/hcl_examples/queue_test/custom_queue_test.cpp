@@ -88,6 +88,9 @@ typedef struct mat_task_t {
     // Constructor 1
     mat_task_t(int s){
         size = s;
+        A = new double[s*s];
+        B = new double[s*s];
+        C = new double[s*s];
         initialize_matrix_rando(A, s);
         initialize_matrix_rando(B, s);
         initialize_matrix_zeros(C, s);
@@ -237,7 +240,7 @@ int main (int argc, char *argv[])
         Timer t_push_local = Timer();
         for(int i = 0; i < num_tasks; i++){
             // allocate an arr_mat task
-            mat_task_t T(mat_size);
+            mat_task_t T = mat_task_t(mat_size);
             
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
