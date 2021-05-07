@@ -92,6 +92,17 @@ struct arr_mat_task {
         initialize_matrix_rando(&B, s);
         initialize_matrix_zeros(&C, s);
     }
+
+    template<typename A>
+        void serialize(A& ar) {
+            ar & size;
+            for (int i = 0;  i < size*size; i++){
+                ar & A[i];
+                ar & B[i];
+                ar & C[i];
+            }
+        }
+
 };
 
 typedef struct general_task_t {
@@ -217,25 +228,6 @@ int main (int argc, char *argv[])
 
             std::cout << "[CHECK] R" << my_rank << ": size of each task T = " << sizeof(T) << " bytes" << std::endl; 
         }
-
-        // estimate the throughput of pushing local
-        // double throughput_pushing_local = (num_tasks*size_of_task*1000) / (timer_loca_queue_put.getElapsedTime()*1024*1024);
-
-        // Timer timer_loca_queue_get = Timer();
-        // for(int i = 0; i < num_request; i++){
-        //     // measure time of get
-        //     timer_loca_queue_get.resumeTime();
-        //     auto result = loca_queue.front();
-        //     loca_queue.pop();
-        //     timer_loca_queue_get.pauseTime();
-        // }
-        // double throughput_loca_queue_get = (num_request*size_of_task*1000) / (timer_loca_queue_get.getElapsedTime()*1024*1024);
-
-        // print the throughput-results
-        // if (my_rank == 0) {
-        //     printf("throughput_loca_queue put: %f (MB/s)\n", throughput_loca_queue_put);
-        //     printf("throughput_loca_queue get: %f (MB/s)\n",throughput_loca_queue_get);
-        // }
 
     } else {
         std::cout << "R" << my_rank << ": is waiting..." << std::endl;
