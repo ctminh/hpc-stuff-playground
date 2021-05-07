@@ -85,6 +85,13 @@ typedef struct mat_task_t {
     double *C;  // ptr to the allocated matrix C - result
 
     // Constructor 1
+    mat_task_t(){
+        A = new double[10*10];
+        B = new double[10*10];
+        C = new double[10*10];
+    }
+
+    // Constructor 2
     mat_task_t(int s){
         size = s;
         A = new double[s*s];
