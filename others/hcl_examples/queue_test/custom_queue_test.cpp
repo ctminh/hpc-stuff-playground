@@ -86,7 +86,7 @@ struct mat_task {
     double *C;  // ptr to the allocated matrix C - result
 };
 
-struct arr_mat_task {
+typedef struct arr_mat_task_t {
     double A[SIZE*SIZE];
     double B[SIZE*SIZE];
     double C[SIZE*SIZE];
@@ -112,7 +112,7 @@ struct arr_mat_task {
         ar & C;
         // }
     }
-};
+}arr_mat_task_t;
 
 typedef struct general_task_t {
     int id;
@@ -194,21 +194,21 @@ int main (int argc, char *argv[])
      * Create hcl global queue over mpi ranks
      * This queue contains the elements with the type is mat_task/general_task_t
      */
-    hcl::queue<arr_mat_task> *mat_tasks_queue;
+    hcl::queue<arr_mat_task_t> *mat_tasks_queue;
 
     // allocate the queue at server-side
     if (is_server) {
-        mat_tasks_queue = new hcl::queue<arr_mat_task>();
+        mat_tasks_queue = new hcl::queue<arr_mat_task_t>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
     // allocate the queue at client-side
     if (!is_server) {
-        mat_tasks_queue = new hcl::queue<arr_mat_task>();
+        mat_tasks_queue = new hcl::queue<arr_mat_task_t>();
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::queue<arr_mat_task> local_queue = std::queue<arr_mat_task>();
+    std::queue<arr_mat_task_t> local_queue = std::queue<arr_mat_task_t>();
 
     // split the mpi communicator from the server, here is just for client communicator
     MPI_Comm client_comm;
@@ -227,7 +227,7 @@ int main (int argc, char *argv[])
         Timer t_push_local = Timer();
         for(int i = 0; i < num_tasks; i++){
             // allocate an arr_mat task
-            struct arr_mat_task T();
+            arr_mat_task_t T();
             
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
