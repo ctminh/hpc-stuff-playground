@@ -284,6 +284,9 @@ int main (int argc, char *argv[])
         }
         double throughput_pop_local = (num_tasks*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
         std::cout << "[THROUGHPUT] R" << my_rank << ": local_pop = " << throughput_pop_local << " MB/s" << std::endl;
+
+        // Barrier here for the client_commm
+        MPI_Barrier(client_comm);
     }
 
     /* /////////////////////////////////////////////////////////////////////////////
