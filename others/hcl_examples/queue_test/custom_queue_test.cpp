@@ -96,6 +96,13 @@ typedef struct mat_task_t {
         initialize_matrix_zeros(C, s);
     }
 
+    // Destructor 1
+    ~mat_task_t(){
+        delete[] A;
+        delete[] B;
+        delete[] C;
+    }
+
 }mat_task_t;
 
 typedef struct arr_mat_task_t {
@@ -248,6 +255,13 @@ int main (int argc, char *argv[])
             t_push_local.pauseTime();
 
             std::cout << "[CHECK] R" << my_rank << ": size of each task T = " << 0.0 << " bytes" << std::endl; 
+        }
+
+
+        // for deleting the local queue
+        for (int i = 0;  i < num_tasks; i++){
+            auto loc_pop_res = local_queue.front();
+            local_queue.pop();
         }
 
     } else {
