@@ -208,7 +208,7 @@ int main (int argc, char *argv[])
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::queue<arr_mat_task_t> local_queue = std::queue<arr_mat_task_t>();
+    std::vector<arr_mat_task_t> local_queue;
 
     // split the mpi communicator from the server, here is just for client communicator
     MPI_Comm client_comm;
@@ -231,10 +231,10 @@ int main (int argc, char *argv[])
             
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
-            local_queue.push(T);
+            local_queue.push_back(T);
             t_push_local.pauseTime();
 
-            std::cout << "[CHECK] R" << my_rank << ": size of each task T = " << sizeof(T) << " bytes" << std::endl; 
+            std::cout << "[CHECK] R" << my_rank << ": size of each task T = " << 0.0 << " bytes" << std::endl; 
         }
 
     } else {
