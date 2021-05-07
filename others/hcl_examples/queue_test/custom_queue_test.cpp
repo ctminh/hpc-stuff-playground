@@ -87,7 +87,7 @@ struct mat_task {
 };
 
 struct arr_mat_task {
-    const int size;
+    int size;
     double A[size*size];
     double B[size*size];
     double C[size*size];
