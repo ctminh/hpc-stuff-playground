@@ -102,6 +102,16 @@ typedef struct mat_task_t {
         initialize_matrix_zeros(C, s);
     }
 
+    // Serialization
+    template <typename Archive>
+    void serialize(Archive &ar) {
+        for (int i = 0; i < 10*10; i++){
+            ar & A[i];
+            ar & B[i];
+            ar & C[i];
+        }
+    }
+
     // Destructor 1
     // ~mat_task_t(){
     //     delete[] A;
