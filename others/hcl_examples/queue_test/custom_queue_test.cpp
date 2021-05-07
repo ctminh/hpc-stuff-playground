@@ -128,15 +128,6 @@ typedef struct arr_mat_task_t {
             C[i] = 0.0;
         }
     }
-
-    template<typename Archive>
-    void serialize(Archive& ar) {
-        // for (int i = 0;  i < SIZE*SIZE; i++){
-        ar & A;
-        ar & B;
-        ar & C;
-        // }
-    }
 }arr_mat_task_t;
 
 typedef struct general_task_t {
@@ -228,9 +219,9 @@ int main (int argc, char *argv[])
     MPI_Barrier(MPI_COMM_WORLD);
 
     // allocate the queue at client-side
-    // if (!is_server) {
-    //     mat_tasks_queue = new hcl::queue<mat_task_t>();
-    // }
+    if (!is_server) {
+        mat_tasks_queue = new hcl::queue<mat_task_t>();
+    }
 
     // declare a std-queue/rank at the local side for comparison
     std::queue<mat_task_t> local_queue;
