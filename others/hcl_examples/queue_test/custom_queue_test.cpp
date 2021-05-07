@@ -105,14 +105,13 @@ struct arr_mat_task {
     }
 
     template<typename A>
-        void serialize(A& ar) {
-            for (int i = 0;  i < SIZE*SIZE; i++){
-                ar & A[i];
-                ar & B[i];
-                ar & C[i];
-            }
-        }
-
+    void serialize(A& ar) {
+        // for (int i = 0;  i < SIZE*SIZE; i++){
+        ar & A;
+        ar & B;
+        ar & C;
+        // }
+    }
 };
 
 typedef struct general_task_t {
