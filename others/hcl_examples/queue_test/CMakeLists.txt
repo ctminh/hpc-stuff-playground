@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 project(hcl_queue_examples)
 
 # set the example
-set(example queue_test custom_queue_test)
+set(examples queue_test custom_queue_test)
 
 # fine MPI package
 find_package(MPI REQUIRED COMPONENTS CXX)
@@ -40,10 +40,12 @@ endif()
 set(LIB_FLAGS ${RPC_LIB_FLAGS} -lmpicxx -lpthread -lrt -lhcl)
 
 # Compile the example with linking hcl
-add_executable(${example} ${example}.cpp util.h)
-target_compile_options(${example} PRIVATE -Wall -Wextra)
-target_link_libraries(${example} "${LIB_FLAGS}") # MPI::MPI_CXX
+foreach(exam ${examples})
+    add_executable(${exam} ${exam}.cpp util.h)
+    target_compile_options(${exam} PRIVATE -Wall -Wextra)
+    target_link_libraries(${exam} "${LIB_FLAGS}") # MPI::MPI_CXX
+endforeach()
 
-# Load hcl directly
-# because libhcl.so is linked by LD_PRELOAD, so don't need to link it in target_link_libs
-# set_target_properties(${example} PROPERTIES ENVIRONMENT LD_PRELOAD=/dss/dsshome1/0A/di49mew/hcl/install/lib64/libhcl.so)
+# Another way to load hcl directly
+#   because libhcl.so is linked by LD_PRELOAD, so don't need to link it in target_link_libs
+#   set_target_properties(${example} PROPERTIES ENVIRONMENT LD_PRELOAD=/dss/dsshome1/0A/di49mew/hcl/install/lib64/libhcl.so)
