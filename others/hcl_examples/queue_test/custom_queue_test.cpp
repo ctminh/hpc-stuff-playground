@@ -215,10 +215,10 @@ int main (int argc, char *argv[])
     hcl::queue<mat_task_t> *mat_tasks_queue;
 
     // allocate the queue at server-side
-    // if (is_server) {
-    //     mat_tasks_queue = new hcl::queue<mat_task_t>();
-    // }
-    // MPI_Barrier(MPI_COMM_WORLD);
+    if (is_server) {
+        mat_tasks_queue = new hcl::queue<mat_task_t>();
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // allocate the queue at client-side
     // if (!is_server) {
