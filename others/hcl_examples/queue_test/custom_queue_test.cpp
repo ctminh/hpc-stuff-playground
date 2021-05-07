@@ -84,6 +84,14 @@ struct mat_task {
     double *A;  // ptr to the allocated matrix A
     double *B;  // ptr to the allocated matrix B
     double *C;  // ptr to the allocated matrix C - result
+
+    // Constructor 1
+    mat_task(int s){
+        size = s;
+        initialize_matrix_rando(A, s);
+        initialize_matrix_rando(B, s);
+        initialize_matrix_zeros(C, s);
+    }
 };
 
 typedef struct arr_mat_task_t {
@@ -194,21 +202,21 @@ int main (int argc, char *argv[])
      * Create hcl global queue over mpi ranks
      * This queue contains the elements with the type is mat_task/general_task_t
      */
-    hcl::queue<arr_mat_task_t> *mat_tasks_queue;
+    hcl::queue<mat_task> *mat_tasks_queue;
 
     // allocate the queue at server-side
     if (is_server) {
-        mat_tasks_queue = new hcl::queue<arr_mat_task_t>();
+        mat_tasks_queue = new hcl::queue<mat_task>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
     // allocate the queue at client-side
     if (!is_server) {
-        mat_tasks_queue = new hcl::queue<arr_mat_task_t>();
+        mat_tasks_queue = new hcl::queue<mat_task>();
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::vector<arr_mat_task_t> local_queue;
+    std::queue<mat_task> local_queue = std::queue<mat_task>();
 
     // split the mpi communicator from the server, here is just for client communicator
     MPI_Comm client_comm;
@@ -222,19 +230,20 @@ int main (int argc, char *argv[])
      * /////////////////////////////////////////////////////////////////////////////  
      */
     int num_tasks = 10;
+    int mat_size = 10;
     if (!is_server) {
         // for pushing local
         Timer t_push_local = Timer();
         for(int i = 0; i < num_tasks; i++){
             // allocate an arr_mat task
-            arr_mat_task_t T();
+            mat_task t(mat_size);
             
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
-            local_queue.push_back(T);
+            local_queue.push(t);
             t_push_local.pauseTime();
 
-            std::cout << "[CHECK] R" << my_rank << ": size of each task T = " << 0.0 << " bytes" << std::endl; 
+            std::cout << "[CHECK] R" << my_rank << ": size of each task t = " << 0.0 << " bytes" << std::endl; 
         }
 
     } else {
