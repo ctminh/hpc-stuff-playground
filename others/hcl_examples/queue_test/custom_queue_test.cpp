@@ -93,9 +93,15 @@ struct arr_mat_task {
 
     // Constructor 1
     arr_mat_task(){
-        initialize_matrix_rando(&A, SIZE);
-        initialize_matrix_rando(&B, SIZE);
-        initialize_matrix_zeros(&C, SIZE);
+        double low_bnd = 0.0;
+        double upp_bnd = 10.0;
+        std::uniform_real_distribution<double> ur_dist(low_bnd, upp_bnd);
+        std::default_random_engine dre;
+        for (int i = 0; i < SIZE*SIZE; i++){
+            A[i] = ur_dist(dre);
+            B[i] = ur_dist(dre);
+            C[i] = 0.0;
+        }
     }
 
     template<typename A>
