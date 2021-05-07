@@ -282,7 +282,6 @@ int main (int argc, char *argv[])
             local_queue.pop();
             t_pop_local.pauseTime();
         }
-        std::cout << "[DBG] check t_pop_local = " << t_pop_local.getElapsedTime() << std::endl;
         double throughput_pop_local = (num_tasks*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
         std::cout << "[THROUGHPUT] R" << my_rank << ": local_pop = " << throughput_pop_local << " MB/s" << std::endl;
     }
