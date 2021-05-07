@@ -275,7 +275,7 @@ int main (int argc, char *argv[])
         Timer t_pop_local = Timer();
         for (int i = 0;  i < num_tasks; i++){
             t_pop_local.resumeTime();
-            auto loc_pop_res = local_queue.pop();
+            local_queue.pop();
             t_pop_local.resumeTime();
         }
         double throughput_pop_local = (num_tasks*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
@@ -308,6 +308,9 @@ int main (int argc, char *argv[])
         std::cout << "[THROUGHPUT] R" << my_rank << " [offset_key=" << offset_key << "]" << ": remote_push = "
                   << throughput_push_remote << " MB/s" << std::endl;
         
+        // Barrier here for the client_commm
+        MPI_Barrier(client_comm);
+        
         // pop tasks from the hcl-global-queue
         Timer t_pop_remote = Timer();
         for(int i = 0; i < num_tasks; i++){
@@ -322,6 +325,9 @@ int main (int argc, char *argv[])
         double throughput_pop_remote = (num_tasks*task_size*1000) / (t_pop_remote.getElapsedTime()*1024*1024);
         std::cout << "[THROUGHPUT] R" << my_rank << " [offset_key=" << offset_key << "]" << ": remote_pop = "
                   << throughput_pop_remote << " MB/s" << std::endl;
+        
+        // Barrier here for the client_commm
+        MPI_Barrier(client_comm);
     }
 
     // wait for make sure finalizing MPI safe
