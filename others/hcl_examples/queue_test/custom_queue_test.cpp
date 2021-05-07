@@ -212,7 +212,7 @@ int main (int argc, char *argv[])
      * Create hcl global queue over mpi ranks
      * This queue contains the elements with the type is mat_task/general_task_t
      */
-    // hcl::queue<mat_task_t> *mat_tasks_queue;
+    hcl::queue<mat_task_t> *mat_tasks_queue;
 
     // allocate the queue at server-side
     // if (is_server) {
