@@ -92,7 +92,7 @@ typedef struct arr_mat_task_t {
     double C[SIZE*SIZE];
 
     // Constructor 1
-    arr_mat_task(){
+    arr_mat_task_t(){
         double low_bnd = 0.0;
         double upp_bnd = 10.0;
         std::uniform_real_distribution<double> ur_dist(low_bnd, upp_bnd);
