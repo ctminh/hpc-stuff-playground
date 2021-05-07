@@ -2,10 +2,10 @@
 cmake_minimum_required(VERSION 3.10)
 
 # project name
-project(hcl_example)
+project(hcl_queue_examples)
 
 # set the example
-set(example queue_test)
+set(example queue_test custom_queue_test)
 
 # fine MPI package
 find_package(MPI REQUIRED COMPONENTS CXX)
