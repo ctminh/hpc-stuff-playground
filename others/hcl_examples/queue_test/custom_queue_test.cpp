@@ -275,8 +275,7 @@ int main (int argc, char *argv[])
         Timer t_pop_local = Timer();
         for (int i = 0;  i < num_tasks; i++){
             t_pop_local.resumeTime();
-            auto loc_pop_res = local_queue.front();
-            local_queue.pop();
+            auto loc_pop_res = local_queue.pop();
             t_pop_local.resumeTime();
         }
         double throughput_pop_local = (num_tasks*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
