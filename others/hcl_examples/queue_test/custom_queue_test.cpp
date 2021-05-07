@@ -212,18 +212,18 @@ int main (int argc, char *argv[])
      * Create hcl global queue over mpi ranks
      * This queue contains the elements with the type is mat_task/general_task_t
      */
-    hcl::queue<mat_task_t> *mat_tasks_queue;
+    // hcl::queue<mat_task_t> *mat_tasks_queue;
 
     // allocate the queue at server-side
-    if (is_server) {
-        mat_tasks_queue = new hcl::queue<mat_task_t>();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
+    // if (is_server) {
+    //     mat_tasks_queue = new hcl::queue<mat_task_t>();
+    // }
+    // MPI_Barrier(MPI_COMM_WORLD);
 
     // allocate the queue at client-side
-    if (!is_server) {
-        mat_tasks_queue = new hcl::queue<mat_task_t>();
-    }
+    // if (!is_server) {
+    //     mat_tasks_queue = new hcl::queue<mat_task_t>();
+    // }
 
     // declare a std-queue/rank at the local side for comparison
     std::queue<mat_task_t> local_queue;
