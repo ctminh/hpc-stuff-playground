@@ -200,7 +200,8 @@ int main (int argc, char *argv[])
     if (is_server){
         std::ofstream server_list_file;
         server_list_file.open("./server_list");
-        server_list_file << processor_name;
+        // temporarily put the hard-code ip of rome1 here
+        server_list_file << "10.12.1.1"; // processor_name;
         server_list_file.close();
     }
     std::cout << "[CHECK] R" << my_rank << ": is_server=" << is_server
@@ -222,13 +223,13 @@ int main (int argc, char *argv[])
      */
     hcl::queue<mat_task_t> *mat_tasks_queue;
 
-    // allocate the queue at server-side
+    // allocate the hcl queue at server-side
     if (is_server) {
         mat_tasks_queue = new hcl::queue<mat_task_t>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
-    // allocate the queue at client-side
+    // allocate the hcl queue at client-side
     if (!is_server) {
         mat_tasks_queue = new hcl::queue<mat_task_t>();
     }
@@ -243,12 +244,17 @@ int main (int argc, char *argv[])
     MPI_Comm_size(client_comm, &client_comm_size);
     MPI_Barrier(MPI_COMM_WORLD);
 
+    // check task size
+    int mat_size = 10;
+    mat_task_t tmp_T = mat_task_t(mat_size);
+    size_t task_size = sizeof(T);
+    std::cout << "[CHECK] matrix size = " << mat_size << " | task size = " << task_size << " bytes" << std::endl;
+
     /* /////////////////////////////////////////////////////////////////////////////
      * Test throughput of the LOCAL QUEUES at client-side
      * /////////////////////////////////////////////////////////////////////////////  
      */
     int num_tasks = 10;
-    int mat_size = 10;
     if (!is_server) {
         // for pushing local
         Timer t_push_local = Timer();
@@ -261,10 +267,9 @@ int main (int argc, char *argv[])
             t_push_local.resumeTime();
             local_queue.push(T);
             t_push_local.pauseTime();
-
-            std::cout << "[CHECK] R" << my_rank << ": size of each task T = " << 0.0 << " bytes" << std::endl; 
         }
-
+        double throughput_push_local = (num_tasks*task_size*1000) / (t_push_local.getElapsedTime()*1024*1024);
+        std::cout << "[THROUGHPUT] R" << my_rank << ": local_push = " << throughput_push_local << " MB/s" << std::endl;
 
         // for deleting the local queue
         for (int i = 0;  i < num_tasks; i++){
