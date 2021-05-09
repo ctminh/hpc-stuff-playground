@@ -150,7 +150,7 @@ typedef struct dbarr_test_t {
         // for (int i = 0; i < 100; i++) {
         //     ar & x[i];
         // }
-        ar & make_array<double>(x, 100);
+        ar & boost::serialization::make_array<double>(x, 100);
     }
 }dbarr_test_t;
 
