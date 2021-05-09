@@ -85,11 +85,14 @@ typedef struct mat_task_t {
     // Serialization
     template <typename Archive>
     void serialize(Archive &ar) {
-        for (int i = 0; i < 10*10; i++){
-            ar & A[i];
-            ar & B[i];
-            ar & C[i];
-        }
+        // for (int i = 0; i < 10*10; i++){
+        //     ar & A[i];
+        //     ar & B[i];
+        //     ar & C[i];
+        // }
+        boost::serialization::make_array<double>(A, 100);
+        boost::serialization::make_array<double>(B, 100);
+        boost::serialization::make_array<double>(C, 100);
     }
 
     // Destructor 1
@@ -147,10 +150,10 @@ typedef struct dbarr_test_t {
     // serialization
     template <typename Archive>
     void serialize(Archive &ar) const {
-        // for (int i = 0; i < 100; i++) {
-        //     ar & x[i];
-        // }
-        ar & boost::serialization::make_array<double>(x);
+        for (int i = 0; i < 100; i++) {
+            ar & x[i];
+        }
+        // ar & boost::serialization::make_array<double>(x);
     }
 }dbarr_test_t;
 
