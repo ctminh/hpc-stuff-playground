@@ -132,13 +132,19 @@ typedef struct dbarr_test_t {
     // constructor 1
     dbarr_test_t(){
         for (int i = 0; i < 100; i++)
-            x[i] = i;
+            x[i] = (double) i;
+    }
+
+    // constructor 2
+    dbarr_test_t(double a){
+        for (int i = 0; i < 100; i++)
+            x[i] = a;
     }
 
     // serialization
     template <typename Archive>
     void serialize(Archive &ar) {
-        for (int i = 0; i < 100; i++){
+        for (int i = 0; i < 100; i++) const {
             ar & x[i];
         }
     }
