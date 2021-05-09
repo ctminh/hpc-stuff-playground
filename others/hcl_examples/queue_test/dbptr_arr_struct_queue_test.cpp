@@ -9,14 +9,7 @@
  * https://github.com/scs-lab/hcl
  *
  */
-
 #include <sys/types.h>
-#include <unistd.h>
-#include <chrono>
-#include <queue>
-#include <fstream>
-#include <atomic>
-#include <random>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -31,122 +24,13 @@
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
 
+// for user-defined types
+#include "util.h"
+
 
 // ================================================================================
 // Global Variables
 // ================================================================================
-const int SIZE = 10;
-
-// ================================================================================
-// Util-functions
-// ================================================================================
-void initialize_matrix_rando(double *mat_ptr, int size){
-    double low_bnd = 0.0;
-    double upp_bnd = 10.0;
-    std::uniform_real_distribution<double> ur_dist(low_bnd, upp_bnd);
-    std::default_random_engine dre;
-    for (int i = 0; i < size*size; i++){
-        mat_ptr[i] = ur_dist(dre);
-    }
-}
-
-void initialize_matrix_zeros(double *mat_ptr, int size){
-    for (int i = 0; i < size*size; i++){
-        mat_ptr[i] = 0.0;
-    }
-}
-
-void compute_mxm(double *a, double *b, double *c, int size){
-    
-    // main loop to compute as a serial way
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            c[i*size + j] = 0;
-            for (int k = 0; k < size; k++) {
-                c[i*size + j] += a[i*size + k] * b[k*size + j];
-            }
-        }
-    }
-}
-
-void mxm_kernel(double *A, double *B, double *C, int size, int i){
-
-    // call the compute entry
-    compute_mxm(A, B, C, size);
-}
-
-// ================================================================================
-// Struct Definition
-// ================================================================================
-typedef struct mat_task_t {
-    int size;
-    double *A;  // ptr to the allocated matrix A
-    double *B;  // ptr to the allocated matrix B
-    double *C;  // ptr to the allocated matrix C - result
-
-    // Constructor 1
-    mat_task_t(){
-        A = new double[10*10];
-        B = new double[10*10];
-        C = new double[10*10];
-    }
-
-    // Constructor 2
-    mat_task_t(int s){
-        size = s;
-        A = new double[s*s];
-        B = new double[s*s];
-        C = new double[s*s];
-        initialize_matrix_rando(A, s);
-        initialize_matrix_rando(B, s);
-        initialize_matrix_zeros(C, s);
-    }
-
-    // Serialization
-    template <typename Archive>
-    void serialize(Archive &ar) {
-        for (int i = 0; i < 10*10; i++){
-            ar & A[i];
-            ar & B[i];
-            ar & C[i];
-        }
-    }
-
-    // Destructor 1
-    // ~mat_task_t(){
-    //     delete[] A;
-    //     delete[] B;
-    //     delete[] C;
-    // }
-
-}mat_task_t;
-
-typedef struct arr_mat_task_t {
-    double A[SIZE*SIZE];
-    double B[SIZE*SIZE];
-    double C[SIZE*SIZE];
-
-    // Constructor 1
-    arr_mat_task_t(){
-        double low_bnd = 0.0;
-        double upp_bnd = 10.0;
-        std::uniform_real_distribution<double> ur_dist(low_bnd, upp_bnd);
-        std::default_random_engine dre;
-        for (int i = 0; i < SIZE*SIZE; i++){
-            A[i] = ur_dist(dre);
-            B[i] = ur_dist(dre);
-            C[i] = 0.0;
-        }
-    }
-}arr_mat_task_t;
-
-typedef struct general_task_t {
-    int id;
-    int32_t idx_image = 0;
-    int32_t arg_num;
-    std::vector<void *> arg_hst_pointers;
-    std::vector<int64_t> arg_sizes;
-}general_task_t;
 
 
 // ================================================================================
@@ -221,6 +105,9 @@ int main (int argc, char *argv[])
      * Create hcl global queue over mpi ranks
      * This queue contains the elements with the type is mat_task/general_task_t
      */
+
+    // Try hcl-queue with different types of user-defined struct
+    //      with mat_task_t
     hcl::queue<mat_task_t> *mat_tasks_queue;
 
     // allocate the hcl queue at server-side
