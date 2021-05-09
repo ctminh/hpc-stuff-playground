@@ -197,7 +197,9 @@ struct MappedType{
         // }
     }
 
+#if HCL_ENABLE_RPCLIB
     MSGPACK_DEFINE(a);
+#endif
 
     /* equal operator for comparing two Matrix. */
     bool operator==(const MappedType &o) const {
