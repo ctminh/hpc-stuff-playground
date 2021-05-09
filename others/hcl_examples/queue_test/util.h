@@ -149,7 +149,9 @@ struct KeyType{
     KeyType():a(0){}
     KeyType(size_t a_):a(a_){}
 
+#if HCL_ENABLE_RPCLIB
     MSGPACK_DEFINE(a);
+#endif
 
     /* equal operator for comparing two Matrix. */
     bool operator==(const KeyType &o) const {

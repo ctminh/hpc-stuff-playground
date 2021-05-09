@@ -133,7 +133,7 @@ int main (int argc, char *argv[])
 
     // check task size
     int num_elements = 100;
-    dbarr_test_t tmp_T = mat_task_t();
+    dbarr_test_t tmp_T = dbarr_test_t();
     size_t task_size = sizeof(tmp_T);
     std::cout << "[CHECK] arr_num_elements = " << num_elements << " | task size = " << task_size << " bytes" << std::endl;
 
