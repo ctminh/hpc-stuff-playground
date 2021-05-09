@@ -1,6 +1,9 @@
 #ifndef HCL_UTIL_H
 #define HCL_UTIL_H
 
+#include <boost/serialization/serialization.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 #include <boost/interprocess/containers/string.hpp>
 #include <stdlib.h>
 #include <unistd.h>
