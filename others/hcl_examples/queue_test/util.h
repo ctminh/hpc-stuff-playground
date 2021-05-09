@@ -143,8 +143,8 @@ typedef struct dbarr_test_t {
 
     // serialization
     template <typename Archive>
-    void serialize(Archive &ar) {
-        for (int i = 0; i < 100; i++) const {
+    void serialize(Archive &ar) const {
+        for (int i = 0; i < 100; i++) {
             ar & x[i];
         }
     }
