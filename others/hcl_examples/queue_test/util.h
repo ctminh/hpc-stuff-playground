@@ -186,9 +186,10 @@ typedef struct single_db_stdarr_t {
     // serialization
     template<typename A>
     void serialize(A& ar) const {
-        for (long i = 0; i < 62500; i++) {
-            ar & a[i];
-        }
+        // for (int i = 0; i < 62500; i++) {
+        //     ar & a[i];
+        // }
+        boost::serialization::make_nvp("elems", (static_cast<void *>(a.data()));
     }
 };
 
