@@ -100,7 +100,7 @@ int main (int argc,char* argv[])
     if (is_server){
         std::ofstream server_list_file;
         server_list_file.open("./server_list");
-        server_list_file << processor_name;
+        server_list_file << "10.12.1.2"; // processor_name;
         server_list_file.close();
     }
 
