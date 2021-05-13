@@ -247,9 +247,6 @@ struct MappedType{
     template<typename A>
     void serialize(A& ar) const {
         ar & a;
-        // for (long i = 0; i < 62500; i++) {
-        //     ar & a[i];
-        // }
     }
 };
 
