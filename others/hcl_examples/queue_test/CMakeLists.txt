@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 project(hcl_queue_examples)
 
 # set the example
-set(examples dbptr_arr_struct_queue_test) # temporarily get queue_test out
+set(examples queue_test dbarr_struct_queue_test dbarr_struct_queue_test dbstdarr_struct_queue_test) # temporarily get queue_test out
 
 # fine MPI package
 find_package(MPI REQUIRED COMPONENTS CXX)

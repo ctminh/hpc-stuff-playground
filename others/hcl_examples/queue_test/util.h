@@ -58,21 +58,23 @@ void mxm_kernel(double *A, double *B, double *C, int size, int i){
 // ================================================================================
 // Struct Definition
 // ================================================================================
-typedef struct mat_task_t {
+
+/* Struct of double pointers */
+typedef struct double_ptr_t {
     int size;
     double *A;  // ptr to the allocated matrix A
     double *B;  // ptr to the allocated matrix B
     double *C;  // ptr to the allocated matrix C - result
 
     // Constructor 1
-    mat_task_t(){
+    double_ptr_t(){
         A = new double[10*10];
         B = new double[10*10];
         C = new double[10*10];
     }
 
     // Constructor 2
-    mat_task_t(int s){
+    double_ptr_t(int s){
         size = s;
         A = new double[s*s];
         B = new double[s*s];
@@ -95,22 +97,17 @@ typedef struct mat_task_t {
         boost::serialization::make_array<double>(C, 100);
     }
 
-    // Destructor 1
-    // ~mat_task_t(){
-    //     delete[] A;
-    //     delete[] B;
-    //     delete[] C;
-    // }
+}double_ptr_t;
 
-}mat_task_t;
 
-typedef struct arr_mat_task_t {
+/* Struct of double array */
+typedef struct double_arr_t {
     double A[SIZE*SIZE];
     double B[SIZE*SIZE];
     double C[SIZE*SIZE];
 
     // Constructor 1
-    arr_mat_task_t(){
+    double_arr_t(){
         double low_bnd = 0.0;
         double upp_bnd = 10.0;
         std::uniform_real_distribution<double> ur_dist(low_bnd, upp_bnd);
@@ -121,8 +118,10 @@ typedef struct arr_mat_task_t {
             C[i] = 0.0;
         }
     }
-}arr_mat_task_t;
+}double_arr_t;
 
+
+/* Struct of mixed types */
 typedef struct general_task_t {
     int id;
     int32_t idx_image = 0;
@@ -131,18 +130,19 @@ typedef struct general_task_t {
     std::vector<int64_t> arg_sizes;
 }general_task_t;
 
-typedef struct dbarr_test_t {
-    // try 100 elements of double-type
+
+/* Struct of a single db-array type */
+typedef struct single_db_arr_t {
     double x[100];
 
     // constructor 1
-    dbarr_test_t(){
+    single_db_arr_t(){
         for (int i = 0; i < 100; i++)
             x[i] = (double) i;
     }
 
     // constructor 2
-    dbarr_test_t(double a){
+    single_db_arr_t(double a){
         for (int i = 0; i < 100; i++)
             x[i] = a;
     }
@@ -155,7 +155,34 @@ typedef struct dbarr_test_t {
         }
         // ar & boost::serialization::make_array<double>(x);
     }
-}dbarr_test_t;
+
+}single_db_arr_t;
+
+
+/* Struct of a single db-array type using std::array */
+typedef struct single_db_stdarr_t {
+
+    std::array<double, 62500> a;
+
+    // constructor 1
+    single_db_stdarr_t() {
+        for (int i = 0; i < 62500; i++) {
+            a[i] = (double) i;
+        }
+    }
+
+    // serialization
+    template<typename A>
+    void serialize(A& ar) const {
+        for (long i = 0; i < 62500; i++) {
+            ar & a[i];
+        }
+    }
+};
+
+// ================================================================================
+// HCL-author-defined Types for Testing
+// ================================================================================
 
 struct KeyType{
     size_t a;
@@ -181,33 +208,23 @@ struct KeyType{
         return a==o.a;
     }
     
-  template<typename A>
+    template<typename A>
     void serialize(A& ar) const {
         ar & a;
     }
 };
 
-// 1,4,16,1000,4000,16000,250000,1000000,4000000,16000000
-
 struct MappedType{
-    // char a[62500];
-    // double a[62500];
-    // std::array<double, 62500> a;
+
     std::string a;
 
     MappedType() {
         a = "";
         a.resize(1000000, 'c');
-        // for (long i = 0; i < 62500; i++) {
-        //     a[i] = 1.1;
-        // }
     }
 
     MappedType(std::string a_) {
         a = a_;
-        // for (long i = 0; i < 62500; i++) {
-        //     a[i] = a_[i];
-        // }
     }
 
 #if HCL_ENABLE_RPCLIB
@@ -219,48 +236,25 @@ struct MappedType{
         if (a == o.a) {
             return false;
         }
-        // for (long i = 0; i < 62500; i++) {
-            // if (a[i] != o.a[i]) {
-            //     return false;
-            // }
-        // }
+
         return true;
     }
     MappedType& operator=( const MappedType& other ) {
         a = other.a;
-        // for (long i = 0; i < 62500; i++) {
-        //     a[i] = other.a[i];
-        // }
         return *this;
     }
-    // bool operator<(const MappedType &o) const {
-    //     for (long i = 0; i < 62500; i++) {
-    //         if (a[i] < o.a[i]) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-    // bool Contains(const MappedType &o) const {
-    //     for (long i = 0; i < 62500; i++) {
-    //         if (a[i] != o.a[i]) {
-    //             return false;
-    //         }
-    //     }
-    //     return true;
-    // }
     
-  template<typename A>
-  void serialize(A& ar) const {
-      ar & a;
-      // for (long i = 0; i < 62500; i++) {
-      //     ar & a[i];
-      // }
-  }
+    template<typename A>
+    void serialize(A& ar) const {
+        ar & a;
+        // for (long i = 0; i < 62500; i++) {
+        //     ar & a[i];
+        // }
+    }
 };
+
 const int MAX = 26;
-std::string printRandomString(int n)
-{
+std::string printRandomString(int n) {
     char alphabet[MAX] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g',
                            'h', 'i', 'j', 'k', 'l', 'm', 'n',
                            'o', 'p', 'q', 'r', 's', 't', 'u',
@@ -289,19 +283,19 @@ void bt_sighandler(int sig, struct sigcontext ctx) {
     int i, trace_size = 0;
 
     if (sig == SIGSEGV)
-        printf("Got signal %d, faulty address is %p, "
-               "from %p\n", sig, ctx.cr2, ctx.rip);
+        printf("Got signal %d, faulty address is %p, from %p\n", sig, ctx.cr2, ctx.rip);
     else
         printf("Got signal %d\n", sig);
 
     trace_size = backtrace(trace, 16);
+
     /* overwrite sigaction with caller's address */
     trace[1] = (void *)ctx.rip;
     messages = backtrace_symbols(trace, trace_size);
+
     /* skip first stack frame (points here) */
     printf("[bt] Execution path:\n");
-    for (i=1; i<trace_size; ++i)
-    {
+    for (i=1; i<trace_size; ++i) {
         printf("[bt] #%d %s\n", i, messages[i]);
 
         /* find first occurence of '(' or ' ' in message[i] and assume

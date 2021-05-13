@@ -107,22 +107,21 @@ int main (int argc, char *argv[])
      */
 
     // Try hcl-queue with different types of user-defined struct
-    //      dbarr_test_t
-    hcl::queue<dbarr_test_t> *global_queue;
+    hcl::queue<double_arr_t> *global_queue;
 
     // allocate the hcl queue at server-side
     if (is_server) {
-        global_queue = new hcl::queue<dbarr_test_t>();
+        global_queue = new hcl::queue<double_arr_t>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
     // allocate the hcl queue at client-side
     if (!is_server) {
-        global_queue = new hcl::queue<dbarr_test_t>();
+        global_queue = new hcl::queue<double_arr_t>();
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::queue<dbarr_test_t> local_queue;
+    std::queue<double_arr_t> local_queue;
 
     // split the mpi communicator from the server, here is just for client communicator
     MPI_Comm client_comm;
@@ -133,7 +132,7 @@ int main (int argc, char *argv[])
 
     // check task size
     int num_elements = 100;
-    dbarr_test_t tmp_T = dbarr_test_t();
+    double_arr_t tmp_T = double_arr_t();
     size_t task_size = sizeof(tmp_T);
     std::cout << "[CHECK] arr_num_elements = " << num_elements << " | task size = " << task_size << " bytes" << std::endl;
 
@@ -148,7 +147,7 @@ int main (int argc, char *argv[])
         for(int i = 0; i < num_tasks; i++){
             
             // allocate an arr_mat task
-            dbarr_test_t lT= dbarr_test_t();
+            double_arr_t lT= double_arr_t();
                        
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
@@ -189,7 +188,7 @@ int main (int argc, char *argv[])
         Timer t_push_remote = Timer();
         for(int i = 0; i < num_tasks; i++){
             // allocate the task
-            dbarr_test_t gT = dbarr_test_t();
+            double_arr_t gT = double_arr_t();
 
             printf("[DBG] R%d pushes task-%d into the global-hcl queue...\n", my_rank, i);
             

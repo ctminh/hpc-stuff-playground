@@ -107,22 +107,21 @@ int main (int argc, char *argv[])
      */
 
     // Try hcl-queue with different types of user-defined struct
-    //      with mat_task_t
-    hcl::queue<mat_task_t> *mat_tasks_queue;
+    hcl::queue<single_db_stdarr_t> *global_queue;
 
     // allocate the hcl queue at server-side
     if (is_server) {
-        mat_tasks_queue = new hcl::queue<mat_task_t>();
+        global_queue = new hcl::queue<single_db_stdarr_t>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
     // allocate the hcl queue at client-side
     if (!is_server) {
-        mat_tasks_queue = new hcl::queue<mat_task_t>();
+        global_queue = new hcl::queue<single_db_stdarr_t>();
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::queue<mat_task_t> local_queue;
+    std::queue<single_db_stdarr_t> local_queue;
 
     // split the mpi communicator from the server, here is just for client communicator
     MPI_Comm client_comm;
@@ -132,10 +131,9 @@ int main (int argc, char *argv[])
     MPI_Barrier(MPI_COMM_WORLD);
 
     // check task size
-    int mat_size = 10;
-    mat_task_t tmp_T = mat_task_t(mat_size);
+    single_db_stdarr_t tmp_T = single_db_stdarr_t();
     size_t task_size = sizeof(tmp_T);
-    std::cout << "[CHECK] matrix size = " << mat_size << " | task size = " << task_size << " bytes" << std::endl;
+    std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
 
     /* /////////////////////////////////////////////////////////////////////////////
      * Test throughput of the LOCAL QUEUES at client-side
@@ -148,7 +146,7 @@ int main (int argc, char *argv[])
         for(int i = 0; i < num_tasks; i++){
             
             // allocate an arr_mat task
-            mat_task_t lT= mat_task_t(mat_size);
+            single_db_stdarr_t lT= single_db_stdarr_t();
                        
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
@@ -189,13 +187,13 @@ int main (int argc, char *argv[])
         Timer t_push_remote = Timer();
         for(int i = 0; i < num_tasks; i++){
             // allocate the task
-            mat_task_t gT = mat_task_t(mat_size);
+            single_db_stdarr_t gT = single_db_stdarr_t();
 
             printf("[DBG] R%d pushes task-%d into the global-hcl queue...\n", my_rank, i);
             
             // put tasks to the glob-queue and measure time
             t_push_remote.resumeTime();
-            mat_tasks_queue->Push(gT, offset_key);
+            global_queue->Push(gT, offset_key);
             t_push_remote.pauseTime();
         }
 
@@ -213,7 +211,7 @@ int main (int argc, char *argv[])
             
             // pop tasks and measure time
             t_pop_remote.resumeTime();
-            auto loc_pop_res = mat_tasks_queue->Pop(offset_key);
+            auto loc_pop_res = global_queue->Pop(offset_key);
             t_pop_remote.pauseTime();
         }
 
