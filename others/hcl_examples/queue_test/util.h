@@ -12,6 +12,7 @@
 #include <fstream>
 #include <atomic>
 #include <random>
+#include <array>
 
 namespace bip=boost::interprocess;
 const int SIZE = 10;
@@ -173,7 +174,7 @@ typedef struct single_db_arr_t {
 /* Struct of a single db-array type using std::array */
 typedef struct single_db_stdarr_t {
 
-    std::array<double, 62500> a;
+    std::array<double,62500> a;
 
     // constructor 1
     single_db_stdarr_t() {
