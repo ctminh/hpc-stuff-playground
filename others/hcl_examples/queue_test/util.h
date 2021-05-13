@@ -179,7 +179,7 @@ typedef struct single_db_stdarr_t {
     // constructor 1
     single_db_stdarr_t() {
         for (int i = 0; i < 62500; i++) {
-            a[i] = (double) i;
+            a[i] = 1.0;
         }
     }
 
