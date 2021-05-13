@@ -118,6 +118,17 @@ typedef struct double_arr_t {
             C[i] = 0.0;
         }
     }
+
+    // serialization
+    template <typename Archive>
+    void serialize(Archive &ar) const {
+        for (int i = 0; i < SIZE*SIZE; i++) {
+            ar & A[i];
+            ar & B[i];
+            ar & C[i];
+        }
+    }
+
 }double_arr_t;
 
 
