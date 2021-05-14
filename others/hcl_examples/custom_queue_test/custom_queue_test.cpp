@@ -94,12 +94,19 @@ int main (int argc, char *argv[])
               << ", my_server=" << my_server
               << ", num_servers=" << num_servers
               << std::endl;
+    
+    // just to make sure the shared-file system done in sync
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // configure hcl components before running, this configuration for each rank
     HCL_CONF->IS_SERVER = is_server;
     HCL_CONF->MY_SERVER = my_server;
     HCL_CONF->NUM_SERVERS = num_servers;
-    HCL_CONF->SERVER_ON_NODE = server_on_node || is_server;
+    // for the first 2 ranks, because R0 is server, R0&R1 are on Node 1
+    if (my_rank < 2)
+        HCL_CONF->SERVER_ON_NODE = true;
+    else
+        HCL_CONF->SERVER_ON_NODE = false;
     HCL_CONF->SERVER_LIST_PATH = "./server_list";
     std::cout << HLINE << std::endl;
 
