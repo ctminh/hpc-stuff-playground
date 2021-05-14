@@ -174,7 +174,7 @@ typedef struct single_db_arr_t {
 /* Struct of a single db-array type using std::array */
 typedef struct single_db_stdarr_t {
 
-    std::array<double,62500> a;
+    std::array<double, 62500> a;
 
     // constructor 1
     single_db_stdarr_t() {
@@ -189,7 +189,8 @@ typedef struct single_db_stdarr_t {
         // for (int i = 0; i < 62500; i++) {
         //     ar & a[i];
         // }
-        ar(a.data());
+        ar(a);
+        ar.serializeDeferments();
     }
 };
 
