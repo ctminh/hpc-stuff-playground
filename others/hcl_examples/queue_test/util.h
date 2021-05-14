@@ -192,10 +192,10 @@ typedef struct single_db_stdarr_t {
     // serialization
     template<class Archive>
     void serialize(Archive& ar) const {
-        // for (int i = 0; i < 62500; i++) {
-        //     ar & a[i];
-        // }
-        ar(a);
+        for (int i = 0; i < 62500; i++) {
+            ar & a[i];
+        }
+        // ar(a);
         // ar.serializeDeferments();
     }
 };
