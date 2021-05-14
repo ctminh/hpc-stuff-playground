@@ -33,15 +33,15 @@ const int SIZE = 100;
 // Struct Definition
 // ================================================================================
 
-/* Struct of a single db-array type using std::array */
-typedef struct single_db_stdarr_t {
+/* Struct of a matrix-tuple type using std::array */
+typedef struct mattup_stdarr_t {
 
     std::array<double, SIZE*SIZE> A;
     std::array<double, SIZE*SIZE> B;
     std::array<double, SIZE*SIZE> C;
 
     // constructor 1
-    single_db_stdarr_t() {
+    mattup_stdarr_t() {
         for (int i = 0; i < SIZE*SIZE; i++) {
             A[i] = 1.0;
             B[i] = 2.0;
@@ -50,15 +50,15 @@ typedef struct single_db_stdarr_t {
     }
 
     // serialization
-    template<class Archive>
-    void serialize(Archive& ar) const {
+    template<typename Archive>
+    void serialize(Archive& ar) {
         for (int i = 0; i < SIZE*SIZE; i++) {
             ar & A[i];
             ar & B[i];
             ar & C[i];
         }
     }
-};
+} mattup_stdarr_t;
 
 // ================================================================================
 // HCL-author-defined Types for Testing
