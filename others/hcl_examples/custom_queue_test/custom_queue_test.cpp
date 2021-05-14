@@ -79,7 +79,9 @@ int main (int argc, char *argv[])
         is_server = true;
 
     int num_servers = 1;
-    size_t my_server = my_rank % num_servers;
+    int my_server = 1;
+    if (is_server)
+        my_server = 0;
 
     // write the server address into file
     if (is_server){
