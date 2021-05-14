@@ -80,8 +80,6 @@ int main (int argc, char *argv[])
 
     int num_servers = 1;
     int my_server = 0;
-    if (my_rank < 2)
-        my_server = 1;
 
     // write the server address into file
     if (is_server){
