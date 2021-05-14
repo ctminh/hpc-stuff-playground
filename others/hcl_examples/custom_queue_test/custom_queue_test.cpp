@@ -79,9 +79,9 @@ int main (int argc, char *argv[])
         is_server = true;
 
     int num_servers = 1;
-    int my_server = 1;
-    if (is_server)
-        my_server = 0;
+    int my_server = 0;
+    if (my_rank < 2)
+        my_server = 1;
 
     // write the server address into file
     if (is_server){
