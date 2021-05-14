@@ -22,6 +22,7 @@
 
 
 namespace bip=boost::interprocess;
+const int SIZE = 100;
 
 // ================================================================================
 // Util-functions
@@ -35,20 +36,26 @@ namespace bip=boost::interprocess;
 /* Struct of a single db-array type using std::array */
 typedef struct single_db_stdarr_t {
 
-    std::array<double, 62500> a;
+    std::array<double, SIZE*SIZE> A;
+    std::array<double, SIZE*SIZE> B;
+    std::array<double, SIZE*SIZE> C;
 
     // constructor 1
     single_db_stdarr_t() {
-        for (int i = 0; i < 62500; i++) {
-            a[i] = 1.0;
+        for (int i = 0; i < SIZE*SIZE; i++) {
+            A[i] = 1.0;
+            B[i] = 2.0;
+            C[i] = 0.0;
         }
     }
 
     // serialization
     template<class Archive>
     void serialize(Archive& ar) const {
-        for (int i = 0; i < 62500; i++) {
-            ar(a[i]);
+        for (int i = 0; i < SIZE*SIZE; i++) {
+            ar & A[i];
+            ar & B[i];
+            ar & C[i];
         }
     }
 };
