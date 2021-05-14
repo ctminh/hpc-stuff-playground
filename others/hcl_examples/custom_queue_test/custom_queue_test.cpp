@@ -78,8 +78,8 @@ int main (int argc, char *argv[])
     if (my_rank == 0)
         is_server = true;
 
-    size_t my_server = my_rank / ranks_per_server;
-    int num_servers = comm_size / ranks_per_server;
+    int num_servers = 1;
+    size_t my_server = my_rank % num_servers;
 
     // write the server address into file
     if (is_server){
