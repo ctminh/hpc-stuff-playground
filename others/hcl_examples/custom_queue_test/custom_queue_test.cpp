@@ -136,7 +136,8 @@ int main (int argc, char *argv[])
     // check task size
     mattup_stdarr_t tmp_T = mattup_stdarr_t();
     size_t task_size = sizeof(tmp_T);
-    // std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
+    std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
+    std::cout << HLINE << std::endl;
 
     /* /////////////////////////////////////////////////////////////////////////////
      * Test throughput of the LOCAL QUEUES at client-side
