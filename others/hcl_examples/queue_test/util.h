@@ -14,6 +14,12 @@
 #include <random>
 #include <array>
 
+#include <cereal/cereal.hpp> // for defer
+#include <cereal/types/memory.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
+
+
 namespace bip=boost::interprocess;
 const int SIZE = 10;
 
