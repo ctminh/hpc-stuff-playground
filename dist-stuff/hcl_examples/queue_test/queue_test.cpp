@@ -15,11 +15,16 @@
 
 struct KeyType{
     size_t a;
-    KeyType():a(0){}
-    KeyType(size_t a_):a(a_){}
+    
+    // constructor 1
+    KeyType(): a(0) { }
+    // constructor 2
+    KeyType(size_t val): a(val) { }
+
 #ifdef HCL_ENABLE_RPCLIB
     MSGPACK_DEFINE(a);
 #endif
+
     /* equal operator for comparing two Matrix. */
     bool operator==(const KeyType &o) const {
         return a == o.a;
@@ -38,12 +43,14 @@ struct KeyType{
         return a==o.a;
     }
 };
+
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
 template<typename A>
 void serialize(A &ar, KeyType &a) {
     ar & a.a;
 }
 #endif
+
 namespace std {
     template<>
     struct hash<KeyType> {
@@ -75,10 +82,6 @@ int main (int argc,char* argv[])
     if(argc > 4)    server_on_node = (bool)atoi(argv[4]);
     if(argc > 5)    debug = (bool)atoi(argv[5]);
 
-   /* if(comm_size/ranks_per_server < 2){
-        perror("comm_size/ranks_per_server should be atleast 2 for this test\n");
-        exit(-1);
-    }*/
     int len;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     MPI_Get_processor_name(processor_name, &len);
@@ -100,7 +103,12 @@ int main (int argc,char* argv[])
     if (is_server){
         std::ofstream server_list_file;
         server_list_file.open("./server_list");
-        server_list_file << "10.12.1.2"; // processor_name;
+
+#if defined(HCL_ENABLE_THALLIUM_TCP)
+        server_list_file << processor_name;
+#elif defined(HCL_ENABLE_THALLIUM_ROCE)
+        server_list_file << "10.12.1.2";
+#endif
         server_list_file.close();
     }
 
@@ -146,13 +154,7 @@ int main (int argc,char* argv[])
     MPI_Comm_split(MPI_COMM_WORLD, !is_server, my_rank, &client_comm);
     int client_comm_size;
     MPI_Comm_size(client_comm, &client_comm_size);
-    // if(is_server){
-    //     std::function<int(int)> func=[](int x){ std::cout<<x<<std::endl;return x; };
-    //     int a;
-    //     std::function<std::pair<bool,int>(KeyType&,std::array<int, array_size>&,std::string,int)> putFunc(std::bind(&hcl::queue<KeyType,std::array<int,
-    //                                                                                                                 array_size>>::LocalPutWithCallback<int,int>,queue,std::placeholders::_1, std::placeholders::_2,std::placeholders::_3, std::placeholders::_4));
-    //     queue->Bind("CB_Put", func, "APut",putFunc);
-    // }
+
     MPI_Barrier(MPI_COMM_WORLD);
     if (!is_server) {
         Timer llocal_queue_timer=Timer();

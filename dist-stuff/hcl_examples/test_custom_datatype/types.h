@@ -75,12 +75,6 @@ typedef struct Single_DB_T {
     // constructor 2
     Single_DB_T(double val): a(val) { }
 
-    // serialization
-    // template<typename Archive>
-    // void serialize(Archive& ar) {
-    //     ar & a;
-    // }
-
 } Single_DB_T;
 
 // try to get the serialization out of the struct define
