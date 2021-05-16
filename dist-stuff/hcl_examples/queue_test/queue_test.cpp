@@ -42,19 +42,48 @@ struct KeyType{
     bool Contains(const KeyType &o) const {
         return a==o.a;
     }
-};
 
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
+    template<typename A>
+    void serialize(A &ar) {
+        ar & a.a;
+    }
+#endif
+
+};
+
+// namespace std {
+//     template<>
+//     struct hash<KeyType> {
+//         size_t operator()(const KeyType &k) const {
+//             return k.a;
+//         }
+//     };
+// }
+
+/* Try a simple struct with a single double element */
+struct DoubleType {
+    double a;
+
+    // constructor 1
+    DoubleType(): a(1.0) { }
+    // constructor 2
+    DoubleType(double val): a(val) { }
+
+};
+
+// try to get the serialization out of the struct define
+#if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
 template<typename A>
-void serialize(A &ar, KeyType &a) {
+void serialize(A &ar, DoubleType &a) {
     ar & a.a;
 }
 #endif
 
 namespace std {
     template<>
-    struct hash<KeyType> {
-        size_t operator()(const KeyType &k) const {
+    struct hash<DoubleType> {
+        size_t operator()(const DoubleType &k) const {
             return k.a;
         }
     };
@@ -139,16 +168,16 @@ int main (int argc,char* argv[])
     HCL_CONF->SERVER_ON_NODE = server_on_node || is_server;
     HCL_CONF->SERVER_LIST_PATH = "./server_list";
 
-    hcl::queue<KeyType> *queue;
+    hcl::queue<DoubleType> *queue;
     if (is_server) {
-        queue = new hcl::queue<KeyType>();
+        queue = new hcl::queue<DoubleType>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if (!is_server) {
-        queue = new hcl::queue<KeyType>();
+        queue = new hcl::queue<DoubleType>();
     }
 
-    std::queue<KeyType> lqueue=std::queue<KeyType>();
+    std::queue<DoubleType> lqueue=std::queue<DoubleType>();
 
     MPI_Comm client_comm;
     MPI_Comm_split(MPI_COMM_WORLD, !is_server, my_rank, &client_comm);
@@ -158,15 +187,16 @@ int main (int argc,char* argv[])
     MPI_Barrier(MPI_COMM_WORLD);
     if (!is_server) {
         Timer llocal_queue_timer=Timer();
-        std::hash<KeyType> keyHash;
+        // std::hash<KeyType> keyHash;
+
         /*Local std::queue test*/
         for(int i=0;i<num_request;i++){
             // size_t val=my_server;
             double val = my_server;
             llocal_queue_timer.resumeTime();
-            size_t key_hash = keyHash(KeyType(val))%num_servers;
+            size_t key_hash = keyHash(DoubleType(val))%num_servers;
             if (key_hash == my_server && is_server){}
-            lqueue.push(KeyType(val));
+            lqueue.push(DoubleType(val));
             llocal_queue_timer.pauseTime();
         }
 
@@ -177,7 +207,7 @@ int main (int argc,char* argv[])
             // size_t val=my_server;
             double val = my_server;
             llocal_get_queue_timer.resumeTime();
-            size_t key_hash = keyHash(KeyType(val))%num_servers;
+            size_t key_hash = keyHash(DoubleType(val))%num_servers;
             if (key_hash == my_server && is_server){}
             auto result = lqueue.front();
             lqueue.pop();
@@ -197,7 +227,7 @@ int main (int argc,char* argv[])
         for(int i=0;i<num_request;i++){
             // size_t val=my_server;
             double val = my_server;
-            auto key=KeyType(val);
+            auto key=DoubleType(val);
             local_queue_timer.resumeTime();
             queue->Push(key, my_server_key);
             local_queue_timer.pauseTime();
@@ -209,9 +239,9 @@ int main (int argc,char* argv[])
         for(int i=0;i<num_request;i++){
             // size_t val=my_server;
             double val = my_server;
-            auto key=KeyType(val);
+            auto key=DoubleType(val);
             local_get_queue_timer.resumeTime();
-            size_t key_hash = keyHash(KeyType(val))%num_servers;
+            size_t key_hash = keyHash(DoubleType(val))%num_servers;
             if (key_hash == my_server && is_server){}
             auto result = queue->Pop(my_server_key);
             local_get_queue_timer.pauseTime();
@@ -246,7 +276,7 @@ int main (int argc,char* argv[])
         for(int i=0;i<num_request;i++){
             // size_t val = my_server+1;
             double val = my_server+1;
-            auto key=KeyType(val);
+            auto key=DoubleType(val);
             remote_queue_timer.resumeTime();
             queue->Push(key, my_server_remote_key);
             remote_queue_timer.pauseTime();
@@ -260,9 +290,9 @@ int main (int argc,char* argv[])
         for(int i=0;i<num_request;i++){
             // size_t val = my_server+1;
             double val = my_server+1;
-            auto key=KeyType(val);
+            auto key=DoubleType(val);
             remote_get_queue_timer.resumeTime();
-            size_t key_hash = keyHash(KeyType(val))%num_servers;
+            size_t key_hash = keyHash(DoubleType(val))%num_servers;
             if (key_hash == my_server && is_server){}
             queue->Pop(my_server_remote_key);
             remote_get_queue_timer.pauseTime();
