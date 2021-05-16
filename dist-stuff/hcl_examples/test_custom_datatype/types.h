@@ -34,14 +34,14 @@ const int SIZE = 100;
 // ================================================================================
 
 /* Struct of a matrix-tuple type using std::array */
-typedef struct mattup_stdarr_t {
+typedef struct Mattup_Stdarr_T {
 
     std::array<double, SIZE*SIZE> A;
     std::array<double, SIZE*SIZE> B;
     std::array<double, SIZE*SIZE> C;
 
     // constructor 1
-    mattup_stdarr_t() {
+    Mattup_Stdarr_T() {
         for (int i = 0; i < SIZE*SIZE; i++) {
             A[i] = 1.0;
             B[i] = 2.0;
@@ -64,10 +64,10 @@ typedef struct mattup_stdarr_t {
         ar & B; //.data();
         ar & C; //.data();
     }
-} mattup_stdarr_t;
+} Mattup_Stdarr_T;
 
 /* Try a simple struct with a single double element */
-typedef struct single_db_t {
+typedef struct Single_DB_T {
     double a;
 
     // constructor 1
@@ -76,12 +76,20 @@ typedef struct single_db_t {
     single_db_t(double val) { a = val; }
 
     // serialization
-    template<typename Archive>
-    void serialize(Archive& ar) {
-        ar & a;
-    }
+    // template<typename Archive>
+    // void serialize(Archive& ar) {
+    //     ar & a;
+    // }
 
-} single_db_t;
+} Single_DB_T;
+
+// try to get the serialization out of the struct define
+#if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
+template<typename A>
+void serialize(A &ar, Single_DB_T &a) {
+    ar & a.a;
+}
+#endif
 
 // ================================================================================
 // HCL-author-defined Types for Testing

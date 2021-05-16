@@ -121,18 +121,18 @@ int main (int argc, char *argv[])
      * Create local-queue and hcl-global-queues
      * /////////////////////////////////////////////////////////////
      */
-    hcl::queue<single_db_t> *global_queue;
+    hcl::queue<Single_DB_T> *global_queue;
     if (is_server) {    // at the server-side
-        global_queue = new hcl::queue<single_db_t>();
+        global_queue = new hcl::queue<Single_DB_T>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (!is_server) {   // at the client-side
-        global_queue = new hcl::queue<single_db_t>();
+        global_queue = new hcl::queue<Single_DB_T>();
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::queue<single_db_t> local_queue;
+    std::queue<Single_DB_T> local_queue;
 
     // split the mpi communicator from the server, here is just for client communicator
     MPI_Comm client_comm;
@@ -142,7 +142,7 @@ int main (int argc, char *argv[])
     MPI_Barrier(MPI_COMM_WORLD);
 
     // check task size
-    single_db_t tmp_T = single_db_t();
+    Single_DB_T tmp_T = Single_DB_T();
     size_t task_size = sizeof(tmp_T);
     std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
     std::cout << HLINE << std::endl;
@@ -158,7 +158,7 @@ int main (int argc, char *argv[])
         for(int i = 0; i < num_tasks; i++){
             
             // allocate an arr_mat task
-            single_db_t lT= single_db_t();
+            Single_DB_T lT= Single_DB_T();
                        
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
@@ -200,7 +200,7 @@ int main (int argc, char *argv[])
         Timer t_push_remote = Timer();
         for(int i = 0; i < num_tasks; i++){
             // allocate the task
-            single_db_t gT = single_db_t();
+            Single_DB_T gT = Single_DB_T();
 
             printf("[DBG] R%d pushes task-%d into the global-hcl queue...\n", my_rank, i);
             
