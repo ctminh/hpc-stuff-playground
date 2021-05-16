@@ -238,6 +238,8 @@ int main (int argc,char* argv[])
 
         Timer local_queue_timer=Timer();
         uint16_t my_server_key = my_server % num_servers;
+        printf("[DBG-REMOTEQUEUE-LOCAL-OPS] R%d: my_server_key = %d\n", my_rank, my_server_key);
+
         /*Local queue test*/
         for(int i=0;i<num_request;i++){
             // size_t val=my_server;
@@ -292,6 +294,7 @@ int main (int argc,char* argv[])
         Timer remote_queue_timer=Timer();
         /*Remote queue test*/
         uint16_t my_server_remote_key = (my_server + 1) % num_servers;
+        printf("[DBG-REMOTEQUEUE-REMOTE-OPS] R%d: my_server_remote_key = %d\n", my_rank, my_server_remote_key);
         for(int i=0;i<num_request;i++){
             // size_t val = my_server+1;
             double val = my_server+1;
