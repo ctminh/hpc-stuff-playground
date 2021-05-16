@@ -82,7 +82,7 @@ void serialize(A &ar, DoubleType &a) {
 
 namespace std {
     template<>
-    struct hash<DoubleType> {
+    struct keyHash<DoubleType> {
         size_t operator()(const DoubleType &k) const {
             return k.a;
         }
