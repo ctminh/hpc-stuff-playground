@@ -46,7 +46,7 @@ struct KeyType{
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
     template<typename A>
     void serialize(A &ar) {
-        ar & a.a;
+        ar & a;
     }
 #endif
 
