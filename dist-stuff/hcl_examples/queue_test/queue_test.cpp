@@ -14,12 +14,12 @@
 #include <hcl/queue/queue.h>
 
 struct KeyType{
-    size_t a;
+    double a;
     
     // constructor 1
     KeyType(): a(0) { }
     // constructor 2
-    KeyType(size_t val): a(val) { }
+    KeyType(double val): a(val) { }
 
 #ifdef HCL_ENABLE_RPCLIB
     MSGPACK_DEFINE(a);
@@ -161,7 +161,8 @@ int main (int argc,char* argv[])
         std::hash<KeyType> keyHash;
         /*Local std::queue test*/
         for(int i=0;i<num_request;i++){
-            size_t val=my_server;
+            // size_t val=my_server;
+            double val = my_server;
             llocal_queue_timer.resumeTime();
             size_t key_hash = keyHash(KeyType(val))%num_servers;
             if (key_hash == my_server && is_server){}
@@ -173,7 +174,8 @@ int main (int argc,char* argv[])
 
         Timer llocal_get_queue_timer=Timer();
         for(int i=0;i<num_request;i++){
-            size_t val=my_server;
+            // size_t val=my_server;
+            double val = my_server;
             llocal_get_queue_timer.resumeTime();
             size_t key_hash = keyHash(KeyType(val))%num_servers;
             if (key_hash == my_server && is_server){}
@@ -193,7 +195,8 @@ int main (int argc,char* argv[])
         uint16_t my_server_key = my_server % num_servers;
         /*Local queue test*/
         for(int i=0;i<num_request;i++){
-            size_t val=my_server;
+            // size_t val=my_server;
+            double val = my_server;
             auto key=KeyType(val);
             local_queue_timer.resumeTime();
             queue->Push(key, my_server_key);
@@ -204,7 +207,8 @@ int main (int argc,char* argv[])
         Timer local_get_queue_timer=Timer();
         /*Local queue test*/
         for(int i=0;i<num_request;i++){
-            size_t val=my_server;
+            // size_t val=my_server;
+            double val = my_server;
             auto key=KeyType(val);
             local_get_queue_timer.resumeTime();
             size_t key_hash = keyHash(KeyType(val))%num_servers;
@@ -240,7 +244,8 @@ int main (int argc,char* argv[])
         /*Remote queue test*/
         uint16_t my_server_remote_key = (my_server + 1) % num_servers;
         for(int i=0;i<num_request;i++){
-            size_t val = my_server+1;
+            // size_t val = my_server+1;
+            double val = my_server+1;
             auto key=KeyType(val);
             remote_queue_timer.resumeTime();
             queue->Push(key, my_server_remote_key);
@@ -253,7 +258,8 @@ int main (int argc,char* argv[])
         Timer remote_get_queue_timer=Timer();
         /*Remote queue test*/
         for(int i=0;i<num_request;i++){
-            size_t val = my_server+1;
+            // size_t val = my_server+1;
+            double val = my_server+1;
             auto key=KeyType(val);
             remote_get_queue_timer.resumeTime();
             size_t key_hash = keyHash(KeyType(val))%num_servers;
