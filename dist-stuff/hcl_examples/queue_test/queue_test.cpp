@@ -70,6 +70,12 @@ struct DoubleType {
     // constructor 2
     DoubleType(double val): a(val) { }
 
+    // define operator for the hash
+    DoubleType& operator=( const DoubleType& other ) {
+        a = other.a;
+        return *this;
+    }
+
 };
 
 // try to get the serialization out of the struct define
