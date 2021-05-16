@@ -52,6 +52,7 @@ int main (int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
     // get hostname of each rank, on beast, hcl works with the direct ib-ip-addresses
+    bool debug = true;
     int name_len;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     MPI_Get_processor_name(processor_name, &name_len);
@@ -70,7 +71,6 @@ int main (int argc, char *argv[])
     if (argc == 2)  // try on rome1, rome2 of beast-system
         num_nodes = atoi(argv[1]);
     int ranks_per_server = comm_size / num_nodes;   // default is total-num of ranks
-    bool debug = true;
     bool server_on_node = false;
 
     // check num of ready ranks when running this program
