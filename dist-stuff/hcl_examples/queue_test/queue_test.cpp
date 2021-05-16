@@ -76,15 +76,15 @@ struct DoubleType {
         return *this;
     }
 
-};
-
-// try to get the serialization out of the struct define
+    // serialization
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
-template<typename A>
-void serialize(A &ar, DoubleType &a) {
-    ar & a.a;
-}
+    template<typename A>
+    void serialize(A &ar) {
+        ar & a;
+    }
 #endif
+
+};
 
 namespace std {
     template<>
