@@ -66,6 +66,23 @@ typedef struct mattup_stdarr_t {
     }
 } mattup_stdarr_t;
 
+/* Try a simple struct with a single double element */
+typedef struct single_db_t {
+    double a;
+
+    // constructor 1
+    single_db_t() { a = 1.0; }
+    // constructor 2
+    single_db_t(double val) { a = val; }
+
+    // serialization
+    template<typename Archive>
+    void serialize(Archive& ar) {
+        ar & a;
+    }
+
+} single_db_t;
+
 // ================================================================================
 // HCL-author-defined Types for Testing
 // ================================================================================
