@@ -82,7 +82,7 @@ void serialize(A &ar, DoubleType &a) {
 
 namespace std {
     template<>
-    struct keyHash<DoubleType> {
+    struct hash<DoubleType> {
         size_t operator()(const DoubleType &k) const {
             return k.a;
         }
@@ -188,6 +188,7 @@ int main (int argc,char* argv[])
     if (!is_server) {
         Timer llocal_queue_timer=Timer();
         // std::hash<KeyType> keyHash;
+        std::hash<DoubleType> keyHash;
 
         /*Local std::queue test*/
         for(int i=0;i<num_request;i++){
