@@ -93,7 +93,7 @@ int main (int argc, char *argv[])
         std::ofstream server_list_file;
         server_list_file.open("./server_list");
         // temporarily put the hard-code ip of rome1 here
-        server_list_file << node1; // processor_name;
+        server_list_file << "10.12.1.1"; // processor_name;
         server_list_file.close();
     }
     std::cout << "[CHECK] R" << my_rank << ": is_server=" << is_server
