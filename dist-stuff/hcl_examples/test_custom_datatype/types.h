@@ -71,9 +71,9 @@ typedef struct Single_DB_T {
     double a;
 
     // constructor 1
-    single_db_t() { a = 1.0; }
+    Single_DB_T(): a(1.0) { }
     // constructor 2
-    single_db_t(double val) { a = val; }
+    Single_DB_T(double val): a(val) { }
 
     // serialization
     // template<typename Archive>
