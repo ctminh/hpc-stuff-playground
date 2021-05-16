@@ -194,7 +194,7 @@ int main (int argc, char *argv[])
     if (!is_server) {
         
         // set a key by rank id
-        uint16_t offset_key = my_rank;
+        uint16_t offset_key = my_server;
 
         // put tasks to the hcl-global-queue
         Timer t_push_remote = Timer();
