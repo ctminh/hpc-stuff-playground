@@ -202,6 +202,10 @@ int main (int argc,char* argv[])
             double val = my_server;
             llocal_queue_timer.resumeTime();
             size_t key_hash = keyHash(DoubleType(val))%num_servers;
+            if (i == 0){
+                bool check_keyhash = (key_hash == my_server && is_server);
+                printf("[DBG-LOCALQUEUE-PUSH] R%d: check_keyhash = %d\n", my_rank, check_keyhash);
+            }
             if (key_hash == my_server && is_server){}
             lqueue.push(DoubleType(val));
             llocal_queue_timer.pauseTime();
@@ -215,6 +219,10 @@ int main (int argc,char* argv[])
             double val = my_server;
             llocal_get_queue_timer.resumeTime();
             size_t key_hash = keyHash(DoubleType(val))%num_servers;
+            if (i == 0){
+                bool check_keyhash = (key_hash == my_server && is_server);
+                printf("[DBG-LOCALQUEUE-POP] R%d: check_keyhash = %d\n", my_rank, check_keyhash);
+            }
             if (key_hash == my_server && is_server){}
             auto result = lqueue.front();
             lqueue.pop();
@@ -249,6 +257,10 @@ int main (int argc,char* argv[])
             auto key=DoubleType(val);
             local_get_queue_timer.resumeTime();
             size_t key_hash = keyHash(DoubleType(val))%num_servers;
+            if (i == 0){
+                bool check_keyhash = (key_hash == my_server && is_server);
+                printf("[DBG-REMOTEQUEUE-LOCALPOP] R%d: check_keyhash = %d\n", my_rank, check_keyhash);
+            }
             if (key_hash == my_server && is_server){}
             auto result = queue->Pop(my_server_key);
             local_get_queue_timer.pauseTime();
@@ -300,6 +312,10 @@ int main (int argc,char* argv[])
             auto key=DoubleType(val);
             remote_get_queue_timer.resumeTime();
             size_t key_hash = keyHash(DoubleType(val))%num_servers;
+            if (i == 0){
+                bool check_keyhash = (key_hash == my_server && is_server);
+                printf("[DBG-REMOTEQUEUE-REMOTEPOP] R%d: check_keyhash = %d\n", my_rank, check_keyhash);
+            }
             if (key_hash == my_server && is_server){}
             queue->Pop(my_server_remote_key);
             remote_get_queue_timer.pauseTime();
