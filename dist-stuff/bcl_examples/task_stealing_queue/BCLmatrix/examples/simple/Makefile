@@ -3,9 +3,7 @@ SHELL='bash'
 # XXX: Modify BCLROOT if you move this Makefile
 #      out of an examples/* directory.
 BCLROOT=$(PWD)/../../
-
 BACKEND = $(shell echo $(BCL_BACKEND) | tr '[:lower:]' '[:upper:]')
-
 TIMER_CMD=time
 
 ifeq ($(BACKEND),SHMEM)
@@ -17,21 +15,26 @@ ifeq ($(BACKEND),SHMEM)
 else ifeq ($(BACKEND),GASNET_EX)
   BACKEND=GASNET_EX
   # XXX: Allow selection of conduit.
-  # include /dss/dsshome1/lxc0B/ge49nuk2/spack/opt/linux-sles15-haswell/gasnet/2019.3.0-gcc-8.4.0-j75dwrr/include/mpi-conduit/mpi-par.mak
-
+  # include /path/to/gasnet/2019.3.0-gcc-8.4.0-j75dwrr/include/mpi-conduit/mpi-par.mak
   BCLFLAGS = $(GASNET_CXXCPPFLAGS) $(GASNET_CXXFLAGS) $(GASNET_LDFLAGS) $(GASNET_LIBS) -DGASNET_EX -I$(BCLROOT)
   CXX = mpicxx -cxx=g++
 
   BCL_RUN=mpirun -n 4
+
 else ifeq ($(BACKEND), UPCXX)
   BACKEND=UPCXX
-  # CXX = /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge49nuk2/upc/bin/upcxx -O3
-  BCL_RUN=mpirun -n 4
+  BCLFLAGS=-DUPCXX -I$(BCLROOT)
+  CXX=upcxx #-O3
+  
+  BCL_RUN=upcxx-run -n 4
+
 else
-  BCL_RUN=mpirun -n 4
   BACKEND=MPI
-  BCLFLAGS = -I$(BCLROOT)
+  BCLFLAGS=-I$(BCLROOT)
   CXX=mpiicpc
+
+  BCL_RUN=mpirun -n 4
+
 endif
 
 # c++ flafs for compiling
