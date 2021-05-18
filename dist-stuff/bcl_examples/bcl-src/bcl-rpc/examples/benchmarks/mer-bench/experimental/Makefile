@@ -1,46 +1,44 @@
+// SPDX-FileCopyrightText: 2021 Benjamin Brock
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 SHELL='bash'
 
 # XXX: Modify BCLROOT if you move this Makefile
 #      out of an examples/* directory.
-BCLROOT=$(PWD)/../../../../bcl-src/bcl-rpc
+BCLROOT=$(PWD)/../../../../
+
 BACKEND = $(shell echo $(BCL_BACKEND) | tr '[:lower:]' '[:upper:]')
+
 TIMER_CMD=time
 
 ifeq ($(BACKEND),SHMEM)
   BACKEND=SHMEM
   BCLFLAGS = -DSHMEM -I$(BCLROOT)
-  CXX=oshc++
+  CXX=CC
 
   BCL_RUN=oshrun -n 4
 else ifeq ($(BACKEND),GASNET_EX)
   BACKEND=GASNET_EX
   # XXX: Allow selection of conduit.
-  # include /path/to/gasnet/2019.3.0-gcc-8.4.0-j75dwrr/include/mpi-conduit/mpi-par.mak
+  include $(gasnet_prefix)/include/aries-conduit/aries-par.mak
+
   BCLFLAGS = $(GASNET_CXXCPPFLAGS) $(GASNET_CXXFLAGS) $(GASNET_LDFLAGS) $(GASNET_LIBS) -DGASNET_EX -I$(BCLROOT)
-  CXX = mpicxx -cxx=g++
+  CXX = CC
 
   BCL_RUN=mpirun -n 4
-
-else ifeq ($(BACKEND), UPCXX)
-  BACKEND=UPCXX
-  BCLFLAGS=-O3 -DUPCXX -I$(BCLROOT)
-  CXX=upcxx
-  
-  BCL_RUN=upcxx-run -n 4
-
 else
   BACKEND=MPI
-  BCLFLAGS=-I$(BCLROOT)
-  CXX=mpiicpc
+  BCLFLAGS = -I$(BCLROOT)
+  CXX=CC
 
   BCL_RUN=mpirun -n 4
-
 endif
 
-# c++ flafs for compiling
-CXXFLAGS = -std=gnu++17 $(BCLFLAGS)
+FUTAR_FLAGS = -I/global/u1/b/brock/src/research/bcl/examples/benchmarks/mer-bench/experimental/futar
 
-# declare src and targets
+CXXFLAGS = -O3 -std=gnu++17 $(BCLFLAGS) $(FUTAR_FLAGS)
+
 SOURCES += $(wildcard *.cpp)
 TARGETS := $(patsubst %.cpp, %, $(SOURCES))
 

@@ -23,12 +23,14 @@ else ifeq ($(BACKEND),GASNET_EX)
   CXX = mpic++
 
   BCL_RUN=mpirun -n 4
+
 else
   BACKEND=MPI
   BCLFLAGS = -I$(BCLROOT)
   CXX=mpic++
 
   BCL_RUN=mpirun -n 4
+  
 endif
 
 CXXFLAGS = -std=gnu++17 $(BCLFLAGS)

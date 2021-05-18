@@ -1,9 +1,15 @@
+// SPDX-FileCopyrightText: 2021 Benjamin Brock
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 SHELL='bash'
 
 # XXX: Modify BCLROOT if you move this Makefile
 #      out of an examples/* directory.
-BCLROOT=$(PWD)/../../../../bcl-src/bcl-rpc
+BCLROOT=$(PWD)/../../
+
 BACKEND = $(shell echo $(BCL_BACKEND) | tr '[:lower:]' '[:upper:]')
+
 TIMER_CMD=time
 
 ifeq ($(BACKEND),SHMEM)
@@ -15,32 +21,22 @@ ifeq ($(BACKEND),SHMEM)
 else ifeq ($(BACKEND),GASNET_EX)
   BACKEND=GASNET_EX
   # XXX: Allow selection of conduit.
-  # include /path/to/gasnet/2019.3.0-gcc-8.4.0-j75dwrr/include/mpi-conduit/mpi-par.mak
+  include $(gasnet_prefix)/include/mpi-conduit/mpi-par.mak
+
   BCLFLAGS = $(GASNET_CXXCPPFLAGS) $(GASNET_CXXFLAGS) $(GASNET_LDFLAGS) $(GASNET_LIBS) -DGASNET_EX -I$(BCLROOT)
-  CXX = mpicxx -cxx=g++
+  CXX = mpic++
 
   BCL_RUN=mpirun -n 4
-
-else ifeq ($(BACKEND), UPCXX)
-  BACKEND=UPCXX
-  BCLFLAGS=-O3 -DUPCXX -I$(BCLROOT)
-  CXX=upcxx
-  
-  BCL_RUN=upcxx-run -n 4
-
 else
   BACKEND=MPI
-  BCLFLAGS=-I$(BCLROOT)
-  CXX=mpiicpc
+  BCLFLAGS = -I$(BCLROOT)
+  CXX=mpic++
 
   BCL_RUN=mpirun -n 4
-
 endif
 
-# c++ flafs for compiling
 CXXFLAGS = -std=gnu++17 $(BCLFLAGS)
 
-# declare src and targets
 SOURCES += $(wildcard *.cpp)
 TARGETS := $(patsubst %.cpp, %, $(SOURCES))
 
