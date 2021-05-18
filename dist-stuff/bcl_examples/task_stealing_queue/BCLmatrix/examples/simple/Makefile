@@ -23,8 +23,8 @@ else ifeq ($(BACKEND),GASNET_EX)
 
 else ifeq ($(BACKEND), UPCXX)
   BACKEND=UPCXX
-  BCLFLAGS=-DUPCXX -I$(BCLROOT)
-  CXX=upcxx #-O3
+  BCLFLAGS=-g -DUPCXX -I$(BCLROOT)
+  CXX=upcxx
   
   BCL_RUN=upcxx-run -n 4
 
