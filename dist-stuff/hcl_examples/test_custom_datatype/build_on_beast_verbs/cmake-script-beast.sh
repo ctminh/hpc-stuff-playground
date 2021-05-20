@@ -18,7 +18,7 @@ module load mercury-2.0.1rc3-gcc-10.2.1-frvg6o6
 module load mochi-abt-io-0.5.1-gcc-10.2.1-rghdmos
 module load mochi-margo-0.9.4-gcc-10.2.1-caqzps7
 module load mochi-thallium-0.7-gcc-10.2.1-i4yovp5 # with libfabric-1.11.1-gcc-10.2.1-bba3lbj enabled sockets
-module load hcl-tl-tcp-1.0
+module load hcl-tl-roce-1.0
 
 # module load libfabric-1.11.1-gcc-10.2.1-7rkzvhv # this one is built with an updated name of rdma-core on beast
 # module load mercury-2.0.1rc3-gcc-10.2.1-565ptkn # this one is built with an updated name of rdma-core on beast

@@ -97,8 +97,8 @@ int main (int argc, char *argv[])
         server_list_file.close();
     }
     std::cout << "[CHECK] R" << my_rank << ": is_server=" << is_server
-              << ", my_server=" << my_server
-              << ", num_servers=" << num_servers
+              << ", my_server="     << my_server
+              << ", num_servers="   << num_servers
               << std::endl;
     
     // just to make sure the shared-file system done in sync
