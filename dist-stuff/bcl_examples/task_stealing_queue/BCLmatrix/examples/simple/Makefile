@@ -32,6 +32,7 @@ else ifeq ($(BACKEND), UPCXX)
 else
   BACKEND=MPI
   BCLFLAGS=-I$(BCLROOT)
+  CXX=mpiicpc
 
   BCL_RUN=mpirun -n 4
 
