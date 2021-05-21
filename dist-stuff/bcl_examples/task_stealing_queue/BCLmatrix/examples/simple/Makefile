@@ -39,7 +39,8 @@ else
 endif
 
 # c++ flafs for compiling
-CXXFLAGS = -std=gnu++17 $(BCLFLAGS)
+# CXXFLAGS = -std=gnu++17 $(BCLFLAGS)
+CXXFLAGS = -fopenmp -std=gnu++17 -pg $(BCLFLAGS)
 
 # declare src and targets
 SOURCES += $(wildcard *.cpp)
