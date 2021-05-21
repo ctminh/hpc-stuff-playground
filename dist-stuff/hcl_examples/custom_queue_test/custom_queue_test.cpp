@@ -197,10 +197,9 @@ int main (int argc, char *argv[])
         // put tasks to the hcl-global-queue
         Timer t_push_remote = Timer();
         for(int i = 0; i < num_tasks; i++){
+            
             // allocate the task
             mattup_stdarr_t gT = mattup_stdarr_t();
-
-            printf("[DBG] R%d pushes task-%d into the global-hcl queue...\n", my_rank, i);
             
             // put tasks to the glob-queue and measure time
             t_push_remote.resumeTime();
