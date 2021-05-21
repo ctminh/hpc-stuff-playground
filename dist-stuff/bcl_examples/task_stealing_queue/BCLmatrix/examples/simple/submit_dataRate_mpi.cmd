@@ -16,5 +16,5 @@ module load slurm_setup
 export OMP_NUM_THREADS=2
 export VT_LOGFILE_PREFIX=/dss/dsshome1/lxc0D/ra56kop/hpc-stuff-playground/dist-stuff/bcl_examples/task_stealing_queue/BCLmatrix/examples/simple/traces
 
-mpirun -n ${SLURM_NTASKS} -trace ./taskStealing 300 100 20
+mpirun -n ${SLURM_NTASKS} -trace ./dataRate 300 100 20
 

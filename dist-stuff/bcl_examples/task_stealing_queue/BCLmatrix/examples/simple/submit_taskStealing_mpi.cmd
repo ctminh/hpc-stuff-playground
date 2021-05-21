@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -J bcl_datarate
-#SBATCH -o ./logs/bcl_datarate_test_%J.out
-#SBATCH -e ./logs/bcl_datarate_test_%J.err
+#SBATCH -J bcl_taskStealing
+#SBATCH -o ./logs/bcl_taskStealing_test_%J.out
+#SBATCH -e ./logs/bcl_taskStealing_test_%J.err
 #SBATCH -D ./
 #SBATCH --get-user-env
 #SBATCH --clusters=cm2_tiny
