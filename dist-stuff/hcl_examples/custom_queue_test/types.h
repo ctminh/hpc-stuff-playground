@@ -22,7 +22,7 @@
 
 
 namespace bip=boost::interprocess;
-const int SIZE = 100;
+const int SIZE = 512;
 
 // ================================================================================
 // Util-functions
@@ -34,14 +34,14 @@ const int SIZE = 100;
 // ================================================================================
 
 /* Struct of a matrix-tuple type using std::array */
-typedef struct mattup_stdarr_t {
+typedef struct Mattup_StdArr_t {
 
     std::array<double, SIZE*SIZE> A;
     std::array<double, SIZE*SIZE> B;
     std::array<double, SIZE*SIZE> C;
 
     // constructor 1
-    mattup_stdarr_t() {
+    Mattup_StdArr_t() {
         for (int i = 0; i < SIZE*SIZE; i++) {
             A[i] = 1.0;
             B[i] = 2.0;
@@ -64,7 +64,7 @@ typedef struct mattup_stdarr_t {
         ar & B; //.data();
         ar & C; //.data();
     }
-} mattup_stdarr_t;
+} Mattup_StdArr_t;
 
 // ================================================================================
 // HCL-author-defined Types for Testing

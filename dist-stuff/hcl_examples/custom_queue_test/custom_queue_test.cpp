@@ -116,21 +116,21 @@ int main (int argc, char *argv[])
      */
 
     // Try hcl-queue with different types of user-defined struct
-    hcl::queue<mattup_stdarr_t> *global_queue;
+    hcl::queue<Mattup_StdArr_t> *global_queue;
 
     // allocate the hcl queue at server-side
     if (is_server) {
-        global_queue = new hcl::queue<mattup_stdarr_t>();
+        global_queue = new hcl::queue<Mattup_StdArr_t>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
     // allocate the hcl queue at client-side
     if (!is_server) {
-        global_queue = new hcl::queue<mattup_stdarr_t>();
+        global_queue = new hcl::queue<Mattup_StdArr_t>();
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::queue<mattup_stdarr_t> local_queue;
+    std::queue<Mattup_StdArr_t> local_queue;
 
     // split the mpi communicator from the server, here is just for client communicator
     MPI_Comm client_comm;
@@ -140,7 +140,7 @@ int main (int argc, char *argv[])
     MPI_Barrier(MPI_COMM_WORLD);
 
     // check task size
-    mattup_stdarr_t tmp_T = mattup_stdarr_t();
+    Mattup_StdArr_t tmp_T = Mattup_StdArr_t();
     size_t task_size = sizeof(tmp_T);
     std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
     std::cout << HLINE << std::endl;
@@ -156,7 +156,7 @@ int main (int argc, char *argv[])
         for(int i = 0; i < num_tasks; i++){
             
             // allocate an arr_mat task
-            mattup_stdarr_t lT= mattup_stdarr_t();
+            Mattup_StdArr_t lT= Mattup_StdArr_t();
                        
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
@@ -197,9 +197,9 @@ int main (int argc, char *argv[])
         // put tasks to the hcl-global-queue
         Timer t_push_remote = Timer();
         for(int i = 0; i < num_tasks; i++){
-            
+
             // allocate the task
-            mattup_stdarr_t gT = mattup_stdarr_t();
+            Mattup_StdArr_t gT = Mattup_StdArr_t();
             
             // put tasks to the glob-queue and measure time
             t_push_remote.resumeTime();
