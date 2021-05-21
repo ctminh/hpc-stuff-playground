@@ -77,9 +77,8 @@ int main (int argc, char *argv[])
     bool is_server = false;
     if (my_rank == 0)
         is_server = true;
-
+    int my_server = 0;  // rank 0 is the server
     int num_servers = 1;
-    int my_server = 0;
 
     // write the server address into file
     if (is_server){
@@ -193,7 +192,7 @@ int main (int argc, char *argv[])
     if (!is_server) {
         
         // set a key by rank id
-        uint16_t offset_key = my_rank;
+        uint16_t offset_key = my_server;
 
         // put tasks to the hcl-global-queue
         Timer t_push_remote = Timer();
