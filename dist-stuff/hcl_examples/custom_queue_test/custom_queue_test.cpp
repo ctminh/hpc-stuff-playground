@@ -108,7 +108,8 @@ int main (int argc, char *argv[])
 
         // temporarily put the hard-code ip of rome1, rome2 here
         // for tcp, we use processor_name and for simple, we use just R0 for writing
-        server_list_file << "10.12.1.1" + "\n";
+        server_list_file << "10.12.1.1";
+        server_list_file << std::endl;
         server_list_file << "10.12.1.2";
         server_list_file.close();
     }
