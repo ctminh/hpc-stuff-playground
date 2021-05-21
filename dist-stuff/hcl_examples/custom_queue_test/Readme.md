@@ -18,11 +18,9 @@ typedef struct mattup_stdarr_t {
     // serialization
     template<typename Archive>
     void serialize(Archive& ar) {
-        for (int i = 0; i < SIZE*SIZE; i++) {
-            ar & A[i];
-            ar & B[i];
-            ar & C[i];
-        }
+        ar & A;
+        ar & B; 
+        ar & C;
     }
 
 } mattup_stdarr_t;

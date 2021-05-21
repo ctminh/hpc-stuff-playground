@@ -22,7 +22,7 @@
 
 
 namespace bip=boost::interprocess;
-const int SIZE = 512;
+const int SIZE = 128;
 
 // ================================================================================
 // Util-functions
