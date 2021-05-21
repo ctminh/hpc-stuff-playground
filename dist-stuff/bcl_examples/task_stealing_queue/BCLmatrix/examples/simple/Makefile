@@ -5,6 +5,7 @@ SHELL='bash'
 BCLROOT=$(PWD)/../.. # ../../bcl-src/bcl-rpc
 BACKEND = $(shell echo $(BCL_BACKEND) | tr '[:lower:]' '[:upper:]')
 TIMER_CMD=time
+ITACFLAGS = -DTRACE -I$(VT_ROOT)/include -trace
 
 ifeq ($(BACKEND),SHMEM)
   BACKEND=SHMEM
@@ -30,7 +31,7 @@ else ifeq ($(BACKEND), UPCXX)
 
 else
   BACKEND=MPI
-  BCLFLAGS=-I$(BCLROOT)
+  BCLFLAGS=-I$(BCLROOT) $(ITACFLAGS)
   CXX=mpiicpc
 
   BCL_RUN=mpirun -n 4
