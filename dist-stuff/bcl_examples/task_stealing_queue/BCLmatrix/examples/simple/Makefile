@@ -2,7 +2,7 @@ SHELL='bash'
 
 # XXX: Modify BCLROOT if you move this Makefile
 #      out of an examples/* directory.
-BCLROOT=$(PWD)/../../../../bcl-src/bcl-rpc
+BCLROOT=$(PWD)/../.. # ../../bcl-src/bcl-rpc
 BACKEND = $(shell echo $(BCL_BACKEND) | tr '[:lower:]' '[:upper:]')
 TIMER_CMD=time
 
