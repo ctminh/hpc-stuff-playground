@@ -55,7 +55,9 @@ int main (int argc, char *argv[])
     int comm_size, my_rank;
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    bool debug = true;
+    bool debug = false;
+    int num_requests = 100; // also num_tasks
+    long size_of_request = 1000;
 
     // get hostname of each rank
     int name_len;
@@ -78,47 +80,41 @@ int main (int argc, char *argv[])
      * ////////////////////////////////////////////////////////////////////////// */
 
     // assume that total ranks is even, 2 nodes for testing
-    int ranks_per_server = comm_size / 2;
-
-    // for simple each node has a server, so server_on_node is true
-    bool server_on_node = true;
+    int ranks_per_node = 2;
+    int num_nodes = comm_size / ranks_per_node;
+    int ranks_per_server = comm_size;
 
     // choose the server, for simple, assign R0 as the server,
-    // for example, R0, R1 on node 1, R2, R3 on node 2,
-    bool is_server = false;
-    if (my_rank == 0 || my_rank == 2)
-        is_server = true;
+    // for example, the last rank is the server
+    bool is_server = (my_rank + 1) % ranks_per_server == 0;
+
+    // for simple each node has a server, so server_on_node is true
+    bool server_on_node = false;
+    if (is_server)
+        server_on_node = true;
 
     // set my_server for R0, R1, others in the if
-    int my_server = 0;
-    if (my_rank > 1)
-        my_server = 2;
+    int my_server = my_rank / ranks_per_server;
 
     // ser num of servers for each rank
-    int num_servers = 2;
+    int num_servers = comm_size / ranks_per_server;
 
     /* /////////////////////////////////////////////////////////////////////////////
      * Writing server addresses
      * ////////////////////////////////////////////////////////////////////////// */
 
     // write the server address into file
-    if (is_server && my_rank == 0){
+    if (is_server){
         std::ofstream server_list_file;
         server_list_file.open("./server_list");
 
         // temporarily put the hard-code ip of rome1, rome2 here
         // for tcp, we use processor_name and for simple, we use just R0 for writing
-        server_list_file << "10.12.1.1";
-        server_list_file << std::endl;
+        // server_list_file << "10.12.1.1";
+        // server_list_file << std::endl;
         server_list_file << "10.12.1.2";
         server_list_file.close();
     }
-    std::cout << "[CHECK] R" << my_rank
-              << ": is_server=" << is_server
-              << ", my_server=" << my_server
-              << ", num_servers=" << num_servers
-              << ", server_on_node=" << server_on_node
-              << std::endl;
     
     // just to make sure the shared-file system done in sync
     MPI_Barrier(MPI_COMM_WORLD);
@@ -129,31 +125,43 @@ int main (int argc, char *argv[])
     HCL_CONF->NUM_SERVERS = num_servers;
     HCL_CONF->SERVER_ON_NODE = server_on_node;
     HCL_CONF->SERVER_LIST_PATH = "./server_list";
+
+    auto mem_size = SIZE * SIZE * (comm_size + 1) * num_request;
+    HCL_CONF->MEMORY_ALLOCATED = mem_size;
     std::cout << HLINE << std::endl;
+
+    std::cout << "[CHECK] R" << my_rank
+              << ": is_server=" << HCL_CONF->IS_SERVER
+              << ", my_server=" << HCL_CONF->MY_SERVER
+              << ", num_servers=" << HCL_CONF->NUM_SERVERS
+              << ", server_on_node=" << HCL_CONF->SERVER_ON_NODE
+              << ", mem_allocated=" << HCL_CONF->MEMORY_ALLOCATED
+              << std::endl;
 
     /* /////////////////////////////////////////////////////////////////////////////
      * Creating HCL global queues over mpi ranks
      * ////////////////////////////////////////////////////////////////////////// */
 
-    hcl::queue<Mattup_StdArr_t> *global_queue;
+    hcl::queue<Mattup_StdArr_Type> *global_queue;
 
     // allocate the hcl queue at server-side
     if (is_server) {
-        global_queue = new hcl::queue<Mattup_StdArr_t>();
+        global_queue = new hcl::queue<Mattup_StdArr_Type>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
     // sounds like the server queue need to be created before the client ones
     if (!is_server) {
-        global_queue = new hcl::queue<Mattup_StdArr_t>();
+        global_queue = new hcl::queue<Mattup_StdArr_Type>();
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::queue<Mattup_StdArr_t> local_queue;
+    std::queue<Mattup_StdArr_Type> local_queue;
 
     /* /////////////////////////////////////////////////////////////////////////////
      * Split the mpi communicator from the server, just for client communicator
      * ////////////////////////////////////////////////////////////////////////// */
+
     MPI_Comm client_comm;
     MPI_Comm_split(MPI_COMM_WORLD, !is_server, my_rank, &client_comm);
     int client_comm_size;
@@ -161,7 +169,7 @@ int main (int argc, char *argv[])
     MPI_Barrier(MPI_COMM_WORLD);
 
     // check task size
-    Mattup_StdArr_t tmp_T = Mattup_StdArr_t();
+    Mattup_StdArr_Type tmp_T = Mattup_StdArr_Type(0);
     size_t task_size = sizeof(tmp_T);
     std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
     std::cout << HLINE << std::endl;
@@ -169,36 +177,53 @@ int main (int argc, char *argv[])
     /* /////////////////////////////////////////////////////////////////////////////
      * Test throughput of the LOCAL QUEUES at client-side
      * ////////////////////////////////////////////////////////////////////////// */
-    int num_tasks = 10;
     if (!is_server) {
+
+        // hask the key
+        std::hash<Mattup_StdArr_Type> keyHash;
 
         // for pushing local
         Timer t_push_local = Timer();
-        for(int i = 0; i < num_tasks; i++){
+        for(int i = 0; i < num_requests; i++){
+            size_t val = my_server;
+            size_t key_hash = keyHash(Mattup_StdArr_Type(val)) % num_servers;
             
             // allocate an arr_mat task
-            Mattup_StdArr_t lT= Mattup_StdArr_t();
+            // Mattup_StdArr_t lT= Mattup_StdArr_t();
+
+            // do nothing, is this important???
+            if (key_hash == my_server && is_server) {}
                        
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
-            local_queue.push(lT);
+            // local_queue.push(lT);
+            local_queue.push(Mattup_StdArr_Type(val));
             t_push_local.pauseTime();
         }
-        double throughput_push_local = (num_tasks*task_size*1000) / (t_push_local.getElapsedTime()*1024*1024);
+        // double throughput_push_local = (num_request*task_size*1000) / (t_push_local.getElapsedTime()*1024*1024);
+        double throughput_push_local = num_request / t_push_local.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
         std::cout << "[THROUGHPUT] R" << my_rank << ": local_push = " << throughput_push_local << " MB/s" << std::endl;
 
         // Barrier here for the client_commm
-        MPI_Barrier(client_comm);
+        // MPI_Barrier(client_comm);
 
         // for deleting the local queue
         Timer t_pop_local = Timer();
         for (int i = 0;  i < num_tasks; i++){
+
+            size_t val = my_server;
+            size_t key_hash = keyHash(Mattup_StdArr_Type(val)) % num_servers;
+
+            // do nothing, is this important???
+            if (key_hash == my_server && is_server) {}
+
             t_pop_local.resumeTime();
             auto result = local_queue.front();
             local_queue.pop();
             t_pop_local.pauseTime();
         }
-        double throughput_pop_local = (num_tasks*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
+        // double throughput_pop_local = (num_request*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
+        double throughput_pop_local = num_request / t_pop_local.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
         std::cout << "[THROUGHPUT] R" << my_rank << ": local_pop = " << throughput_pop_local << " MB/s" << std::endl;
 
         // Barrier here for the client_commm
@@ -211,45 +236,93 @@ int main (int argc, char *argv[])
      * /////////////////////////////////////////////////////////////////////////////  
      */
     if (!is_server) {
-        
-        // set a key by rank id
-        uint16_t offset_key = my_server;
 
-        // put tasks to the hcl-global-queue
+        /* Local Operations for the global-HCL queue */
+        
+        // set the server key for clients
+        uint16_t my_server_key = my_server % num_servers;
+
+        Timer t_localpush_on_globalqueue = Timer();
+        for (int i = 0; i < num_requests; i++){
+            size_t val = my_server;
+            auto key = Mattup_StdArr_Type(val);
+
+            t_localpush_on_globalqueue.resumeTime();
+            global_queue->Push(key, my_server_key);
+            t_localpush_on_globalqueue.pauseTime();
+        }
+        // double throughput_localpush_on_globalqueue = (num_request*task_size*1000) / (t_localpush_on_globalqueue.getElapsedTime()*1024*1024);
+        double throughput_localpush_on_globalqueue = num_request / t_localpush_on_globalqueue.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        std::cout << "[THROUGHPUT] R" << my_rank << ": localpush_on_globalqueue = " << throughput_localpush_on_globalqueue << " MB/s" << std::endl;
+
+        Timer t_localpop_on_globalqueue = Timer();
+        for (int i = 0; i < num_request; i++) {
+            size_t val = my_server;
+            auto key = Mattup_StdArr_Type(val);
+            size_t key_hash = keyHash(Mattup_StdArr_Type(val)) % num_servers;
+
+            // do nothing, is this important???
+            if (key_hash == my_server && is_server) { }
+
+            t_localpop_on_globalqueue.resumeTime();
+            auto result = global_queue->Pop(my_server_key);
+            t_localpop_on_globalqueue.pauseTime();
+        }
+        // double throughput_localpop_on_globalqueue = (num_request*task_size*1000) / (t_localpop_on_globalqueue.getElapsedTime()*1024*1024);
+        double throughput_localpop_on_globalqueue = num_request / t_localpop_on_globalqueue.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        std::cout << "[THROUGHPUT] R" << my_rank << " [local_key=" << my_server_key << "]"
+                  << ": localpop_on_globalqueue = " << throughput_localpop_on_globalqueue << " MB/s" << std::endl;
+
+        MPI_Barrier(client_comm);
+        
+        // set the server key for clients
+        uint16_t my_server_remote_key = (my_server + 1) % num_servers;
+
+        // remote put tasks to the hcl-global-queue
         Timer t_push_remote = Timer();
-        for(int i = 0; i < num_tasks; i++){
+        for(int i = 0; i < num_request; i++){
+            size_t val = my_server + 1;
+            auto key = Mattup_StdArr_Type(val);
 
             // allocate the task
-            Mattup_StdArr_t gT = Mattup_StdArr_t();
+            // Mattup_StdArr_t gT = Mattup_StdArr_t();
             
             // put tasks to the glob-queue and measure time
             t_push_remote.resumeTime();
-            global_queue->Push(gT, offset_key);
+            global_queue->Push(key, my_server_remote_key);
             t_push_remote.pauseTime();
         }
 
         // estimate the remote-push throughput
-        double throughput_push_remote = (num_tasks*task_size*1000) / (t_push_remote.getElapsedTime()*1024*1024);
-        std::cout << "[THROUGHPUT] R" << my_rank << " [offset_key=" << offset_key << "]" << ": remote_push = "
-                  << throughput_push_remote << " MB/s" << std::endl;
+        // double throughput_push_remote = (num_request*task_size*1000) / (t_push_remote.getElapsedTime()*1024*1024);
+        double throughput_push_remote = num_request / t_push_remote.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        std::cout << "[THROUGHPUT] R" << my_rank << " [remote_key=" << my_server_remote_key << "]"
+                  << ": remote_push = " << throughput_push_remote << " MB/s" << std::endl;
         
         // Barrier here for the client_commm
         MPI_Barrier(client_comm);
         
         // pop tasks from the hcl-global-queue
         Timer t_pop_remote = Timer();
-        for(int i = 0; i < num_tasks; i++){
+        for(int i = 0; i < num_request; i++){
+            size_t val = my_server + 1;
+            auto key = Mattup_StdArr_Type(val);
+            size_t keyhash = keyHash(Mattup_StdArr_Type(val)) % num_servers;
+
+            // do nothing
+            if (key_hash == my_server && is_server) { }
             
             // pop tasks and measure time
             t_pop_remote.resumeTime();
-            auto loc_pop_res = global_queue->Pop(offset_key);
+            auto remote_pop_res = global_queue->Pop(my_server_remote_key);
             t_pop_remote.pauseTime();
         }
 
         // estimate the remote-push throughput
-        double throughput_pop_remote = (num_tasks*task_size*1000) / (t_pop_remote.getElapsedTime()*1024*1024);
-        std::cout << "[THROUGHPUT] R" << my_rank << " [offset_key=" << offset_key << "]" << ": remote_pop = "
-                  << throughput_pop_remote << " MB/s" << std::endl;
+        // double throughput_pop_remote = (num_request*task_size*1000) / (t_pop_remote.getElapsedTime()*1024*1024);
+        double throughput_pop_remote = num_request / t_pop_remote.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        std::cout << "[THROUGHPUT] R" << my_rank << " [remote_key=" << my_server_remote_key << "]"
+                  << ": remote_pop = " << throughput_pop_remote << " MB/s" << std::endl;
         
         // Barrier here for the client_commm
         MPI_Barrier(client_comm);

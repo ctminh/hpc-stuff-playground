@@ -22,7 +22,7 @@
 
 
 namespace bip=boost::interprocess;
-const int SIZE = 128;
+const int SIZE = 512;
 
 // ================================================================================
 // Util-functions
@@ -34,37 +34,103 @@ const int SIZE = 128;
 // ================================================================================
 
 /* Struct of a matrix-tuple type using std::array */
-typedef struct Mattup_StdArr_t {
+typedef struct Mattup_StdArr_Type {
 
-    std::array<double, SIZE*SIZE> A;
-    std::array<double, SIZE*SIZE> B;
-    std::array<double, SIZE*SIZE> C;
+    std::array<double> A;
+    std::array<double> B;
+    std::array<double> C;
 
     // constructor 1
-    Mattup_StdArr_t() {
-        for (int i = 0; i < SIZE*SIZE; i++) {
-            A[i] = 1.0;
-            B[i] = 2.0;
-            C[i] = 0.0;
+    Mattup_StdArr_Type(): A(), B(), C() {}
+
+    // constructor 2
+    Mattup_StdArr_Type(int val):
+            A(SIZE * SIZE, val),
+            B(SIZE * SIZE, val),
+            C(SIZE * SIZE, val) { }
+    
+    // overwrite operators
+    bool operator==(const Mattup_StdArr_Type &o) const {
+        
+        if (o.A.size() != A.size()) return false;
+        if (o.B.size() != B.size()) return false;
+        if (o.C.size() != C.size()) return false;
+        
+        for (int i = 0; i < SIZE*SIZE; ++i) {
+            if (o.A[i] != A[i]) return false;
+            if (o.B[i] != B[i]) return false;
+            if (o.C[i] != C[i]) return false;
+        }
+
+        return true;
+    }
+
+    Mattup_StdArr_Type &operator=(const Mattup_StdArr_Type &other){
+        A = other.A;
+        B = other.B;
+        C = other.C;
+        return *this;
+    }
+
+    bool operator<(const Mattup_StdArr_Type &o) const {
+
+        if (o.A.size() < A.size()) return false;
+        if (o.A.size() > A.size()) return true;
+        if (o.B.size() < B.size()) return false;
+        if (o.B.size() > B.size()) return true;
+        if (o.C.size() < C.size()) return false;
+        if (o.C.size() > C.size()) return true;
+        
+        for (int i = 0; i < SIZE*SIZE; ++i) {
+            if (o.A[i] < A[i]) return false;
+            if (o.A[i] > A[i]) return true;
+            if (o.B[i] < B[i]) return false;
+            if (o.B[i] > B[i]) return true;
+            if (o.C[i] < C[i]) return false;
+            if (o.C[i] > C[i]) return true;
+        }
+
+        return false;
+    }
+ 
+    bool operator>(const Mattup_StdArr_Type &o) const {
+        return !(*this < o);
+    }
+ 
+    bool Contains(const Mattup_StdArr_Type &o) const {
+        return *this == o;
+    }
+
+    // serialization for using rpc lib
+#ifdef HCL_ENABLE_RPCLIB
+    MSGPACK_DEFINE(A,B,C);
+#endif
+
+} Mattup_StdArr_Type;
+
+// serialization for using thallium
+#if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
+    template<typename A>
+    void serialize(A &ar, Mattup_StdArr_Type &a) {
+        ar & a.A;
+        ar & a.B;
+        ar & a.C;
+    }
+#endif
+
+namespace std {
+    template<>
+    struct hash<Mattup_StdArr_Type> {
+        size_t operator()(const Mattup_StdArr_Type &k) const {
+            size_t hash_val = hash<int>()(k.A[0]);
+            for (int i = 1; i < k.A.size(); ++i) {
+                hash_val ^= hash<int>()(k.A[0]);
+            }
+            return hash_val;
         }
     }
+}
 
-    // serialization
-    template<typename Archive>
-    void serialize(Archive& ar) {
-        // serialize one by one
-        // for (int i = 0; i < SIZE*SIZE; i++) {
-        //     ar & A[i];
-        //     ar & B[i];
-        //     ar & C[i];
-        // }
-
-        // serialize a bulk of data
-        ar & A; //.data();
-        ar & B; //.data();
-        ar & C; //.data();
-    }
-} Mattup_StdArr_t;
 
 // ================================================================================
 // HCL-author-defined Types for Testing
