@@ -308,7 +308,7 @@ int main (int argc, char *argv[])
         for(int i = 0; i < num_requests; i++){
             size_t val = my_server + 1;
             auto key = Mattup_StdArr_Type(val);
-            size_t keyhash = keyHash(Mattup_StdArr_Type(val)) % num_servers;
+            size_t key_hash = keyHash(Mattup_StdArr_Type(val)) % num_servers;
 
             // do nothing
             if (key_hash == my_server && is_server) { }
