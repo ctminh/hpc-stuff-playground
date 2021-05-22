@@ -128,7 +128,7 @@ namespace std {
             }
             return hash_val;
         }
-    }
+    };
 }
 
 
