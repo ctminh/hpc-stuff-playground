@@ -177,10 +177,11 @@ int main (int argc, char *argv[])
     /* /////////////////////////////////////////////////////////////////////////////
      * Test throughput of the LOCAL QUEUES at client-side
      * ////////////////////////////////////////////////////////////////////////// */
-    if (!is_server) {
 
-        // hask the key
-        std::hash<Mattup_StdArr_Type> keyHash;
+    // Declare a keyHash object
+    std::hash<Mattup_StdArr_Type> keyHash;
+    
+    if (!is_server) {
 
         // for pushing local
         Timer t_push_local = Timer();
