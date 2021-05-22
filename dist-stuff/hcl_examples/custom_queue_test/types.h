@@ -36,9 +36,9 @@ const int SIZE = 512;
 /* Struct of a matrix-tuple type using std::array */
 typedef struct Mattup_StdArr_Type {
 
-    std::array<double> A;
-    std::array<double> B;
-    std::array<double> C;
+    std::vector<double> A;
+    std::vector<double> B;
+    std::vector<double> C;
 
     // constructor 1
     Mattup_StdArr_Type(): A(), B(), C() {}

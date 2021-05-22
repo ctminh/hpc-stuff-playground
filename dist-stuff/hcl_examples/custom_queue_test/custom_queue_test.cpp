@@ -126,7 +126,7 @@ int main (int argc, char *argv[])
     HCL_CONF->SERVER_ON_NODE = server_on_node;
     HCL_CONF->SERVER_LIST_PATH = "./server_list";
 
-    auto mem_size = SIZE * SIZE * (comm_size + 1) * num_request;
+    auto mem_size = SIZE * SIZE * (comm_size + 1) * num_requests;
     HCL_CONF->MEMORY_ALLOCATED = mem_size;
     std::cout << HLINE << std::endl;
 
@@ -200,8 +200,8 @@ int main (int argc, char *argv[])
             local_queue.push(Mattup_StdArr_Type(val));
             t_push_local.pauseTime();
         }
-        // double throughput_push_local = (num_request*task_size*1000) / (t_push_local.getElapsedTime()*1024*1024);
-        double throughput_push_local = num_request / t_push_local.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        // double throughput_push_local = (num_requests*task_size*1000) / (t_push_local.getElapsedTime()*1024*1024);
+        double throughput_push_local = num_requests / t_push_local.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
         std::cout << "[THROUGHPUT] R" << my_rank << ": local_push = " << throughput_push_local << " MB/s" << std::endl;
 
         // Barrier here for the client_commm
@@ -209,7 +209,7 @@ int main (int argc, char *argv[])
 
         // for deleting the local queue
         Timer t_pop_local = Timer();
-        for (int i = 0;  i < num_tasks; i++){
+        for (int i = 0;  i < num_requests; i++){
 
             size_t val = my_server;
             size_t key_hash = keyHash(Mattup_StdArr_Type(val)) % num_servers;
@@ -222,8 +222,8 @@ int main (int argc, char *argv[])
             local_queue.pop();
             t_pop_local.pauseTime();
         }
-        // double throughput_pop_local = (num_request*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
-        double throughput_pop_local = num_request / t_pop_local.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        // double throughput_pop_local = (num_requests*task_size*1000) / (t_pop_local.getElapsedTime()*1024*1024);
+        double throughput_pop_local = num_requests / t_pop_local.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
         std::cout << "[THROUGHPUT] R" << my_rank << ": local_pop = " << throughput_pop_local << " MB/s" << std::endl;
 
         // Barrier here for the client_commm
@@ -251,12 +251,12 @@ int main (int argc, char *argv[])
             global_queue->Push(key, my_server_key);
             t_localpush_on_globalqueue.pauseTime();
         }
-        // double throughput_localpush_on_globalqueue = (num_request*task_size*1000) / (t_localpush_on_globalqueue.getElapsedTime()*1024*1024);
-        double throughput_localpush_on_globalqueue = num_request / t_localpush_on_globalqueue.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        // double throughput_localpush_on_globalqueue = (num_requests*task_size*1000) / (t_localpush_on_globalqueue.getElapsedTime()*1024*1024);
+        double throughput_localpush_on_globalqueue = num_requests / t_localpush_on_globalqueue.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
         std::cout << "[THROUGHPUT] R" << my_rank << ": localpush_on_globalqueue = " << throughput_localpush_on_globalqueue << " MB/s" << std::endl;
 
         Timer t_localpop_on_globalqueue = Timer();
-        for (int i = 0; i < num_request; i++) {
+        for (int i = 0; i < num_requests; i++) {
             size_t val = my_server;
             auto key = Mattup_StdArr_Type(val);
             size_t key_hash = keyHash(Mattup_StdArr_Type(val)) % num_servers;
@@ -268,8 +268,8 @@ int main (int argc, char *argv[])
             auto result = global_queue->Pop(my_server_key);
             t_localpop_on_globalqueue.pauseTime();
         }
-        // double throughput_localpop_on_globalqueue = (num_request*task_size*1000) / (t_localpop_on_globalqueue.getElapsedTime()*1024*1024);
-        double throughput_localpop_on_globalqueue = num_request / t_localpop_on_globalqueue.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        // double throughput_localpop_on_globalqueue = (num_requests*task_size*1000) / (t_localpop_on_globalqueue.getElapsedTime()*1024*1024);
+        double throughput_localpop_on_globalqueue = num_requests / t_localpop_on_globalqueue.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
         std::cout << "[THROUGHPUT] R" << my_rank << " [local_key=" << my_server_key << "]"
                   << ": localpop_on_globalqueue = " << throughput_localpop_on_globalqueue << " MB/s" << std::endl;
 
@@ -280,7 +280,7 @@ int main (int argc, char *argv[])
 
         // remote put tasks to the hcl-global-queue
         Timer t_push_remote = Timer();
-        for(int i = 0; i < num_request; i++){
+        for(int i = 0; i < num_requests; i++){
             size_t val = my_server + 1;
             auto key = Mattup_StdArr_Type(val);
 
@@ -294,8 +294,8 @@ int main (int argc, char *argv[])
         }
 
         // estimate the remote-push throughput
-        // double throughput_push_remote = (num_request*task_size*1000) / (t_push_remote.getElapsedTime()*1024*1024);
-        double throughput_push_remote = num_request / t_push_remote.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        // double throughput_push_remote = (num_requests*task_size*1000) / (t_push_remote.getElapsedTime()*1024*1024);
+        double throughput_push_remote = num_requests / t_push_remote.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
         std::cout << "[THROUGHPUT] R" << my_rank << " [remote_key=" << my_server_remote_key << "]"
                   << ": remote_push = " << throughput_push_remote << " MB/s" << std::endl;
         
@@ -304,7 +304,7 @@ int main (int argc, char *argv[])
         
         // pop tasks from the hcl-global-queue
         Timer t_pop_remote = Timer();
-        for(int i = 0; i < num_request; i++){
+        for(int i = 0; i < num_requests; i++){
             size_t val = my_server + 1;
             auto key = Mattup_StdArr_Type(val);
             size_t keyhash = keyHash(Mattup_StdArr_Type(val)) % num_servers;
@@ -319,8 +319,8 @@ int main (int argc, char *argv[])
         }
 
         // estimate the remote-push throughput
-        // double throughput_pop_remote = (num_request*task_size*1000) / (t_pop_remote.getElapsedTime()*1024*1024);
-        double throughput_pop_remote = num_request / t_pop_remote.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
+        // double throughput_pop_remote = (num_requests*task_size*1000) / (t_pop_remote.getElapsedTime()*1024*1024);
+        double throughput_pop_remote = num_requests / t_pop_remote.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
         std::cout << "[THROUGHPUT] R" << my_rank << " [remote_key=" << my_server_remote_key << "]"
                   << ": remote_pop = " << throughput_pop_remote << " MB/s" << std::endl;
         
