@@ -16,6 +16,25 @@
 #include <bitset>
 #include <random>
 
+#ifndef TRACE
+#define TRACE 0
+#endif
+
+#if TRACE==1
+
+#include "VT.h"
+static int _tracing_enabled = 1;
+
+#ifndef VT_BEGIN_CONSTRAINED
+#define VT_BEGIN_CONSTRAINED(event_id) if (_tracing_enabled) VT_begin(event_id);
+#endif
+
+#ifndef VT_END_W_CONSTRAINED
+#define VT_END_W_CONSTRAINED(event_id) if (_tracing_enabled) VT_end(event_id);
+#endif
+
+#endif
+
 // ================================================================================
 // Global Variables
 // ================================================================================
@@ -183,6 +202,16 @@ void initialize_matrix_rnd(double *mat) {
 }
 
 void multiply(double *matrix, double *matrix2, double *result) {
+
+    // put itac trace here
+#if TRACE==1
+    static int event_multiply = -1;
+    std::string event_multiply_name = "multiply";
+    if(event_multiply == -1) 
+        int ierr = VT_funcdef(event_multiply_name.c_str(), VT_NOCLASS, &event_multiply);
+    VT_BEGIN_CONSTRAINED(event_multiply);
+#endif
+
     for (int i = 0; i < MSIZE * MSIZE; i += 1) {
         double value = 0;
         int k = i % MSIZE;
@@ -192,6 +221,11 @@ void multiply(double *matrix, double *matrix2, double *result) {
         }
         result[i] = value;
     }
+
+#if TRACE==1
+    VT_END_W_CONSTRAINED(event_multiply);
+#endif
+
 }
 
 bool steal(std::vector<BCL::CircularQueue<int>> *queues) {
@@ -221,8 +255,22 @@ bool steal(std::vector<BCL::CircularQueue<int>> *queues) {
                 int tId;
                 start = curtime();
                 if ((*queues)[*it].pop(tId)) {
+
+                    // try to put a trace-event here
+                    #if TRACE==1
+                    static int event_steal = -1;
+                    std::string event_steal_name = "steal";
+                    if(event_steal == -1) 
+                        int ierr = VT_funcdef(event_steal_name.c_str(), VT_NOCLASS, &event_steal);
+                    VT_BEGIN_CONSTRAINED(event_steal);
+                    #endif
+
                     stealTime += curtime() - start;
                     (*queues)[BCL::rank()].push(tId);
+
+                    #if TRACE==1
+                    VT_END_W_CONSTRAINED(event_steal);
+                    #endif
                 }
 
                 j++;

@@ -51,10 +51,14 @@ all: $(TARGETS)
 	@echo "C $@ $(BACKEND)"
 	@time $(CXX) -o $@ $^ $(CXXFLAGS) || echo "$@ $(BACKEND) BUILD FAIL"
 
+trace: taskStealing.cpp
+	@echo "Make [$@] $(BACKEND) WITH ITAC"
+	@time $(CXX) -o taskStealing $^ $(CXXFLAGS) -I$(VT_ROOT)/include -DTRACE -L$(VT_LIB_DIR) -lVT $(VT_ADD_LIBS) || echo "$@ $(BACKEND) BUILD FAIL WITH ITAC"
+
 test: all
 	@for target in $(TARGETS) ; do \
-	    echo "R $$target $(BACKEND)" ;\
-	    time $(BCL_RUN) ./$$target || (echo "$$target $(BACKEND) FAIL $$?"; exit 1) ;\
+		echo "R $$target $(BACKEND)" ;\
+		time $(BCL_RUN) ./$$target || (echo "$$target $(BACKEND) FAIL $$?"; exit 1) ;\
 	done
 
 clean:
