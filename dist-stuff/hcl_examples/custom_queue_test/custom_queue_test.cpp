@@ -58,6 +58,10 @@ int main (int argc, char *argv[])
     bool debug = false;
     int num_requests = 100; // also num_tasks
     long size_of_request = 1000;
+    if (comm_size != 4){
+        printf("This test is designed for running with 4 mpi ranks...\n");
+        exit(EXIT_FAILURE);
+    }
 
     // get hostname of each rank
     int name_len;
@@ -82,7 +86,7 @@ int main (int argc, char *argv[])
     // assume that total ranks is even, 2 nodes for testing
     int ranks_per_node = 2;
     int num_nodes = comm_size / ranks_per_node;
-    int ranks_per_server = comm_size;
+    int ranks_per_server = ranks_per_node;
 
     // choose the server, for simple, assign R0 as the server,
     // for example, the last rank is the server
@@ -104,14 +108,14 @@ int main (int argc, char *argv[])
      * ////////////////////////////////////////////////////////////////////////// */
 
     // write the server address into file
-    if (is_server){
+    if (is_server && my_rank == 0){
         std::ofstream server_list_file;
         server_list_file.open("./server_list");
 
         // temporarily put the hard-code ip of rome1, rome2 here
         // for tcp, we use processor_name and for simple, we use just R0 for writing
-        // server_list_file << "10.12.1.1";
-        // server_list_file << std::endl;
+        server_list_file << "10.12.1.1";
+        server_list_file << std::endl;
         server_list_file << "10.12.1.2";
         server_list_file.close();
     }
@@ -329,6 +333,8 @@ int main (int argc, char *argv[])
         MPI_Barrier(client_comm);
         std::cout << HLINE << std::endl;
     }
+
+
 
     // wait for make sure finalizing MPI safe
     MPI_Barrier(MPI_COMM_WORLD);
