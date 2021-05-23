@@ -108,17 +108,17 @@ int main (int argc, char *argv[])
      * ////////////////////////////////////////////////////////////////////////// */
 
     // write the server address into file
-    if (is_server && my_rank == 0){
-        std::ofstream server_list_file;
-        server_list_file.open("./server_list");
+    // if (is_server && my_rank == 0){
+    //     std::ofstream server_list_file;
+    //     server_list_file.open("./server_list");
 
         // temporarily put the hard-code ip of rome1, rome2 here
         // for tcp, we use processor_name and for simple, we use just R0 for writing
-        server_list_file << "10.12.1.1";
-        server_list_file << std::endl;
-        server_list_file << "10.12.1.2";
-        server_list_file.close();
-    }
+    //     server_list_file << "10.12.1.1";
+    //     server_list_file << std::endl;
+    //     server_list_file << "10.12.1.2";
+    //     server_list_file.close();
+    // }
     
     // just to make sure the shared-file system done in sync
     MPI_Barrier(MPI_COMM_WORLD);
