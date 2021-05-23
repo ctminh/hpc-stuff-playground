@@ -123,8 +123,8 @@ typedef struct MatTup_Type {
 
 namespace std {
     template<>
-    struct hash<Mattup_StdArr_Type> {
-        size_t operator()(const Mattup_StdArr_Type &k) const {
+    struct hash<MatTup_Type> {
+        size_t operator()(const MatTup_Type &k) const {
             size_t hash_val = hash<int>()(k.A[0]);
 
             for (int i = 1; i < k.A.size(); ++i) {
