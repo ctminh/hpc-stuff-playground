@@ -354,7 +354,7 @@ int main (int argc, char *argv[])
         // Check one of the matrices which is popped out
         std::cout << "[CHECK] R" << my_rank << ": one of the tasks that are popped out remotely, " << std::endl;
         std::cout << "\t tid: " << tmp_popped_T.tid << std::endl;
-        std::cout << "\t the first 10 elements: " << std::endl;
+        std::cout << "\t the first 10 elements: ";
         for (int i = 0; i < 10; i++){
             std::cout << tmp_popped_T.A[i] << " ";
         } std::cout << std::endl;
