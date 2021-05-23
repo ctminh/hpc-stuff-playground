@@ -35,7 +35,7 @@ const int SIZE = 512;
 
 /* Struct of a matrix-tuple type using std::array */
 typedef struct Mattup_StdArr_Type {
-
+    int tid;
     std::vector<double> A;
     std::vector<double> B;
     std::vector<double> C;
@@ -44,14 +44,15 @@ typedef struct Mattup_StdArr_Type {
     Mattup_StdArr_Type(): A(), B(), C() {}
 
     // constructor 2
-    Mattup_StdArr_Type(int val):
+    Mattup_StdArr_Type(int id, int val):
+            tid(id),
             A(SIZE * SIZE, val),
             B(SIZE * SIZE, val),
             C(SIZE * SIZE, val) { }
     
     // overwrite operators
     bool operator==(const Mattup_StdArr_Type &o) const {
-        
+        if (o.tid != tid) return false;
         if (o.A.size() != A.size()) return false;
         if (o.B.size() != B.size()) return false;
         if (o.C.size() != C.size()) return false;
@@ -66,6 +67,7 @@ typedef struct Mattup_StdArr_Type {
     }
 
     Mattup_StdArr_Type &operator=(const Mattup_StdArr_Type &other){
+        tid = other.tid;
         A = other.A;
         B = other.B;
         C = other.C;
@@ -112,6 +114,7 @@ typedef struct Mattup_StdArr_Type {
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
     template<typename A>
     void serialize(A &ar, Mattup_StdArr_Type &a) {
+        ar & a.tid;
         ar & a.A;
         ar & a.B;
         ar & a.C;
@@ -123,9 +126,11 @@ namespace std {
     struct hash<Mattup_StdArr_Type> {
         size_t operator()(const Mattup_StdArr_Type &k) const {
             size_t hash_val = hash<int>()(k.A[0]);
+
             for (int i = 1; i < k.A.size(); ++i) {
                 hash_val ^= hash<int>()(k.A[0]);
             }
+            
             return hash_val;
         }
     };
