@@ -110,7 +110,7 @@ typedef struct Mattup_StdArr_Type {
 
 } Mattup_StdArr_Type;
 
-// serialization for using thallium
+// serialization like thallium does
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
     template<typename A>
     void serialize(A &ar, Mattup_StdArr_Type &a) {
@@ -130,7 +130,7 @@ namespace std {
             for (int i = 1; i < k.A.size(); ++i) {
                 hash_val ^= hash<int>()(k.A[0]);
             }
-            
+
             return hash_val;
         }
     };
