@@ -176,7 +176,7 @@ int main (int argc, char *argv[])
     Mattup_StdArr_Type tmp_T = Mattup_StdArr_Type(0, 0);
     size_t task_size = sizeof(tmp_T);
     if (is_server){
-        std::cout << "[CHECK] Task size = " << task_size << " bytes" << std::endl;
+        std::cout << "[CHECK] R" << my_rank << ": task size = " << task_size << " bytes" << std::endl;
         std::cout << "        The first 10 elements of tmp_T:" << std::endl;
         for (int i = 0; i < 10; i++){
             std::cout << tmp_T.A[i] << " ";
