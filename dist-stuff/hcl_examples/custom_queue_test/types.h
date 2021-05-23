@@ -34,24 +34,24 @@ const int SIZE = 512;
 // ================================================================================
 
 /* Struct of a matrix-tuple type using std::array */
-typedef struct Mattup_StdArr_Type {
+typedef struct MatTup_Type {
     int tid;
     std::vector<double> A;
     std::vector<double> B;
     std::vector<double> C;
 
     // constructor 1
-    Mattup_StdArr_Type(): A(), B(), C() {}
+    MatTup_Type(): A(), B(), C() {}
 
     // constructor 2
-    Mattup_StdArr_Type(int id, int val):
+    MatTup_Type(int id, int val):
             tid(id),
             A(SIZE * SIZE, val),
             B(SIZE * SIZE, val),
             C(SIZE * SIZE, val) { }
     
     // overwrite operators
-    bool operator==(const Mattup_StdArr_Type &o) const {
+    bool operator==(const MatTup_Type &o) const {
         if (o.tid != tid) return false;
         if (o.A.size() != A.size()) return false;
         if (o.B.size() != B.size()) return false;
@@ -66,7 +66,7 @@ typedef struct Mattup_StdArr_Type {
         return true;
     }
 
-    Mattup_StdArr_Type &operator=(const Mattup_StdArr_Type &other){
+    MatTup_Type &operator=(const MatTup_Type &other){
         tid = other.tid;
         A = other.A;
         B = other.B;
@@ -74,7 +74,7 @@ typedef struct Mattup_StdArr_Type {
         return *this;
     }
 
-    bool operator<(const Mattup_StdArr_Type &o) const {
+    bool operator<(const MatTup_Type &o) const {
 
         if (o.A.size() < A.size()) return false;
         if (o.A.size() > A.size()) return true;
@@ -95,11 +95,11 @@ typedef struct Mattup_StdArr_Type {
         return false;
     }
  
-    bool operator>(const Mattup_StdArr_Type &o) const {
+    bool operator>(const MatTup_Type &o) const {
         return !(*this < o);
     }
  
-    bool Contains(const Mattup_StdArr_Type &o) const {
+    bool Contains(const MatTup_Type &o) const {
         return *this == o;
     }
 
@@ -108,12 +108,12 @@ typedef struct Mattup_StdArr_Type {
     MSGPACK_DEFINE(A,B,C);
 #endif
 
-} Mattup_StdArr_Type;
+} MatTup_Type;
 
 // serialization like thallium does
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
     template<typename A>
-    void serialize(A &ar, Mattup_StdArr_Type &a) {
+    void serialize(A &ar, MatTup_Type &a) {
         ar & a.tid;
         ar & a.A;
         ar & a.B;

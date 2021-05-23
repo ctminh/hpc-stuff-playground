@@ -146,21 +146,21 @@ int main (int argc, char *argv[])
      * Creating HCL global queues over mpi ranks
      * ////////////////////////////////////////////////////////////////////////// */
 
-    hcl::queue<Mattup_StdArr_Type> *global_queue;
+    hcl::queue<MatTup_Type> *global_queue;
 
     // allocate the hcl queue at server-side
     if (is_server) {
-        global_queue = new hcl::queue<Mattup_StdArr_Type>();
+        global_queue = new hcl::queue<MatTup_Type>();
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
     // sounds like the server queue need to be created before the client ones
     if (!is_server) {
-        global_queue = new hcl::queue<Mattup_StdArr_Type>();
+        global_queue = new hcl::queue<MatTup_Type>();
     }
 
     // declare a std-queue/rank at the local side for comparison
-    std::queue<Mattup_StdArr_Type> local_queue;
+    std::queue<MatTup_Type> local_queue;
 
     /* /////////////////////////////////////////////////////////////////////////////
      * Split the mpi communicator from the server, just for client communicator
@@ -173,7 +173,7 @@ int main (int argc, char *argv[])
     MPI_Barrier(MPI_COMM_WORLD);
 
     // check task size
-    Mattup_StdArr_Type tmp_T = Mattup_StdArr_Type(0, 0);
+    MatTup_Type tmp_T = MatTup_Type(0, 0);
     size_t task_size = sizeof(tmp_T);
     if (is_server){
         std::cout << "[CHECK] R" << my_rank << ": task size = " << task_size << " bytes" << std::endl;
@@ -189,7 +189,7 @@ int main (int argc, char *argv[])
      * ////////////////////////////////////////////////////////////////////////// */
 
     // Declare a keyHash object
-    std::hash<Mattup_StdArr_Type> keyHash;
+    std::hash<MatTup_Type> keyHash;
     
     if (!is_server) {
 
@@ -197,10 +197,10 @@ int main (int argc, char *argv[])
         Timer t_push_local = Timer();
         for(int i = 0; i < num_requests; i++){
             size_t val = my_server;
-            size_t key_hash = keyHash(Mattup_StdArr_Type(i, val)) % num_servers;
+            size_t key_hash = keyHash(MatTup_Type(i, val)) % num_servers;
             
             // allocate an arr_mat task
-            // Mattup_StdArr_t lT= Mattup_StdArr_t();
+            // MatTup_Type lT= MatTup_Type();
             // local_queue.push(lT);
 
             // do nothing, is this important???
@@ -208,7 +208,7 @@ int main (int argc, char *argv[])
                        
             // put T into the queue and record eslapsed-time
             t_push_local.resumeTime();
-            local_queue.push(Mattup_StdArr_Type(i, val));
+            local_queue.push(MatTup_Type(i, val));
             t_push_local.pauseTime();
         }
         // double throughput_push_local = (num_requests*task_size*1000) / (t_push_local.getElapsedTime()*1024*1024);
@@ -223,7 +223,7 @@ int main (int argc, char *argv[])
         for (int i = 0;  i < num_requests; i++){
 
             size_t val = my_server;
-            size_t key_hash = keyHash(Mattup_StdArr_Type(i, val)) % num_servers;
+            size_t key_hash = keyHash(MatTup_Type(i, val)) % num_servers;
 
             // do nothing, is this important???
             if (key_hash == my_server && is_server) {}
@@ -256,7 +256,7 @@ int main (int argc, char *argv[])
         Timer t_localpush_on_globalqueue = Timer();
         for (int i = 0; i < num_requests; i++){
             size_t val = my_server;
-            auto key = Mattup_StdArr_Type(i, val);
+            auto key = MatTup_Type(i, val);
 
             t_localpush_on_globalqueue.resumeTime();
             global_queue->Push(key, my_server_key);
@@ -271,8 +271,8 @@ int main (int argc, char *argv[])
         Timer t_localpop_on_globalqueue = Timer();
         for (int i = 0; i < num_requests; i++) {
             size_t val = my_server;
-            auto key = Mattup_StdArr_Type(i, val);
-            size_t key_hash = keyHash(Mattup_StdArr_Type(i, val)) % num_servers;
+            auto key = MatTup_Type(i, val);
+            size_t key_hash = keyHash(MatTup_Type(i, val)) % num_servers;
 
             // do nothing, is this important???
             if (key_hash == my_server && is_server) { }
@@ -296,7 +296,7 @@ int main (int argc, char *argv[])
         Timer t_push_remote = Timer();
         for(int i = 0; i < num_requests; i++){
             size_t val = my_server + 1;
-            auto key = Mattup_StdArr_Type(i, val);
+            auto key = MatTup_Type(i, val);
 
             // allocate the task
             // Mattup_StdArr_t gT = Mattup_StdArr_t();
@@ -318,14 +318,14 @@ int main (int argc, char *argv[])
         MPI_Barrier(client_comm);
 
         // Create a temp_tasks for checking the elements are popped out
-        Mattup_StdArr_Type tmp_popped_T;
+        MatTup_Type tmp_popped_T;
         
         // pop tasks from the hcl-global-queue
         Timer t_pop_remote = Timer();
         for(int i = 0; i < num_requests; i++){
             size_t val = my_server + 1;
-            auto key = Mattup_StdArr_Type(i, val);
-            size_t key_hash = keyHash(Mattup_StdArr_Type(i, val)) % num_servers;
+            auto key = MatTup_Type(i, val);
+            size_t key_hash = keyHash(MatTup_Type(i, val)) % num_servers;
 
             // do nothing
             if (key_hash == my_server && is_server) { }
