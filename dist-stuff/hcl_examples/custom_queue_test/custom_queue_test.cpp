@@ -177,6 +177,10 @@ int main (int argc, char *argv[])
     size_t task_size = sizeof(tmp_T);
     if (is_server){
         std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
+        std::cout << "\t The first 10 elements of tmp_T:" << std::endl;
+        for (int i = 0; i < 10; i++){
+            std::cout << tmp_T.A[i] << " ";
+        } std::cout << std::endl;
         std::cout << HLINE << std::endl;
     }
 
@@ -340,8 +344,6 @@ int main (int argc, char *argv[])
         MPI_Barrier(client_comm);
         std::cout << HLINE << std::endl;
     }
-
-
 
     // wait for make sure finalizing MPI safe
     MPI_Barrier(MPI_COMM_WORLD);
