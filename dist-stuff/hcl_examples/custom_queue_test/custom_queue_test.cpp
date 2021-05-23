@@ -337,7 +337,7 @@ int main (int argc, char *argv[])
 
             // if task i is the last one, assign it to the tmp_popped_T for checking internal-values
             if (i == num_requests-1)
-                tmp_popped_T = remote_pop_res.second();
+                tmp_popped_T = remote_pop_res.second;
         }
 
         // estimate the remote-push throughput
