@@ -177,7 +177,7 @@ int main (int argc, char *argv[])
     size_t task_size = sizeof(tmp_T);
     if (is_server){
         std::cout << "[CHECK] R" << my_rank << ": task size = " << task_size << " bytes" << std::endl;
-        std::cout << "        The first 10 elements of tmp_T:" << std::endl;
+        std::cout << "        The first 10-elements of tmp_T: ";
         for (int i = 0; i < 10; i++){
             std::cout << tmp_T.A[i] << " ";
         } std::cout << std::endl;
