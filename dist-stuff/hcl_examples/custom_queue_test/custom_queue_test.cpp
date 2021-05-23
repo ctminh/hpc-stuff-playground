@@ -175,8 +175,10 @@ int main (int argc, char *argv[])
     // check task size
     Mattup_StdArr_Type tmp_T = Mattup_StdArr_Type(0);
     size_t task_size = sizeof(tmp_T);
-    std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
-    std::cout << HLINE << std::endl;
+    if (is_server){
+        std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
+        std::cout << HLINE << std::endl;
+    }
 
     /* /////////////////////////////////////////////////////////////////////////////
      * Test throughput of the LOCAL QUEUES at client-side
@@ -258,7 +260,9 @@ int main (int argc, char *argv[])
         }
         // double throughput_localpush_on_globalqueue = (num_requests*task_size*1000) / (t_localpush_on_globalqueue.getElapsedTime()*1024*1024);
         double throughput_localpush_on_globalqueue = num_requests / t_localpush_on_globalqueue.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
-        std::cout << "[THROUGHPUT] R" << my_rank << ": localpush_on_globalqueue = " << throughput_localpush_on_globalqueue << " MB/s" << std::endl;
+        std::cout << "[THROUGHPUT] R" << my_rank
+                  << " [my_local_server_key=" <<  my_server_key << "]"
+                  << ": localpush_on_globalqueue = " << throughput_localpush_on_globalqueue << " MB/s" << std::endl;
 
         Timer t_localpop_on_globalqueue = Timer();
         for (int i = 0; i < num_requests; i++) {
@@ -275,7 +279,8 @@ int main (int argc, char *argv[])
         }
         // double throughput_localpop_on_globalqueue = (num_requests*task_size*1000) / (t_localpop_on_globalqueue.getElapsedTime()*1024*1024);
         double throughput_localpop_on_globalqueue = num_requests / t_localpop_on_globalqueue.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
-        std::cout << "[THROUGHPUT] R" << my_rank << " [local_key=" << my_server_key << "]"
+        std::cout << "[THROUGHPUT] R" << my_rank
+                  << " [my_local_server_key=" << my_server_key << "]"
                   << ": localpop_on_globalqueue = " << throughput_localpop_on_globalqueue << " MB/s" << std::endl;
 
         MPI_Barrier(client_comm);
@@ -301,7 +306,8 @@ int main (int argc, char *argv[])
         // estimate the remote-push throughput
         // double throughput_push_remote = (num_requests*task_size*1000) / (t_push_remote.getElapsedTime()*1024*1024);
         double throughput_push_remote = num_requests / t_push_remote.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
-        std::cout << "[THROUGHPUT] R" << my_rank << " [remote_key=" << my_server_remote_key << "]"
+        std::cout << "[THROUGHPUT] R" << my_rank 
+                  << " [remote_key=" << my_server_remote_key << "]"
                   << ": remote_push = " << throughput_push_remote << " MB/s" << std::endl;
         
         // Barrier here for the client_commm
@@ -326,7 +332,8 @@ int main (int argc, char *argv[])
         // estimate the remote-push throughput
         // double throughput_pop_remote = (num_requests*task_size*1000) / (t_pop_remote.getElapsedTime()*1024*1024);
         double throughput_pop_remote = num_requests / t_pop_remote.getElapsedTime() * 1000 * SIZE * SIZE * 3 * sizeof(double) / 1024 / 1024;
-        std::cout << "[THROUGHPUT] R" << my_rank << " [remote_key=" << my_server_remote_key << "]"
+        std::cout << "[THROUGHPUT] R" << my_rank
+                  << " [remote_key=" << my_server_remote_key << "]"
                   << ": remote_pop = " << throughput_pop_remote << " MB/s" << std::endl;
         
         // Barrier here for the client_commm
