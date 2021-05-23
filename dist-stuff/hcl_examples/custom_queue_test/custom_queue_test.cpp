@@ -176,8 +176,8 @@ int main (int argc, char *argv[])
     Mattup_StdArr_Type tmp_T = Mattup_StdArr_Type(0, 0);
     size_t task_size = sizeof(tmp_T);
     if (is_server){
-        std::cout << "[CHECK] task size = " << task_size << " bytes" << std::endl;
-        std::cout << "\t The first 10 elements of tmp_T:" << std::endl;
+        std::cout << "[CHECK] Task size = " << task_size << " bytes" << std::endl;
+        std::cout << "        The first 10 elements of tmp_T:" << std::endl;
         for (int i = 0; i < 10; i++){
             std::cout << tmp_T.A[i] << " ";
         } std::cout << std::endl;
@@ -316,6 +316,9 @@ int main (int argc, char *argv[])
         
         // Barrier here for the client_commm
         MPI_Barrier(client_comm);
+
+        // Create a temp_tasks for checking the elements are popped out
+        Mattup_StdArr_Type tmp_popped_T;
         
         // pop tasks from the hcl-global-queue
         Timer t_pop_remote = Timer();
@@ -331,6 +334,10 @@ int main (int argc, char *argv[])
             t_pop_remote.resumeTime();
             auto remote_pop_res = global_queue->Pop(my_server_remote_key);
             t_pop_remote.pauseTime();
+
+            // if task i is the last one, assign it to the tmp_popped_T for checking internal-values
+            if (i == num_requests-1)
+                tmp_popped_T = remote_pop_res;
         }
 
         // estimate the remote-push throughput
@@ -343,6 +350,14 @@ int main (int argc, char *argv[])
         // Barrier here for the client_commm
         MPI_Barrier(client_comm);
         std::cout << HLINE << std::endl;
+
+        // Check one of the matrices which is popped out
+        std::cout << "[CHECK] R" << my_rank << ": one of the tasks that are popped out remotely, " << std::endl;
+        std::cout << "\t tid: " << tmp_popped_T.tid << std::endl;
+        std::cout << "\t the first 10 elements: " << std::endl;
+        for (int i = 0; i < 10; i++){
+            std::cout << tmp_popped_T.A[i] << " "
+        } std::cout << std::endl;
     }
 
     // wait for make sure finalizing MPI safe
