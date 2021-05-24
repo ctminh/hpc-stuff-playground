@@ -176,9 +176,16 @@ int main (int argc, char *argv[])
 
         // use the local key to push tasks on each server side
         std::cout << "[PUSH] R" << my_rank
-                  << ": is creating " << num_tasks << " mxm-tasks" << std::endl;
+                  << ": is creating " << num_tasks << " mxm-tasks..." << std::endl;
         uint16_t my_server_key = my_server % num_servers;
+
+        #pragma omp parallel for num_threads(2)
         for (int i = 0; i < num_tasks; i++){
+
+            int thread_id = omp_get_thread_num();
+            std:: << "[PUSH] R" << my_rank
+                  << "-Thread " << thread_id << ": is pushing Task " << i
+                  << " into the global-queue..." << std::endl;
 
             // init the tasks with their values = their rank idx
             size_t val = my_rank;
@@ -192,8 +199,15 @@ int main (int argc, char *argv[])
 
         // pop tasks from the queue and then execute them
         std::cout << "[POP] R" << my_rank
-                  << ": is getting " << num_tasks << " mxm-tasks out for executing" << std::endl;
+                  << ": is getting " << num_tasks << " mxm-tasks out for executing..." << std::endl;
+
+        #pragma omp parallel for num_threads(2)
         for (int i = 0; i < num_tasks; i++) {
+
+            int thread_id = omp_get_thread_num();
+            std:: << "[PUSH] R" << my_rank
+                  << "-Thread " << thread_id << ": is popping Task " << i
+                  << " out of the global-queue..." << std::endl;
 
             MatTask_Type tmp_pop_T;
             auto pop_result = global_queue->Pop(my_server_key);
