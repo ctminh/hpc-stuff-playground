@@ -183,7 +183,7 @@ int main (int argc, char *argv[])
         for (int i = 0; i < num_tasks; i++){
 
             int thread_id = omp_get_thread_num();
-            std:: << "[PUSH] R" << my_rank
+            std::cout << "[PUSH] R" << my_rank
                   << "-Thread " << thread_id << ": is pushing Task " << i
                   << " into the global-queue..." << std::endl;
 
@@ -205,7 +205,7 @@ int main (int argc, char *argv[])
         for (int i = 0; i < num_tasks; i++) {
 
             int thread_id = omp_get_thread_num();
-            std:: << "[PUSH] R" << my_rank
+            std::cout << "[PUSH] R" << my_rank
                   << "-Thread " << thread_id << ": is popping Task " << i
                   << " out of the global-queue..." << std::endl;
 
