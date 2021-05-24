@@ -19,6 +19,25 @@
 #include <mpi.h>
 #include <omp.h>
 
+#ifndef TRACE
+#define TRACE 0
+#endif
+
+#if TRACE==1
+
+#include "VT.h"
+static int _tracing_enabled = 1;
+
+#ifndef VT_BEGIN_CONSTRAINED
+#define VT_BEGIN_CONSTRAINED(event_id) if (_tracing_enabled) VT_begin(event_id);
+#endif
+
+#ifndef VT_END_W_CONSTRAINED
+#define VT_END_W_CONSTRAINED(event_id) if (_tracing_enabled) VT_end(event_id);
+#endif
+
+#endif
+
 // for hcl data-structures
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
