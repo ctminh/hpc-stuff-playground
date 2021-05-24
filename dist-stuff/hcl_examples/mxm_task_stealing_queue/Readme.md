@@ -1,5 +1,5 @@
-## Try a distributed mxm-task queue with HCL
-Assume the usecase, we have multiple ranks running on distributed memory machines, each rank has a queue of tasks and multiple execution threads inside. Task could be defined as a data tuple of matrices, for example:
+## A prototype for task-stealing with HCl-distributed queues
+Assume the usecase, we have multiple ranks running on distributed memory machines/nodes, each node has a global queue of tasks and multiple execution-threads per rank. Task could be defined as a data tuple of matrices and the payload is mxm kernel (i.e., mxm-multiplication), for example:
 ```C
 typedef struct MatTup_Type {
     int tid;
@@ -14,7 +14,7 @@ typedef struct MatTup_Type {
             A(SIZE * SIZE, val),
             B(SIZE * SIZE, val),
             C(SIZE * SIZE, val) { }
-
+    ...
 } MatTup_Type;
 
 // serialization as thallium does
@@ -28,8 +28,8 @@ typedef struct MatTup_Type {
     }
 #endif
 ```
-A, B, C as the fixed-sized arrays with SIZE. Instead of creating separate queues on separate ranks, we try to create an HCL-global queue of MatTup_Type objects. In further, for the scanario as task-stealing, the current rank could easily get the task from other ranks, and put back later on.
+A, B, C as the fixed-sized vectors with SIZE before the execution. Instead of creating separate queues on separate ranks, we try to use an HCL-global queue of MatTup_Type objects per node. For the scanario of task-stealing on distributed memory machines/nodes, one global-tasks queue per node, the tasks on remote nodes could be stolen when the current queue is empty and returned back later on. Such a prototype, the design could be simply as follow with HCL:
 
 <p align="left">
-  <img src="./figures/usecase_mxm_task_queue.png" alt="An example with task-queues" width="700">
+  <img src="./figures/hcl_queue_with_task_stealing_design.png" alt="An example with task-queues" width="700">
 </p>
