@@ -28,7 +28,7 @@ typedef struct MatTup_Type {
     }
 #endif
 ```
-A, B, C as the fixed-sized vectors with SIZE before the execution. Instead of creating separate queues on separate ranks, we try to use an HCL-global queue of MatTup_Type objects per node. For the scanario of task-stealing on distributed memory machines/nodes, one global-tasks queue per node, the tasks on remote nodes could be stolen when the current queue is empty and returned back later on. Such a prototype, the design could be simply as follow with HCL:
+A, B, C as the fixed-sized vectors with SIZE before the execution. Instead of creating separate queues on separate ranks, we try to use an HCL-global queue of MatTup_Type objects per node. For the scanario of task-stealing on distributed memory machines/nodes, one global-tasks queue per node, the tasks on remote nodes could be stolen when the current queue is empty and returned back later on. Such a prototype, the design could be simply as follows, (e.g., running on 4 MPI ranks, 2 ranks/nodes, multithreads/the-client-rank):
 
 <p align="left">
   <img src="./figures/hcl_queue_with_task_stealing_design.png" alt="An example with task-queues" width="700">
