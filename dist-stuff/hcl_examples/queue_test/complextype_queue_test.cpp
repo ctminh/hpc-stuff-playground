@@ -16,6 +16,7 @@
 #include <functional>
 #include <utility>
 #include <mpi.h>
+#include <omp.h>
 #include <iostream>
 #include <signal.h>
 #include <execinfo.h>
