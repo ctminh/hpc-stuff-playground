@@ -11,6 +11,12 @@ set(examples complextype_queue_test)
 find_package(MPI REQUIRED COMPONENTS CXX)
 message(STATUS "found mpi.h at ${MPI_CXX_INCLUDE_DIRS}")
 
+# fine OpenMP package
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    set(DEFAULT_OPENMP_FLAG OpenMP::OpenMP_CXX)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gdwarf-2 -g3")
 
@@ -37,7 +43,7 @@ if(HCL_ENABLE_THALLIUM_ROCE OR HCL_ENABLE_THALLIUM_TCP)
     set(RPC_LIB_FLAGS -lthallium -lmercury -lmercury_util -lmargo -labt ${RPC_LIB_FLAGS})
 endif()
 
-set(LIB_FLAGS ${RPC_LIB_FLAGS} -lmpicxx -lpthread -lrt -lhcl)
+set(LIB_FLAGS ${RPC_LIB_FLAGS} -lmpicxx -lpthread -lrt -lhcl ${DEFAULT_OPENMP_FLAG})
 
 # Compile the example with linking hcl
 foreach(exam ${examples})

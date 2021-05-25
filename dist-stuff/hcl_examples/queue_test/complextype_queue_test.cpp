@@ -275,14 +275,18 @@ int main(int argc, char *argv[]) {
                 num_request / llocal_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 / 1024;
 
         Timer llocal_get_queue_timer = Timer();
-        for (int i = 0; i < num_request; i++) {
-            size_t val = my_server;
-            size_t key_hash = keyHash(KeyType(val)) % num_servers;
-            llocal_get_queue_timer.resumeTime();
-            if (key_hash == my_server && is_server) {}
-            auto result = lqueue.front();
-            lqueue.pop();
-            llocal_get_queue_timer.pauseTime();
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp for
+            for (int i = 0; i < num_request; i++) {
+                size_t val = my_server;
+                size_t key_hash = keyHash(KeyType(val)) % num_servers;
+                llocal_get_queue_timer.resumeTime();
+                if (key_hash == my_server && is_server) {}
+                auto result = lqueue.front();
+                lqueue.pop();
+                llocal_get_queue_timer.pauseTime();
+            }
         }
         double llocal_get_queue_throughput =
                 num_request / llocal_get_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 /
@@ -297,12 +301,16 @@ int main(int argc, char *argv[]) {
         Timer local_queue_timer = Timer();
         uint16_t my_server_key = my_server % num_servers;
         /*Local queue test*/
-        for (int i = 0; i < num_request; i++) {
-            size_t val = my_server;
-            auto key = KeyType(val);
-            local_queue_timer.resumeTime();
-            queue->Push(key, my_server_key);
-            local_queue_timer.pauseTime();
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp for
+            for (int i = 0; i < num_request; i++) {
+                size_t val = my_server;
+                auto key = KeyType(val);
+                local_queue_timer.resumeTime();
+                queue->Push(key, my_server_key);
+                local_queue_timer.pauseTime();
+            }
         }
         double local_queue_throughput =
                 num_request / local_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 / 1024;
