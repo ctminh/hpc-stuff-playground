@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
     long size_of_request = 1000;
     bool debug = false;
     bool server_on_node = false;
-    std::string server_lists = "./simple_types/server_list";
+    std::string server_lists = "./server_list";
     if (argc > 1) ranks_per_server = atoi(argv[1]);
     if (argc > 2) num_request = atoi(argv[2]);
     if (argc > 3) size_of_request = (long) atol(argv[3]);
