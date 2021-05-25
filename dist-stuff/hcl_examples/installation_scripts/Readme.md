@@ -36,7 +36,7 @@ To this end, we coudld do as follow: create a config file in our spack workspace
 rpm -qa | grep rdma-core
 ```
 
-The result could be: $rdma-core-47mlnx1-1.47329.x86_64$ on CoolMUC2. Then, add this info for the Spack configuration in packages.yaml file by Vim or whatever:
+The result could be: `rdma-core-47mlnx1-1.47329.x86_64` on CoolMUC2. Then, add this info for the Spack configuration in packages.yaml file by Vim or whatever:
 
 ``` Bash
 vim ~/.spack/packages.yaml
