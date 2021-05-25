@@ -1,4 +1,4 @@
-## A prototype for task-stealing with HCl-distributed queues
+## A prototype for task-stealing with HCL-distributed queues
 Assume the usecase, we have multiple ranks running on distributed memory machines/nodes, each node has a global queue of tasks and multiple execution-threads per rank. Task could be defined as a data tuple of matrices and the payload is mxm kernel (i.e., mxm-multiplication), for example:
 ```C
 typedef struct MatTup_Type {
