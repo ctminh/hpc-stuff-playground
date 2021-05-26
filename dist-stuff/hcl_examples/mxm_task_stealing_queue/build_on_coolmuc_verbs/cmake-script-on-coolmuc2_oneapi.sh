@@ -18,7 +18,7 @@ module load mercury-2.0.0-oneapi-2021.1-gecxu7y # this one is built with an upda
 module load mochi-abt-io-0.5.1-oneapi-2021.1-byoahez
 module load mochi-margo-0.9.1-oneapi-2021.1-fwjkhal
 module load mochi-thallium-0.7-oneapi-2021.1-ln74gab
-module load hcl-tl-roce-1.0
+module load hcl-tl-oneapi-roce-1.0
 
 # indicate which compiler for C/C++
 echo "4. Setting which C/C++ compiler is used..."
