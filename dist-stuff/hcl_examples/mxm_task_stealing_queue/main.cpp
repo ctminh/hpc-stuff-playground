@@ -130,7 +130,7 @@ int main (int argc, char *argv[])
     if (is_server){
         char *IPbuffer;
         IPbuffer = getHostIB_IPAddr();
-        std::cout << "[DBG] R" << my_rank << ": host IB-IP=" << IPbuffer << std::endl;
+        // std::cout << "[DBG] R" << my_rank << ": server IB-IP=" << IPbuffer << std::endl;
         int ip_length = std::strlen(IPbuffer);
         char recv_buff[ip_length*server_comm_size];
         MPI_Allgather(IPbuffer, ip_length, MPI_CHAR, recv_buff, ip_length, MPI_CHAR, server_comm);
@@ -142,7 +142,7 @@ int main (int argc, char *argv[])
                 std::string ib_addr = "";
                 for (int j = 0; j < ip_length; j++)
                     ib_addr = ib_addr + recv_buff[i*ip_length + j];
-                // std::cout << "[DBG] Server " << i << ": host IB-IP=" << ib_addr << std::endl;
+                std::cout << "[DBG] Server " << i << ": IB-IP=" << ib_addr << std::endl;
                 ser_addr_file << ib_addr << std::endl;
             }
             ser_addr_file.close();
