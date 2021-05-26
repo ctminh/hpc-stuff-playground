@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J hcl_mxmtask_queue_test
-#SBATCH -o ./logs/hcl_mxmtask_queue_test_%J.out
-#SBATCH -e ./logs/hcl_mxmtask_queue_test_%J.err
+#SBATCH -o ./logs/hcl_mxmtask_queue_test_oneapi_%J.out
+#SBATCH -e ./logs/hcl_mxmtask_queue_test_oneapi_%J.err
 #SBATCH -D ./
 #SBATCH --get-user-env
 #SBATCH --clusters=cm2_tiny
@@ -9,7 +9,7 @@
 #SBATCH --qos=cm2_tiny
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=2
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=2
 #SBATCH --export=NONE
 #SBATCH --time=00:05:00
 
