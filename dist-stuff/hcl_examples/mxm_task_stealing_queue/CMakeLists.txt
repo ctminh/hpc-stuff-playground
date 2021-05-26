@@ -51,7 +51,7 @@ endif()
 
 
 # Compile the example with linking hcl
-add_executable(main main.cpp mxm_task_types.h mxm_kernel.h)
+add_executable(main main.cpp mxm_task_types.h mxm_kernel.h util.h)
 target_compile_options(main PRIVATE -Wall -Wextra)
 target_link_libraries(main "${LIB_FLAGS}") # MPI::MPI_CXX
 

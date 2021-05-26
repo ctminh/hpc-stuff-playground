@@ -9,15 +9,18 @@
  * https://github.com/scs-lab/hcl
  *
  */
-#include <sys/types.h>
-#include <iostream>
-#include <string>
-#include <cmath>
-#include <sys/syscall.h>
 
 // for mpi, omp dependencies
 #include <mpi.h>
 #include <omp.h>
+
+// for hcl data-structures
+#include <hcl/common/data_structures.h>
+#include <hcl/queue/queue.h>
+
+#ifndef PARALLEL_OMP
+#define PARALLEL_OMP 0
+#endif
 
 #ifndef TRACE
 #define TRACE 0
@@ -38,13 +41,12 @@ static int _tracing_enabled = 1;
 
 #endif
 
-// for hcl data-structures
-#include <hcl/common/data_structures.h>
-#include <hcl/queue/queue.h>
-
 // for user-defined types
 #include "mxm_task_types.h"
 #include "mxm_kernel.h"
+
+// for other util-fnctions
+#include "util.h"
 
 // for display hline
 #define HLINE "-------------------------------------------------------------"
@@ -97,7 +99,6 @@ int main (int argc, char *argv[])
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
-
     /* /////////////////////////////////////////////////////////////////////////////
      * Configuring HCL-setup
      * ////////////////////////////////////////////////////////////////////////// */
@@ -120,6 +121,33 @@ int main (int argc, char *argv[])
     // ser num of servers for each rank
     int num_servers = comm_size / ranks_per_server;
 
+    // get IB IP addresses
+    MPI_Comm server_comm;
+    MPI_Comm_split(MPI_COMM_WORLD, is_server, my_rank, &server_comm);
+    int server_comm_size;
+    MPI_Comm_size(server_comm, &server_comm_size);
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (is_server){
+        char *IPbuffer;
+        IPbuffer = getHostIB_IPAddr();
+        // std::cout << "[DBG] R" << my_rank << ": host IB-IP=" << IPbuffer << std::endl;
+        int ip_length = std::strlen(IPbuffer);
+        char recv_buff[ip_length*server_comm_size];
+        MPI_Allgather(IPbuffer, ip_length, MPI_CHAR, recv_buff, ip_length, MPI_CHAR, server_comm);
+        if (my_rank == 1){
+            // write ib-addresses to file
+            ofstream ser_addr_file;
+            ser_addr_file.open("./server_list");
+            for (int i = 0;  i < num_servers; i++){
+                std::string ib_addr = "";
+                for (int j = 0; j < ip_length; j++)
+                    ib_addr = ib_addr + recv_buff[i*ip_length + j];
+                // std::cout << "[DBG] Server " << i << ": host IB-IP=" << ib_addr << std::endl;
+                ser_addr_file << ib_addr << std::endl;
+            }
+            ser_addr_file.close();
+        }
+    }
     MPI_Barrier(MPI_COMM_WORLD);
 
     // configure hcl components before running, this configuration for each rank
@@ -140,6 +168,8 @@ int main (int argc, char *argv[])
               << ", server_on_node=" << HCL_CONF->SERVER_ON_NODE
               << ", mem_allocated=" << HCL_CONF->MEMORY_ALLOCATED
               << std::endl;
+
+    exit(1);
 
     /* /////////////////////////////////////////////////////////////////////////////
      * Creating HCL global queues over mpi ranks
@@ -172,31 +202,35 @@ int main (int argc, char *argv[])
      * Main loop for creating tasks on each compute rank/ client rank
      * ////////////////////////////////////////////////////////////////////////// */
 
-    if (!is_server) {
+    if (!is_server) { /* IF NOT THE SERVER */
 
         // use the local key to push tasks on each server side
         std::cout << "[PUSH] R" << my_rank
                   << ": is creating " << num_tasks << " mxm-tasks..." << std::endl;
         uint16_t my_server_key = my_server % num_servers;
 
-        #pragma omp parallel num_threads(2)
-        {
-            #pragma omp for
-            for (int i = 0; i < num_tasks; i++){
+#if PARALLEL_OMP==1
+    #pragma omp parallel num_threads(2)
+    {
+        #pragma omp for
+#endif
+        for (int i = 0; i < num_tasks; i++){
 
-                int thread_id = omp_get_thread_num();
-                std::cout << "[PUSH] R" << my_rank
-                    << "-Thread " << thread_id << ": is pushing Task " << i
-                    << " into the global-queue..." << std::endl;
+            int thread_id = omp_get_thread_num();
+            std::cout << "[PUSH] R" << my_rank
+                << "-Thread " << thread_id << ": is pushing Task " << i
+                << " into the global-queue..." << std::endl;
 
-                // init the tasks with their values = their rank idx
-                size_t val = my_rank;
-                auto key = MatTask_Type(i, val);
+            // init the tasks with their values = their rank idx
+            size_t val = my_rank;
+            auto key = MatTask_Type(i, val);
 
-                // push task to the global queue of each server
-                global_queue->Push(key, my_server_key);
-            }
+            // push task to the global queue of each server
+            global_queue->Push(key, my_server_key);
         }
+#if PARALLEL_OMP==1
+    }
+#endif
 
         MPI_Barrier(client_comm);
 
@@ -204,22 +238,27 @@ int main (int argc, char *argv[])
         std::cout << "[POP] R" << my_rank
                   << ": is getting " << num_tasks << " mxm-tasks out for executing..." << std::endl;
 
-        #pragma omp parallel num_threads(2)
-        {
-            #pragma omp for
-            for (int i = 0; i < num_tasks; i++) {
+#if PARALLEL_OMP==1
+    #pragma omp parallel num_threads(2)
+    {
+        #pragma omp for
+#endif
+        for (int i = 0; i < num_tasks; i++) {
 
-                int thread_id = omp_get_thread_num();
-                std::cout << "[PUSH] R" << my_rank
-                    << "-Thread " << thread_id << ": is popping Task " << i
-                    << " out of the global-queue..." << std::endl;
+            int thread_id = omp_get_thread_num();
+            std::cout << "[PUSH] R" << my_rank
+                << "-Thread " << thread_id << ": is popping Task " << i
+                << " out of the global-queue..." << std::endl;
 
-                MatTask_Type tmp_pop_T;
-                auto pop_result = global_queue->Pop(my_server_key);
-                tmp_pop_T = pop_result.second;
-            }
+            MatTask_Type tmp_pop_T;
+            auto pop_result = global_queue->Pop(my_server_key);
+            tmp_pop_T = pop_result.second;
         }
+#if PARALLEL_OMP==1
     }
+#endif
+
+    } /* ENDIF NOT THE SERVER */
 
     // wait for making sure finalizing MPI safe
     MPI_Barrier(MPI_COMM_WORLD);
