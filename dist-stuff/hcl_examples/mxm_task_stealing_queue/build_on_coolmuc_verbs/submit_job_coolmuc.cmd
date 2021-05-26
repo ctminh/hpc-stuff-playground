@@ -4,8 +4,8 @@
 #SBATCH -e ./logs/hcl_mxmtask_queue_test_%J.err
 #SBATCH -D ./
 #SBATCH --get-user-env
-#SBATCH --clusters=cm2
-#SBATCH --partition=cm2_std
+#SBATCH --clusters=cm2_tiny
+#SBATCH --partition=cm2_tiny
 #SBATCH --qos=cm2_std
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=2
