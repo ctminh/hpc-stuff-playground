@@ -131,7 +131,7 @@ int main (int argc, char *argv[])
         char *IPbuffer;
         IPbuffer = getHostIB_IPAddr();
         std::cout << "[DBG] R" << my_rank << ": server IB-IP=" << IPbuffer << std::endl;
-        size_t ip_length = std::strlen(IPbuffer);
+        size_t ip_length = 15; // std::strlen(IPbuffer);
         char recv_buff[ip_length*server_comm_size];
         MPI_Allgather(IPbuffer, ip_length, MPI_CHAR, recv_buff, ip_length, MPI_CHAR, server_comm);
         if (my_rank == 1){
