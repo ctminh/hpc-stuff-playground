@@ -13,6 +13,10 @@
 #include <netinet/in.h>
 #include <net/if.h>
 
+#ifndef TEST_ON_LAPTOP
+#define TEST_ON_LAPTOP 0
+#endif
+
 char *getHostIB_IPAddr(){
 
     char *ret;
@@ -24,8 +28,16 @@ char *getHostIB_IPAddr(){
     // choose IPv4 type to get
     ifr.ifr_addr.sa_family = AF_INET;
 
+#if TEST_ON_LAPTOP==1
+    // get IP address attached to localhost
+    // std::cout << "[DBG] getting local-addr..." << std::endl;
+    std::strncpy(ifr.ifr_name, "lo", IFNAMSIZ-1);
+#else
     // get IP address attached to ib0
+    // std::cout << "[DBG] getting IB-addr..." << std::endl;
     std::strncpy(ifr.ifr_name, "ib0", IFNAMSIZ-1);
+#endif
+    
     ioctl(fd, SIOCGIFADDR, &ifr);
     close(fd);
 

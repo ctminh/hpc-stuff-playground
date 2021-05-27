@@ -21,6 +21,7 @@ option(HCL_ENABLE_RPCLIB "allow hcl to use RPCLIB" OFF)
 option(HCL_ENABLE_THALLIUM_TCP "allow hcl to use THALLIUM_TCP" OFF)
 option(HCL_ENABLE_THALLIUM_ROCE "allow hcl to use THALLIUM_ROCE" OFF)
 option(ENABLE_ITAC_TRACE "allow the program to use Intel ITAC" OFF)
+option(TEST_ON_LAPTOP "testing on the local laptop" OFF)
 
 if(HCL_ENABLE_RPCLIB)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHCL_ENABLE_RPCLIB")

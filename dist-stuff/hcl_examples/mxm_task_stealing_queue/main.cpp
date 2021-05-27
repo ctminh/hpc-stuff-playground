@@ -130,18 +130,23 @@ int main (int argc, char *argv[])
     if (is_server){
         char *IPbuffer;
         IPbuffer = getHostIB_IPAddr();
-        std::cout << "[DBG] R" << my_rank << ": server IB-IP=" << IPbuffer << std::endl;
-        size_t ip_length = 15; // std::strlen(IPbuffer);
-        char recv_buff[ip_length*server_comm_size];
-        MPI_Allgather(IPbuffer, ip_length, MPI_CHAR, recv_buff, ip_length, MPI_CHAR, server_comm);
+        // std::cout << "[DBG] R" << my_rank << ": IPbuffer=" << IPbuffer << std::endl;
+        size_t cur_length = std::strlen(IPbuffer);
+        std::string send_addr(IPbuffer);
+        // std::cout << "[DBG] R" << my_rank << ": send_addr=" << send_addr << std::endl;
+        if (cur_length < 15)
+            send_addr.insert(cur_length, (15-cur_length), ' ');
+        // assume the full lenght of ip-addr = 15
+        char recv_buff[15*server_comm_size];
+        MPI_Allgather(send_addr.c_str(), 15, MPI_CHAR, recv_buff, 15, MPI_CHAR, server_comm);
         if (my_rank == 1){
             // write ib-addresses to file
             ofstream ser_addr_file;
             ser_addr_file.open("./server_list");
             for (int i = 0;  i < num_servers; i++){
                 std::string ib_addr = "";
-                for (int j = 0; j < ip_length; j++)
-                    ib_addr = ib_addr + recv_buff[i*ip_length + j];
+                for (int j = 0; j < 15; j++)
+                    ib_addr = ib_addr + recv_buff[i*15 + j];
                 std::cout << "[DBG] Server " << i << ": IB-IP=" << ib_addr << std::endl;
                 ser_addr_file << ib_addr << std::endl;
             }
