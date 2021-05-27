@@ -24,7 +24,7 @@ char *getHostIB_IPAddr(){
     // choose IPv4 type to get
     ifr.ifr_addr.sa_family = AF_INET;
 
-    // get IP address attached to wlp61s0
+    // get IP address attached to ib0
     std::strncpy(ifr.ifr_name, "ib0", IFNAMSIZ-1);
     ioctl(fd, SIOCGIFADDR, &ifr);
     close(fd);

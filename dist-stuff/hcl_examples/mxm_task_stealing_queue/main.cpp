@@ -147,6 +147,7 @@ int main (int argc, char *argv[])
             }
             ser_addr_file.close();
         }
+        MPI_Barrier(server_comm);
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -168,6 +169,8 @@ int main (int argc, char *argv[])
               << ", server_on_node=" << HCL_CONF->SERVER_ON_NODE
               << ", mem_allocated=" << HCL_CONF->MEMORY_ALLOCATED
               << std::endl;
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     /* /////////////////////////////////////////////////////////////////////////////
      * Creating HCL global queues over mpi ranks
