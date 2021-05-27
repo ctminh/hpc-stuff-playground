@@ -79,10 +79,10 @@ int main (int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     bool debug = true;
     int num_tasks = 10;
-    if (comm_size != 4){
-        printf("[ERR] This prototype is designed for running with 4 mpi ranks...\n");
-        exit(EXIT_FAILURE);
-    }
+    // if (comm_size != 4){
+    //     printf("[ERR] This prototype is designed for running with 4 mpi ranks...\n");
+    //     exit(EXIT_FAILURE);
+    // }
 
     // get hostname of each rank
     int name_len;
