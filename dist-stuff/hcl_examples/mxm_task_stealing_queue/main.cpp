@@ -128,31 +128,51 @@ int main (int argc, char *argv[])
     MPI_Comm_size(server_comm, &server_comm_size);
     MPI_Barrier(MPI_COMM_WORLD);
     if (is_server){
-        char *IPbuffer;
-        IPbuffer = getHostIB_IPAddr();
+        // char *IPbuffer;
+        // IPbuffer = getHostIB_IPAddr();
         // std::cout << "[DBG] R" << my_rank << ": IPbuffer=" << IPbuffer << std::endl;
-        size_t cur_length = std::strlen(IPbuffer);
-        std::string send_addr(IPbuffer);
+        // size_t cur_length = std::strlen(IPbuffer);
+        // std::string send_addr(IPbuffer);
         // std::cout << "[DBG] R" << my_rank << ": send_addr=" << send_addr << std::endl;
-        if (cur_length < 15)
-            send_addr.insert(cur_length, (15-cur_length), ' ');
+        // if (cur_length < 15)
+            // send_addr.insert(cur_length, (15-cur_length), ' ');
         // assume the full lenght of ip-addr = 15
-        char recv_buff[15*server_comm_size];
-        MPI_Allgather(send_addr.c_str(), 15, MPI_CHAR, recv_buff, 15, MPI_CHAR, server_comm);
-        if (my_rank == 1){
+        // char recv_buff[15*server_comm_size];
+        // MPI_Allgather(send_addr.c_str(), 15, MPI_CHAR, recv_buff, 15, MPI_CHAR, server_comm);
+        // if (my_rank == 1){
             // write ib-addresses to file
+            // ofstream ser_addr_file;
+            // ser_addr_file.open("./server_list");
+            // for (int i = 0;  i < num_servers; i++){
+            //     std::string ib_addr = "";
+            //     for (int j = 0; j < 15; j++)
+            //         ib_addr = ib_addr + recv_buff[i*15 + j];
+            //     std::cout << "[DBG] Server " << i << ": IB-IP=" << ib_addr << std::endl;
+            //     ser_addr_file << ib_addr << std::endl;
+            // }
+            // ser_addr_file.close();
+        // }
+        // MPI_Barrier(server_comm);
+
+        // try to write hostname on coolmuc
+        std::string send_hostname(processor_name);
+        std::cout << "[DBG] R" << my_rank << ": send_hostname=" << send_hostname << std::endl;
+        size_t hn_length = send_hostname.size();
+        char recv_buff[hn_length * server_comm_size];
+        MPI_Allgather(send_hostname.c_str(), hn_length, MPI_CHAR, recv_buff, hn_length, MPI_CHAR, server_comm);
+        if (my_rank == 1){
+            // write hostname to file
             ofstream ser_addr_file;
             ser_addr_file.open("./server_list");
             for (int i = 0;  i < num_servers; i++){
-                std::string ib_addr = "";
-                for (int j = 0; j < 15; j++)
-                    ib_addr = ib_addr + recv_buff[i*15 + j];
-                std::cout << "[DBG] Server " << i << ": IB-IP=" << ib_addr << std::endl;
-                ser_addr_file << ib_addr << std::endl;
+                std::string hostname_addr = "";
+                for (int j = 0; j < hn_length; j++)
+                    hostname_addr = hostname_addr + recv_buff[i*hn_length + j];
+                std::cout << "[DBG] Server " << i << ": hostname=" << hostname_addr << std::endl;
+                ser_addr_file << hostname_addr << std::endl;
             }
             ser_addr_file.close();
         }
-        MPI_Barrier(server_comm);
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
