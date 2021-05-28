@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
         IPbuffer = getHostIB_IPAddr();
         // std::cout << "[DBG] R" << my_rank << ": IPbuffer=" << IPbuffer << std::endl;
         std::string send_addr(IPbuffer);
-        // std::cout << "[DBG] R" << my_rank << ": send_addr=" << send_addr << std::endl;
+        std::cout << "[DBG] R" << my_rank << ": send_addr=" << send_addr << std::endl;
         size_t message_length = send_addr.size();
         char recv_buff[message_length*server_comm_size];
         MPI_Allgather(send_addr.c_str(), message_length, MPI_CHAR, recv_buff, message_length, MPI_CHAR, server_comm);
