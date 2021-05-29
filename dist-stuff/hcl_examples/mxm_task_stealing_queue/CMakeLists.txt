@@ -64,7 +64,6 @@ endif()
 # enable linking the program with boost-stacktrace
 if(ENABLE_BOOST_STACKTRACE)
     message("BOOST_STACKTRACE: ON")
-    set(BOOST_STACKTRACE_USE_BACKTRACE 1)
 endif()
 
 # Compile the example with linking hcl
