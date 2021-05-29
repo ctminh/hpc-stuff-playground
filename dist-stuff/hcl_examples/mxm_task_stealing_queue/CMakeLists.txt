@@ -16,6 +16,7 @@ option(HCL_ENABLE_THALLIUM_TCP "allow hcl to use THALLIUM_TCP" OFF)
 option(HCL_ENABLE_THALLIUM_ROCE "allow hcl to use THALLIUM_ROCE" OFF)
 option(ENABLE_ITAC_TRACE "allow the program to use Intel ITAC" OFF)
 option(ENABLE_PARALLEL_OMP "allow the program to use OPENMP" OFF)
+option(ENABLE_BOOST_STACKTRACE "allow the program to link boost-stacktrace" OFF)
 option(TEST_ON_LAPTOP "testing on the local laptop" OFF)
 
 if(HCL_ENABLE_RPCLIB)
@@ -58,6 +59,13 @@ if(ENABLE_PARALLEL_OMP)
     message("PARALLEL_OMP: ON")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPARALLEL_OMP")
     set(LIB_FLAGS ${LIB_FLAGS} ${DEFAULT_OPENMP_FLAG})
+endif()
+
+# enable linking the program with boost-stacktrace
+if(ENABLE_BOOST_STACKTRACE)
+    message("BOOST_STACKTRACE: ON")
+    set(BOOST_STACKTRACE_LINK 1)
+    set(LIB_FLAGS ${LIB_FLAGS} -lboost_stacktrace_backtrace -ldl -lbacktrace)
 endif()
 
 # Compile the example with linking hcl
