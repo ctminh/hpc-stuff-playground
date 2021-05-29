@@ -64,8 +64,7 @@ endif()
 # enable linking the program with boost-stacktrace
 if(ENABLE_BOOST_STACKTRACE)
     message("BOOST_STACKTRACE: ON")
-    set(BOOST_STACKTRACE_LINK 1)
-    set(LIB_FLAGS ${LIB_FLAGS} -lboost_stacktrace_backtrace -ldl -lbacktrace)
+    set(BOOST_STACKTRACE_USE_BACKTRACE 1)
 endif()
 
 # Compile the example with linking hcl
