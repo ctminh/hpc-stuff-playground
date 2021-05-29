@@ -243,6 +243,9 @@ int main (int argc, char *argv[])
                 << "-Thread " << thread_id << ": is pushing Task " << i
                 << " into the global-queue..." << std::endl;
 
+            // try to call boost-stacktrace
+            print_stacktrace();
+
             // init the tasks with their values = their rank idx
             size_t val = my_rank;
             auto key = MatTask_Type(i, val);
@@ -271,6 +274,9 @@ int main (int argc, char *argv[])
             std::cout << "[PUSH] R" << my_rank
                 << "-Thread " << thread_id << ": is popping Task " << i
                 << " out of the global-queue..." << std::endl;
+
+            // try to call boost-stacktrace
+            print_stacktrace();
 
             MatTask_Type tmp_pop_T;
             auto pop_result = global_queue->Pop(my_server_key);
