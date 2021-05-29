@@ -47,16 +47,17 @@ if(ENABLE_ITAC_TRACE)
     set(LIB_FLAGS ${LIB_FLAGS} ${ITAC_FLAGS})
 endif()
 
-# enable Paralle with OpenMP in a single rank
+# enable Paralle with OpenMP threads in a single rank
 if(ENABLE_PARALLEL_OMP)
     # find OpenMP lib
     find_package(OpenMP)
     if(OpenMP_CXX_FOUND)
         set(DEFAULT_OPENMP_FLAG OpenMP::OpenMP_CXX)
     endif()
+
     message("PARALLEL_OMP: ON")
     set(PARALLEL_OMP 1)
-    set(LIB_FLAGS ${DEFAULT_OPENMP_FLAG})
+    set(LIB_FLAGS ${LIB_FLAGS} ${DEFAULT_OPENMP_FLAG})
 endif()
 
 # Compile the example with linking hcl
