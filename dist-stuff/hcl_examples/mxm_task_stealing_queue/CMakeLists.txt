@@ -8,12 +8,6 @@ project(mxm_task_stealing_prototype)
 find_package(MPI REQUIRED COMPONENTS CXX)
 message(STATUS "found mpi.h at ${MPI_CXX_INCLUDE_DIRS}")
 
-# find OpenMP lib
-find_package(OpenMP)
-if(OpenMP_CXX_FOUND)
-    set(DEFAULT_OPENMP_FLAG OpenMP::OpenMP_CXX)
-endif()
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gdwarf-2 -g3")
 
@@ -44,7 +38,7 @@ if(HCL_ENABLE_THALLIUM_ROCE OR HCL_ENABLE_THALLIUM_TCP)
 endif()
 
 # the main flag for compiling the program
-set(LIB_FLAGS ${RPC_LIB_FLAGS} ${DEFAULT_OPENMP_FLAG} -lmpicxx -lpthread -lrt -lhcl)
+set(LIB_FLAGS ${RPC_LIB_FLAGS} -lmpicxx -lpthread -lrt -lhcl)
 
 # enable ITAC for tracing
 if(ENABLE_ITAC_TRACE)
@@ -55,8 +49,14 @@ endif()
 
 # enable Paralle with OpenMP in a single rank
 if(ENABLE_PARALLEL_OMP)
+    # find OpenMP lib
+    find_package(OpenMP)
+    if(OpenMP_CXX_FOUND)
+        set(DEFAULT_OPENMP_FLAG OpenMP::OpenMP_CXX)
+    endif()
     message("PARALLEL_OMP: ON")
-    set(LIB_FLAGS -DPARALLEL_OMP=1)
+    
+    set(LIB_FLAGS -DPARALLEL_OMP=1 ${DEFAULT_OPENMP_FLAG})
 endif()
 
 # Compile the example with linking hcl
