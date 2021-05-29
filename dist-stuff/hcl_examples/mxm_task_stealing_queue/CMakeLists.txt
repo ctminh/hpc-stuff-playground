@@ -21,6 +21,7 @@ option(HCL_ENABLE_RPCLIB "allow hcl to use RPCLIB" OFF)
 option(HCL_ENABLE_THALLIUM_TCP "allow hcl to use THALLIUM_TCP" OFF)
 option(HCL_ENABLE_THALLIUM_ROCE "allow hcl to use THALLIUM_ROCE" OFF)
 option(ENABLE_ITAC_TRACE "allow the program to use Intel ITAC" OFF)
+option(ENABLE_PARALLEL_OMP "allow the program to use OPENMP" OFF)
 option(TEST_ON_LAPTOP "testing on the local laptop" OFF)
 
 if(HCL_ENABLE_RPCLIB)
@@ -45,11 +46,18 @@ endif()
 # the main flag for compiling the program
 set(LIB_FLAGS ${RPC_LIB_FLAGS} ${DEFAULT_OPENMP_FLAG} -lmpicxx -lpthread -lrt -lhcl)
 
+# enable ITAC for tracing
 if(ENABLE_ITAC_TRACE)
+    message("Intel_TRACE: ON")
     set(ITAC_FLAGS -DTRACE -I${VT_ROOT}/include -L${VT_LIB_DIR} -lVT ${VT_ADD_LIBS})
     set(LIB_FLAGS ${LIB_FLAGS} ${ITAC_FLAGS})
 endif()
 
+# enable Paralle with OpenMP in a single rank
+if(ENABLE_PARALLEL_OMP)
+    message("PARALLEL_OMP: ON")
+    set(LIB_FLAGS -DPARALLEL_OMP=1)
+endif()
 
 # Compile the example with linking hcl
 add_executable(main main.cpp mxm_task_types.h mxm_kernel.h util.h)
