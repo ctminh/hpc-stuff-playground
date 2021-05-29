@@ -55,8 +55,8 @@ if(ENABLE_PARALLEL_OMP)
         set(DEFAULT_OPENMP_FLAG OpenMP::OpenMP_CXX)
     endif()
     message("PARALLEL_OMP: ON")
-    
-    set(LIB_FLAGS -DPARALLEL_OMP=1 ${DEFAULT_OPENMP_FLAG})
+    set(PARALLEL_OMP 1)
+    set(LIB_FLAGS ${DEFAULT_OPENMP_FLAG})
 endif()
 
 # Compile the example with linking hcl
