@@ -130,7 +130,6 @@ int main (int argc, char *argv[])
     if (is_server){
         char *IPbuffer;
         IPbuffer = getHostIB_IPAddr();
-        // std::cout << "[DBG] R" << my_rank << ": IPbuffer=" << IPbuffer << std::endl;
         std::string send_addr(IPbuffer);
         std::cout << "[DBG] R" << my_rank << ": send_addr=" << send_addr << std::endl;
         size_t message_length = send_addr.size();
@@ -151,25 +150,25 @@ int main (int argc, char *argv[])
         }
         MPI_Barrier(server_comm);
 
-        // try to write hostname on coolmuc
-        // std::string send_hostname(processor_name);
-        // std::cout << "[DBG] R" << my_rank << ": send_hostname=" << send_hostname << std::endl;
-        // size_t hn_length = send_hostname.size();
-        // char recv_buff[hn_length * server_comm_size];
-        // MPI_Allgather(send_hostname.c_str(), hn_length, MPI_CHAR, recv_buff, hn_length, MPI_CHAR, server_comm);
-        // if (my_rank == 1){
-        //     // write hostname to file
-        //     ofstream ser_addr_file;
-        //     ser_addr_file.open("./server_list");
-        //     for (int i = 0;  i < num_servers; i++){
-        //         std::string hostname_addr = "";
-        //         for (int j = 0; j < hn_length; j++)
-        //             hostname_addr = hostname_addr + recv_buff[i*hn_length + j];
-        //         std::cout << "[DBG] Server " << i << ": hostname=" << hostname_addr << std::endl;
-        //         ser_addr_file << hostname_addr << std::endl;
-        //     }
-        //     ser_addr_file.close();
-        // }
+        /* try to write hostname on coolmuc
+        std::string send_hostname(processor_name);
+        std::cout << "[DBG] R" << my_rank << ": send_hostname=" << send_hostname << std::endl;
+        size_t hn_length = send_hostname.size();
+        char recv_buff[hn_length * server_comm_size];
+        MPI_Allgather(send_hostname.c_str(), hn_length, MPI_CHAR, recv_buff, hn_length, MPI_CHAR, server_comm);
+        if (my_rank == 1){
+            // write hostname to file
+            ofstream ser_addr_file;
+            ser_addr_file.open("./server_list");
+            for (int i = 0;  i < num_servers; i++){
+                std::string hostname_addr = "";
+                for (int j = 0; j < hn_length; j++)
+                    hostname_addr = hostname_addr + recv_buff[i*hn_length + j];
+                std::cout << "[DBG] Server " << i << ": hostname=" << hostname_addr << std::endl;
+                ser_addr_file << hostname_addr << std::endl;
+            }
+            ser_addr_file.close();
+        } */
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
