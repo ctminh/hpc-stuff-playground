@@ -12,11 +12,19 @@
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <net/if.h>
+#include <boost/stacktrace.hpp>
 
 #ifndef TEST_ON_LAPTOP
 #define TEST_ON_LAPTOP 0
 #endif
 
+/**
+ * Getting IP_addr of IB devices
+ * 
+ * @param None
+ * @return the IB-IP address corresponding to the interface name "ib0"
+ * Depends on the system, it works on CoolMUC2 and BEAST system.
+ */
 char *getHostIB_IPAddr(){
 
     char *ret;
@@ -45,6 +53,20 @@ char *getHostIB_IPAddr(){
     ret = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
 
     return ret;
+}
+
+
+/**
+ * Tracing stack-call with Boost-StackTrace
+ * 
+ * @param None
+ * @return print the current calls on stack.
+ */
+void print_stacktrace() {
+
+    // ... somewhere inside a specific function
+    // that is called recursively
+    std::cout << boost::stacktrace::stacktrace();
 }
 
 #endif // UTIL_H
