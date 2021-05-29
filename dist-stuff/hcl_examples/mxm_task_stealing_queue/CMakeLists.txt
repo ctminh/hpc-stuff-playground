@@ -56,8 +56,7 @@ if(ENABLE_PARALLEL_OMP)
     endif()
 
     message("PARALLEL_OMP: ON")
-    set(PARALLEL_OMP 1)
-    set(LIB_FLAGS ${LIB_FLAGS} ${DEFAULT_OPENMP_FLAG})
+    set(LIB_FLAGS ${LIB_FLAGS} ${DEFAULT_OPENMP_FLAG} -DPARALLEL_OMP=1)
 endif()
 
 # Compile the example with linking hcl
