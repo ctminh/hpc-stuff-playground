@@ -34,4 +34,5 @@ export CXX_COMPILER=mpicxx
 echo "5. Running cmake to config..."
 cmake -DHCL_ENABLE_THALLIUM_ROCE=true -DCMAKE_C_COMPILER=${C_COMPILER} -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
     -DENABLE_PARALLEL_OMP=1 \
+    -DENABLE_GDB=1 \
     ..
