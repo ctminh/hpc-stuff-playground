@@ -16,8 +16,7 @@ option(HCL_ENABLE_THALLIUM_TCP "allow hcl to use THALLIUM_TCP" OFF)
 option(HCL_ENABLE_THALLIUM_ROCE "allow hcl to use THALLIUM_ROCE" OFF)
 option(ENABLE_ITAC_TRACE "allow the program to use Intel ITAC" OFF)
 option(ENABLE_PARALLEL_OMP "allow the program to use OPENMP" OFF)
-option(ENABLE_BOOST_STACKTRACE "allow the program to link boost-stacktrace" OFF)
-option(ENABLE_DDT "allow debugging with gdb" OFF)
+option(ENABLE_GDB_DEBUG "allow the program to debug by gdb" OFF)
 option(TEST_ON_LAPTOP "testing on the local laptop" OFF)
 
 if(HCL_ENABLE_RPCLIB)
@@ -67,9 +66,9 @@ if(ENABLE_BOOST_STACKTRACE)
     message("BOOST_STACKTRACE: ON")
 endif()
 
-# enable gbd debugging
-if(ENABLE_DDT)
-    message("ENABLE_DDT: ON")
+# enable gdb debugging
+if(ENABLE_GDB_DEBUG)
+    message("ENABLE_GDB_DEBUG: ON")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O2")
 endif()
 

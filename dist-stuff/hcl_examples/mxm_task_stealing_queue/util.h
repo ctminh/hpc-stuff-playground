@@ -62,11 +62,6 @@ char *getHostIB_IPAddr(){
  * @param None
  * @return print the current calls on stack.
  */
-// void print_stacktrace() {
 
-//     // ... somewhere inside a specific function
-//     // that is called recursively
-//     std::cout << boost::stacktrace::stacktrace();
-// }
 
 #endif // UTIL_H
