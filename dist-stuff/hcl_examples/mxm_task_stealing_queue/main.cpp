@@ -79,10 +79,6 @@ int main (int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     bool debug = true;
     int num_tasks = 10;
-    // if (comm_size != 4){
-    //     printf("[ERR] This prototype is designed for running with 4 mpi ranks...\n");
-    //     exit(EXIT_FAILURE);
-    // }
 
     // get hostname of each rank
     int name_len;
@@ -102,18 +98,26 @@ int main (int argc, char *argv[])
     /* /////////////////////////////////////////////////////////////////////////////
      * Configuring HCL-setup
      * ////////////////////////////////////////////////////////////////////////// */
+
+    // get config-values from keyboard
+    int num_request = 10;
+    int size_of_request = 1000;
     int ranks_per_node = 2;
     int num_nodes = comm_size / ranks_per_node;
     int ranks_per_server = ranks_per_node;
+    bool server_on_node = false;
+    std::string server_lists = "./server_list";
+    
+    if (argc > 1) ranks_per_server = atoi(argv[1]);
+    if (argc > 2) num_request = atoi(argv[2]);
+    if (argc > 3) size_of_request = (long) atol(argv[3]);
+    if (argc > 4) server_on_node = (bool) atoi(argv[4]);
+    if (argc > 5) debug = (bool) atoi(argv[5]);
+    if (argc > 6) server_lists = argv[6];
 
     // choose the server, for simple, assign R0 as the server,
     // for example, the last rank is the server
     bool is_server = (my_rank + 1) % ranks_per_server == 0;
-
-    // for simple each node has a server, so server_on_node is true
-    bool server_on_node = false;
-    if (is_server)
-        server_on_node = true;
 
     // set my_server for R0, R1, others in the if
     int my_server = my_rank / ranks_per_server;
