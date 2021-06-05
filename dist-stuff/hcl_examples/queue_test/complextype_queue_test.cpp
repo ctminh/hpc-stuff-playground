@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
     //     queue->Bind("CB_Put", func, "APut",putFunc);
     // }
     // MPI_Barrier(MPI_COMM_WORLD);
-    // if (!is_server) {
+    if (!is_server) {
     //     Timer llocal_queue_timer = Timer();
     //     std::hash<KeyType> keyHash;
     //     /*Local std::queue test*/
@@ -402,6 +402,7 @@ int main(int argc, char *argv[]) {
             printf("remote queue throughput (get): %f\n", remote_get_tp_result);
         }
     }
+
     MPI_Barrier(MPI_COMM_WORLD);
     delete(queue);
     MPI_Finalize();
