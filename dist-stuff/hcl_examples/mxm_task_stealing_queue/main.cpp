@@ -106,7 +106,7 @@ int main (int argc, char *argv[])
     int num_nodes = comm_size / ranks_per_node;
     int ranks_per_server = ranks_per_node;
     bool server_on_node = false;
-    int num_omp_threads = 4;
+    int num_omp_threads = 1;
     std::string server_lists = "./server_list";
     
     if (argc > 1) ranks_per_server = atoi(argv[1]);
@@ -226,13 +226,15 @@ int main (int argc, char *argv[])
 
     if (!is_server) { /* IF NOT THE SERVER */
 
+        // Set num of omp threads here, default is 1
+        const int NTHREADS = num_omp_threads;
+
         // use the local key to push tasks on each server side
-        std::cout << "[PUSH] R" << my_rank
+        std::cout << "[PUSH] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
                   << ": is creating " << num_tasks << " mxm-tasks..." << std::endl;
         uint16_t my_server_key = my_server % num_servers;
 
 #if PARALLEL_OMP==1
-    const int NTHREADS = num_omp_threads;
     #pragma omp parallel num_threads(NTHREADS)
     {
         #pragma omp for
@@ -258,7 +260,7 @@ int main (int argc, char *argv[])
         MPI_Barrier(client_comm);
 
         // pop tasks from the queue and then execute them
-        std::cout << "[POP] R" << my_rank
+        std::cout << "[POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
                   << ": is getting " << num_tasks << " mxm-tasks out for executing..." << std::endl;
 
 #if PARALLEL_OMP==1
