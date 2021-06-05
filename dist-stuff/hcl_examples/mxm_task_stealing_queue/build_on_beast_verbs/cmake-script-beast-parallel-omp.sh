@@ -4,7 +4,8 @@ rm -r CMakeCache.txt  ./CMakeFiles cmake_install.cmake  Makefile
 echo "2. Exporting MPICH on BEAST ..."
 module use ~/.module
 module use ~/loc-libs/spack/share/spack/lmod/linux-sles15-zen2
-module load mpich-3.3.2-gcc-10.2.1-nfqpwl7  # without linking fortran
+# module load mpich-3.3.2-gcc-10.2.1-nfqpwl7  # without linking fortran, +argobots, -verbs
+module load mpich-3.3.2-gcc-10.2.1-l57k3pr    # without linking fortran, -argobots, +verbs
 
 # load dependencies
 echo "3. Loading thallium-rpc, mercury, margo dependencies..."
