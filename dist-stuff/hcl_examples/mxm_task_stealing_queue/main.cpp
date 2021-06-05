@@ -78,7 +78,7 @@ int main (int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     bool debug = true;
-    int num_tasks = 10;
+    int num_tasks = 1000;
 
     // get hostname of each rank
     int name_len;
