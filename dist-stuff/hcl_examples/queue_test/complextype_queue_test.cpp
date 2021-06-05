@@ -224,10 +224,10 @@ int main(int argc, char *argv[]) {
     HCL_CONF->NUM_SERVERS = num_servers;
     int ranks_per_node = 2;
     int num_nodes = comm_size / ranks_per_node;
-    if (is_server)
-        HCL_CONF->SERVER_ON_NODE = true;
-    else
-        HCL_CONF->SERVER_ON_NODE = false;
+    // if (is_server)
+    //     HCL_CONF->SERVER_ON_NODE = true;
+    // else
+    //     HCL_CONF->SERVER_ON_NODE = false;
 
     HCL_CONF->SERVER_LIST_PATH = server_lists;
     auto mem_size = KEY_SIZE * KEY_SIZE * (comm_size + 1) * num_request;
