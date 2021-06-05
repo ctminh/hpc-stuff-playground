@@ -177,20 +177,20 @@ int main (int argc, char *argv[])
     MPI_Barrier(MPI_COMM_WORLD);
 
     // configure hcl components before running, this configuration for each rank
+    auto mem_size = SIZE * SIZE * (comm_size + 1) * num_tasks;
     HCL_CONF->IS_SERVER = is_server;
     HCL_CONF->MY_SERVER = my_server;
     HCL_CONF->NUM_SERVERS = num_servers;
     HCL_CONF->SERVER_ON_NODE = server_on_node;
     HCL_CONF->SERVER_LIST_PATH = "./server_list";
-
-    auto mem_size = SIZE * SIZE * (comm_size + 1) * num_tasks;
     HCL_CONF->MEMORY_ALLOCATED = mem_size;
-    std::cout << HLINE << std::endl;
 
     if (my_rank == 0){
         printf("[HCL_CONF] Rank | is_server | my_server | num_servers | server_on_node | mem_alloc\n");
     }
-    printf("R%d %d %d %d %d %lu\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS, HCL_CONF->SERVER_ON_NODE, HCL_CONF->MEMORY_ALLOCATED);
+    printf("R%d %d %d %d %d %lu\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS,
+                                    HCL_CONF->SERVER_ON_NODE, HCL_CONF->MEMORY_ALLOCATED);
+    std::cout << HLINE << std::endl;
     MPI_Barrier(MPI_COMM_WORLD);
 
     /* /////////////////////////////////////////////////////////////////////////////
