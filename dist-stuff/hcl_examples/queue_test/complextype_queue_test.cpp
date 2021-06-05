@@ -257,46 +257,46 @@ int main(int argc, char *argv[]) {
     //                                                                                                                 array_size>>::LocalPutWithCallback<int,int>,queue,std::placeholders::_1, std::placeholders::_2,std::placeholders::_3, std::placeholders::_4));
     //     queue->Bind("CB_Put", func, "APut",putFunc);
     // }
-    MPI_Barrier(MPI_COMM_WORLD);
-    if (!is_server) {
-        Timer llocal_queue_timer = Timer();
-        std::hash<KeyType> keyHash;
-        /*Local std::queue test*/
-        for (int i = 0; i < num_request; i++) {
-            size_t val = my_server;
-            size_t key_hash = keyHash(KeyType(val)) % num_servers;
-            llocal_queue_timer.resumeTime();
-            if (key_hash == my_server && is_server) {}
-            lqueue.push(KeyType(val));
-            llocal_queue_timer.pauseTime();
-        }
+    // MPI_Barrier(MPI_COMM_WORLD);
+    // if (!is_server) {
+    //     Timer llocal_queue_timer = Timer();
+    //     std::hash<KeyType> keyHash;
+    //     /*Local std::queue test*/
+    //     for (int i = 0; i < num_request; i++) {
+    //         size_t val = my_server;
+    //         size_t key_hash = keyHash(KeyType(val)) % num_servers;
+    //         llocal_queue_timer.resumeTime();
+    //         if (key_hash == my_server && is_server) {}
+    //         lqueue.push(KeyType(val));
+    //         llocal_queue_timer.pauseTime();
+    //     }
 
-        double llocal_queue_throughput =
-                num_request / llocal_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 / 1024;
+    //     double llocal_queue_throughput =
+    //             num_request / llocal_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 / 1024;
 
-        Timer llocal_get_queue_timer = Timer();
-        #pragma omp parallel num_threads(2)
-        {
-            #pragma omp for
-            for (int i = 0; i < num_request; i++) {
-                size_t val = my_server;
-                size_t key_hash = keyHash(KeyType(val)) % num_servers;
-                llocal_get_queue_timer.resumeTime();
-                if (key_hash == my_server && is_server) {}
-                auto result = lqueue.front();
-                lqueue.pop();
-                llocal_get_queue_timer.pauseTime();
-            }
-        }
-        double llocal_get_queue_throughput =
-                num_request / llocal_get_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 /
-                1024;
+    //     Timer llocal_get_queue_timer = Timer();
+    //     #pragma omp parallel num_threads(2)
+    //     {
+    //         #pragma omp for
+    //         for (int i = 0; i < num_request; i++) {
+    //             size_t val = my_server;
+    //             size_t key_hash = keyHash(KeyType(val)) % num_servers;
+    //             llocal_get_queue_timer.resumeTime();
+    //             if (key_hash == my_server && is_server) {}
+    //             auto result = lqueue.front();
+    //             lqueue.pop();
+    //             llocal_get_queue_timer.pauseTime();
+    //         }
+    //     }
+    //     double llocal_get_queue_throughput =
+    //             num_request / llocal_get_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 /
+    //             1024;
 
-        if (my_rank == 0) {
-            printf("llocal_queue_throughput put: %f\n", llocal_queue_throughput);
-            printf("llocal_queue_throughput get: %f\n", llocal_get_queue_throughput);
-        }
-        MPI_Barrier(client_comm);
+    //     if (my_rank == 0) {
+    //         printf("llocal_queue_throughput put: %f\n", llocal_queue_throughput);
+    //         printf("llocal_queue_throughput get: %f\n", llocal_get_queue_throughput);
+    //     }
+    //     MPI_Barrier(client_comm);
 
         Timer local_queue_timer = Timer();
         uint16_t my_server_key = my_server % num_servers;
