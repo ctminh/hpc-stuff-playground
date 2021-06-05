@@ -100,7 +100,7 @@ int main (int argc, char *argv[])
      * ////////////////////////////////////////////////////////////////////////// */
 
     // get config-values from keyboard
-    int num_request = 10;
+    int num_request = 1000;
     int size_of_request = 1000;
     int ranks_per_node = 2;
     int num_nodes = comm_size / ranks_per_node;
@@ -236,7 +236,7 @@ int main (int argc, char *argv[])
         uint16_t my_server_key = my_server % num_servers;
 
 #if PARALLEL_OMP==1
-    #pragma omp parallel num_threads(2)
+    #pragma omp parallel num_threads(32)
     {
         #pragma omp for
 #endif
@@ -268,7 +268,7 @@ int main (int argc, char *argv[])
                   << ": is getting " << num_tasks << " mxm-tasks out for executing..." << std::endl;
 
 #if PARALLEL_OMP==1
-    #pragma omp parallel num_threads(2)
+    #pragma omp parallel num_threads(32)
     {
         #pragma omp for
 #endif
