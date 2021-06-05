@@ -298,6 +298,9 @@ int main(int argc, char *argv[]) {
     //     }
     //     MPI_Barrier(client_comm);
 
+        // declare key-hasing
+        std::hash<KeyType> keyHash;
+
         Timer local_queue_timer = Timer();
         uint16_t my_server_key = my_server % num_servers;
         /*Local queue test*/
