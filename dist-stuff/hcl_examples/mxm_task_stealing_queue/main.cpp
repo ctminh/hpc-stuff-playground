@@ -78,7 +78,6 @@ int main (int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     bool debug = true;
-    int num_tasks = 1000;
 
     // get hostname of each rank
     int name_len;
@@ -89,8 +88,9 @@ int main (int argc, char *argv[])
     }
 
     // check num of ready ranks
-    if(debug && my_rank == 0){
-        printf("[DBG] %d ranks ready for HCL_CONF attaching\n", comm_size);
+    if(my_rank == 0){
+        printf("[Usage] %d ranks ready for HCL_CONF attaching\n", comm_size);
+        printf("[Usage] ./main <ranks_per_server> <server_on_node> <num_tasks> <num_threads> <server_list/hostfile>\n");
         fflush(stdout);
     }
     MPI_Barrier(MPI_COMM_WORLD);
@@ -100,20 +100,20 @@ int main (int argc, char *argv[])
      * ////////////////////////////////////////////////////////////////////////// */
 
     // get config-values from keyboard
-    int num_request = 1000;
+    int num_tasks = 1000;
     int size_of_request = 1000;
     int ranks_per_node = 2;
     int num_nodes = comm_size / ranks_per_node;
     int ranks_per_server = ranks_per_node;
     bool server_on_node = false;
+    int num_omp_threads = 4;
     std::string server_lists = "./server_list";
     
     if (argc > 1) ranks_per_server = atoi(argv[1]);
-    if (argc > 2) num_request = atoi(argv[2]);
-    if (argc > 3) size_of_request = (long) atol(argv[3]);
-    if (argc > 4) server_on_node = (bool) atoi(argv[4]);
-    if (argc > 5) debug = (bool) atoi(argv[5]);
-    if (argc > 6) server_lists = argv[6];
+    if (argc > 2) server_on_node = (bool) atoi(argv[2]);
+    if (argc > 3) num_tasks = atoi(argv[3]);
+    if (argc > 4) num_omp_threads = atoi(argv[4]);
+    if (argc > 5) server_lists = argv[5];
 
     // choose the server, for simple, assign R0 as the server,
     // for example, the last rank is the server
@@ -187,14 +187,10 @@ int main (int argc, char *argv[])
     HCL_CONF->MEMORY_ALLOCATED = mem_size;
     std::cout << HLINE << std::endl;
 
-    std::cout << "[CHECK] R" << my_rank
-              << ": is_server=" << HCL_CONF->IS_SERVER
-              << ", my_server=" << HCL_CONF->MY_SERVER
-              << ", num_servers=" << HCL_CONF->NUM_SERVERS
-              << ", server_on_node=" << HCL_CONF->SERVER_ON_NODE
-              << ", mem_allocated=" << HCL_CONF->MEMORY_ALLOCATED
-              << std::endl;
-
+    if (my_rank == 0){
+        printf("[HCL_CONF] Rank | is_server | my_server | num_servers | server_on_node | mem_alloc\n");
+    }
+    printf("R%d %d %d %d %d %lu\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS, HCL_CONF->SERVER_ON_NODE, HCL_CONF->MEMORY_ALLOCATED);
     MPI_Barrier(MPI_COMM_WORLD);
 
     /* /////////////////////////////////////////////////////////////////////////////
@@ -236,19 +232,17 @@ int main (int argc, char *argv[])
         uint16_t my_server_key = my_server % num_servers;
 
 #if PARALLEL_OMP==1
-    #pragma omp parallel num_threads(128)
+    const int NTHREADS = num_omp_threads;
+    #pragma omp parallel num_threads(NTHREADS)
     {
         #pragma omp for
 #endif
         for (int i = 0; i < num_tasks; i++){
 
-            int thread_id = omp_get_thread_num();
-            std::cout << "[PUSH] R" << my_rank
-                << "-Thread " << thread_id << ": is pushing Task " << i
-                << " into the global-queue..." << std::endl;
-
-            // try to call boost-stacktrace
-            // print_stacktrace();
+            // int thread_id = omp_get_thread_num();
+            // std::cout << "[PUSH] R" << my_rank
+            //     << "-Thread " << thread_id << ": is pushing Task " << i
+            //     << " into the global-queue..." << std::endl;
 
             // init the tasks with their values = their rank idx
             size_t val = my_rank;
@@ -268,19 +262,16 @@ int main (int argc, char *argv[])
                   << ": is getting " << num_tasks << " mxm-tasks out for executing..." << std::endl;
 
 #if PARALLEL_OMP==1
-    #pragma omp parallel num_threads(128)
+    #pragma omp parallel num_threads(NTHREADS)
     {
         #pragma omp for
 #endif
         for (int i = 0; i < num_tasks; i++) {
 
-            int thread_id = omp_get_thread_num();
-            std::cout << "[PUSH] R" << my_rank
-                << "-Thread " << thread_id << ": is popping Task " << i
-                << " out of the global-queue..." << std::endl;
-
-            // try to call boost-stacktrace
-            // print_stacktrace();
+            // int thread_id = omp_get_thread_num();
+            // std::cout << "[PUSH] R" << my_rank
+            //     << "-Thread " << thread_id << ": is popping Task " << i
+            //     << " out of the global-queue..." << std::endl;
 
             MatTask_Type tmp_pop_T;
             auto pop_result = global_queue->Pop(my_server_key);
