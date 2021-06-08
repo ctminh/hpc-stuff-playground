@@ -27,7 +27,6 @@
 #endif
 
 #if TRACE==1
-
 #include "VT.h"
 static int _tracing_enabled = 1;
 
@@ -132,6 +131,7 @@ int main (int argc, char *argv[])
     MPI_Comm_size(server_comm, &server_comm_size);
     MPI_Barrier(MPI_COMM_WORLD);
     if (is_server){
+        /* try to get IB-IP address on BEAST and write file
         char *IPbuffer;
         IPbuffer = getHostIB_IPAddr();
         std::string send_addr(IPbuffer);
@@ -152,7 +152,7 @@ int main (int argc, char *argv[])
             }
             ser_addr_file.close();
         }
-        MPI_Barrier(server_comm);
+        MPI_Barrier(server_comm); */
 
         /* try to write hostname on coolmuc
         std::string send_hostname(processor_name);
