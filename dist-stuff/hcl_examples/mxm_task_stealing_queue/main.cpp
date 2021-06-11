@@ -267,11 +267,11 @@ int main (int argc, char *argv[])
                   << ", local_key=" << my_local_key
                   << ": is getting " << num_tasks/2 << " mxm-tasks out for executing..." << std::endl;
 
-#if PARALLEL_OMP==1
-    #pragma omp parallel num_threads(NTHREADS)
-    {
-        #pragma omp for
-#endif
+// #if PARALLEL_OMP==1
+//     #pragma omp parallel num_threads(NTHREADS)
+//     {
+//         #pragma omp for
+// #endif
         // for (int i = 0; i < num_tasks/2; i++) {
 
             // int thread_id = omp_get_thread_num();
@@ -293,9 +293,9 @@ int main (int argc, char *argv[])
             tmp_pop_T = pop_result.second;
         }
 
-#if PARALLEL_OMP==1
-    }
-#endif
+// #if PARALLEL_OMP==1
+//     }
+// #endif
 
     } /* ENDIF NOT THE SERVER */
 
