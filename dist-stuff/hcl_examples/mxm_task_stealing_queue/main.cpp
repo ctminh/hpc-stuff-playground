@@ -230,7 +230,9 @@ int main (int argc, char *argv[])
         const int NTHREADS = num_omp_threads;
 
         // use the local key to push tasks on each server side
-        uint16_t my_server_key = my_server % num_servers;
+        // uint16_t my_server_key = my_server % num_servers;
+        uint16_t my_server_key = 1; // a quick hack for choosing the remote server
+        if (my_rank >= 2) my_server_key = 0;
         std::cout << "[PUSH] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
                   << ", server_key=" << my_server_key
                   << ": is creating " << num_tasks << " mxm-tasks..." << std::endl;
@@ -293,6 +295,7 @@ int main (int argc, char *argv[])
     // remove boost-shared-mapping-file
     if (is_server){
         std::string shm_mem_file = "/dev/shm/TEST_QUEUE_" + std::to_string(my_rank);
+        std::cout << "R" << my_rank << " removes shm-mem-file: " << shm_mem_file << std::endl;
         boost::interprocess::shared_memory_object::remove(shm_mem_file.c_str());
     }
 
