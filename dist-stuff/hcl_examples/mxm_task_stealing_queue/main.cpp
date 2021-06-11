@@ -287,7 +287,7 @@ int main (int argc, char *argv[])
         std::cout << "[REMOTE_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
                   << ", remote_key=" << my_remote_key
                   << ": is getting " << num_tasks/2 << " mxm-tasks out for executing..." << std::endl;
-        for (int i = 0; i < num_tasks/2; i++){
+        for (int i = 0; i < num_tasks; i++){
             MatTask_Type tmp_pop_T;
             auto pop_result = global_queue->Pop(my_remote_key);
             tmp_pop_T = pop_result.second;
