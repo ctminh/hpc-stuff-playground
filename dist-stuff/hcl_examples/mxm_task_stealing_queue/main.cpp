@@ -293,7 +293,7 @@ int main (int argc, char *argv[])
     // remove boost-shared-mapping-file
     if (is_server){
         std::string shm_mem_file = "/dev/shm/TEST_QUEUE_" + std::to_string(my_rank);
-        boost::interprocess::shared_memory_object::remove(shm_mem_file);
+        boost::interprocess::shared_memory_object::remove(shm_mem_file.c_str());
     }
 
     // finalize MPI
