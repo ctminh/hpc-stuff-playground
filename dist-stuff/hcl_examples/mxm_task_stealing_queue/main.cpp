@@ -263,15 +263,15 @@ int main (int argc, char *argv[])
 
         MPI_Barrier(client_comm);
 
+        std::cout << "[LOCAL_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
+                  << ", server_key=" << my_local_key
+                  << ": is getting " << num_tasks/2 << " mxm-tasks out for executing..." << std::endl;
+
 #if PARALLEL_OMP==1
     #pragma omp parallel num_threads(NTHREADS)
     {
         #pragma omp for
 #endif
-        std::cout << "[LOCAL_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
-                  << ", server_key=" << my_local_key
-                  << ": is getting " << num_tasks/2 << " mxm-tasks out for executing..." << std::endl;
-
         for (int i = 0; i < num_tasks/2; i++) {
 
             // int thread_id = omp_get_thread_num();
