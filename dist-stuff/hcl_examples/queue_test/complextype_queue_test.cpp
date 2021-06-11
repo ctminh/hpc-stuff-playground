@@ -357,13 +357,18 @@ int main(int argc, char *argv[]) {
         Timer remote_queue_timer = Timer();
         /*Remote queue test*/
         uint16_t my_server_remote_key = (my_server + 1) % num_servers;
-        for (int i = 0; i < num_request; i++) {
-            size_t val = my_server + 1;
-            auto key = KeyType(val);
-            remote_queue_timer.resumeTime();
-            queue->Push(key, my_server_remote_key);
-            remote_queue_timer.pauseTime();
+        #pragma omp parallel num_threads(2)
+        {
+            #pragma omp for
+            for (int i = 0; i < num_request; i++) {
+                size_t val = my_server + 1;
+                auto key = KeyType(val);
+                remote_queue_timer.resumeTime();
+                queue->Push(key, my_server_remote_key);
+                remote_queue_timer.pauseTime();
+            }
         }
+        
         double remote_queue_throughput =
                 num_request / remote_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 / 1024;
 
