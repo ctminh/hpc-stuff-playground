@@ -235,7 +235,7 @@ int main (int argc, char *argv[])
         // uint16_t my_server_key = 1; // a quick hack for choosing the remote server
         // if (my_rank >= 2) my_server_key = 0;
         std::cout << "[PUSH] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
-                  << ", server_key=" << my_local_key
+                  << ", local_key=" << my_local_key
                   << ": is creating " << num_tasks << " mxm-tasks..." << std::endl;
 
 #if PARALLEL_OMP==1
@@ -264,7 +264,7 @@ int main (int argc, char *argv[])
         MPI_Barrier(client_comm);
 
         std::cout << "[LOCAL_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
-                  << ", server_key=" << my_local_key
+                  << ", local_key=" << my_local_key
                   << ": is getting " << num_tasks/2 << " mxm-tasks out for executing..." << std::endl;
 
 #if PARALLEL_OMP==1
@@ -284,8 +284,10 @@ int main (int argc, char *argv[])
             tmp_pop_T = pop_result.second;
         }
 
+        MPI_Barrier(client_comm);
+
         std::cout << "[REMOTE_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
-                  << ", server_key=" << my_remote_key
+                  << ", remote_key=" << my_remote_key
                   << ": is getting " << num_tasks/2 << " mxm-tasks out for executing..." << std::endl;
         for (int i = 0; i < num_tasks/2; i++){
             MatTask_Type tmp_pop_T;
