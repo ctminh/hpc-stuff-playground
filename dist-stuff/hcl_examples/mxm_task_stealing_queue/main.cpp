@@ -272,17 +272,17 @@ int main (int argc, char *argv[])
     {
         #pragma omp for
 #endif
-        for (int i = 0; i < num_tasks/2; i++) {
+        // for (int i = 0; i < num_tasks/2; i++) {
 
             // int thread_id = omp_get_thread_num();
             // std::cout << "[PUSH] R" << my_rank
             //     << "-Thread " << thread_id << ": is popping Task " << i
             //     << " out of the global-queue..." << std::endl;
 
-            MatTask_Type tmp_pop_T;
-            auto pop_result = global_queue->Pop(my_local_key);
-            tmp_pop_T = pop_result.second;
-        }
+        //     MatTask_Type tmp_pop_T;
+        //     auto pop_result = global_queue->Pop(my_local_key);
+        //     tmp_pop_T = pop_result.second;
+        // }
 
         std::cout << "[REMOTE_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
                   << ", remote_key=" << my_remote_key
