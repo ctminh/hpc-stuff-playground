@@ -131,28 +131,28 @@ int main (int argc, char *argv[])
     MPI_Comm_size(server_comm, &server_comm_size);
     MPI_Barrier(MPI_COMM_WORLD);
     if (is_server){
-        // try to get IB-IP address on BEAST and write file
-        char *IPbuffer;
-        IPbuffer = getHostIB_IPAddr();
-        std::string send_addr(IPbuffer);
-        std::cout << "[DBG] R" << my_rank << ": send_addr=" << send_addr << std::endl;
-        size_t message_length = send_addr.size();
-        char recv_buff[message_length*server_comm_size];
-        MPI_Allgather(send_addr.c_str(), message_length, MPI_CHAR, recv_buff, message_length, MPI_CHAR, server_comm);
-        if (my_rank == 1){
-            // write ib-addresses to file
-            ofstream ser_addr_file;
-            ser_addr_file.open("./server_list");
-            for (int i = 0;  i < num_servers; i++){
-                std::string ib_addr = "";
-                for (int j = 0; j < message_length; j++)
-                    ib_addr = ib_addr + recv_buff[i*message_length + j];
-                std::cout << "[DBG] Server " << i << ": IB-IP=" << ib_addr << std::endl;
-                ser_addr_file << ib_addr << std::endl;
-            }
-            ser_addr_file.close();
-        }
-        MPI_Barrier(server_comm);
+        // // try to get IB-IP address on BEAST and write file
+        // char *IPbuffer;
+        // IPbuffer = getHostIB_IPAddr();
+        // std::string send_addr(IPbuffer);
+        // std::cout << "[DBG] R" << my_rank << ": send_addr=" << send_addr << std::endl;
+        // size_t message_length = send_addr.size();
+        // char recv_buff[message_length*server_comm_size];
+        // MPI_Allgather(send_addr.c_str(), message_length, MPI_CHAR, recv_buff, message_length, MPI_CHAR, server_comm);
+        // if (my_rank == 1){
+        //     // write ib-addresses to file
+        //     ofstream ser_addr_file;
+        //     ser_addr_file.open("./server_list");
+        //     for (int i = 0;  i < num_servers; i++){
+        //         std::string ib_addr = "";
+        //         for (int j = 0; j < message_length; j++)
+        //             ib_addr = ib_addr + recv_buff[i*message_length + j];
+        //         std::cout << "[DBG] Server " << i << ": IB-IP=" << ib_addr << std::endl;
+        //         ser_addr_file << ib_addr << std::endl;
+        //     }
+        //     ser_addr_file.close();
+        // }
+        // MPI_Barrier(server_comm);
 
         /* try to write hostname on coolmuc
         std::string send_hostname(processor_name);
