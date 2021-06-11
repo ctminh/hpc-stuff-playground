@@ -284,8 +284,6 @@ int main (int argc, char *argv[])
             tmp_pop_T = pop_result.second;
         }
 
-        MPI_Barrier(client_comm);
-
         std::cout << "[REMOTE_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
                   << ", remote_key=" << my_remote_key
                   << ": is getting " << num_tasks/2 << " mxm-tasks out for executing..." << std::endl;
