@@ -134,19 +134,6 @@ int main (int argc,char* argv[])
     int my_server=my_rank / ranks_per_server;
     int num_servers=comm_size/ranks_per_server;
 
-    // write server_list file
-    if (is_server){
-        std::ofstream server_list_file;
-        server_list_file.open("./server_list");
-
-#if defined(HCL_ENABLE_THALLIUM_TCP)
-        server_list_file << processor_name;
-#elif defined(HCL_ENABLE_THALLIUM_ROCE)
-        server_list_file << "10.12.1.2";
-#endif
-        server_list_file.close();
-    }
-
     // The following is used to switch to 40g network on Ares.
     // This is necessary when we use RoCE on Ares.
     std::string proc_name = std::string(processor_name);
@@ -294,13 +281,13 @@ int main (int argc,char* argv[])
         Timer remote_queue_timer=Timer();
         /*Remote queue test*/
         uint16_t my_server_remote_key = (my_server + 1) % num_servers;
-        printf("[DBG-REMOTEQUEUE-REMOTE-OPS] R%d: my_server_remote_key = %d\n", my_rank, my_server_remote_key);
+        uint16_t my_server_local_key = my_server % num_servers;;
         for(int i=0;i<num_request;i++){
             // size_t val = my_server+1;
             double val = my_server+1;
             auto key=DoubleType(val);
             remote_queue_timer.resumeTime();
-            queue->Push(key, my_server_remote_key);
+            queue->Push(key, my_server_local_key);
             remote_queue_timer.pauseTime();
         }
         double remote_queue_throughput=num_request/remote_queue_timer.getElapsedTime()*1000*size_of_elem*my_vals.size()/1024/1024;
