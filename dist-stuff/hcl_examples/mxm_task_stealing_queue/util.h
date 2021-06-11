@@ -13,6 +13,8 @@
 #include <netinet/in.h>
 #include <net/if.h>
 #include <boost/stacktrace.hpp>
+#include <boost/interprocess/shared_memory_object.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
 
 #ifndef TEST_ON_LAPTOP
 #define TEST_ON_LAPTOP 0

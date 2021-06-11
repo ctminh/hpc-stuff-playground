@@ -131,7 +131,7 @@ int main (int argc, char *argv[])
     MPI_Comm_size(server_comm, &server_comm_size);
     MPI_Barrier(MPI_COMM_WORLD);
     if (is_server){
-        /* try to get IB-IP address on BEAST and write file
+        // try to get IB-IP address on BEAST and write file
         char *IPbuffer;
         IPbuffer = getHostIB_IPAddr();
         std::string send_addr(IPbuffer);
@@ -152,7 +152,7 @@ int main (int argc, char *argv[])
             }
             ser_addr_file.close();
         }
-        MPI_Barrier(server_comm); */
+        MPI_Barrier(server_comm);
 
         /* try to write hostname on coolmuc
         std::string send_hostname(processor_name);
@@ -230,9 +230,10 @@ int main (int argc, char *argv[])
         const int NTHREADS = num_omp_threads;
 
         // use the local key to push tasks on each server side
-        std::cout << "[PUSH] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
-                  << ": is creating " << num_tasks << " mxm-tasks..." << std::endl;
         uint16_t my_server_key = my_server % num_servers;
+        std::cout << "[PUSH] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
+                  << ", server_key=" << my_server_key
+                  << ": is creating " << num_tasks << " mxm-tasks..." << std::endl;
 
 #if PARALLEL_OMP==1
     #pragma omp parallel num_threads(NTHREADS)
@@ -261,6 +262,7 @@ int main (int argc, char *argv[])
 
         // pop tasks from the queue and then execute them
         std::cout << "[POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
+                  << ", server_key=" << my_server_key
                   << ": is getting " << num_tasks << " mxm-tasks out for executing..." << std::endl;
 
 #if PARALLEL_OMP==1
@@ -287,6 +289,14 @@ int main (int argc, char *argv[])
 
     // wait for making sure finalizing MPI safe
     MPI_Barrier(MPI_COMM_WORLD);
+
+    // remove boost-shared-mapping-file
+    if (is_server){
+        std::string shm_mem_file = "/dev/shm/TEST_QUEUE_" + std::to_string(my_rank);
+        boost::interprocess::shared_memory_object::remove(shm_mem_file);
+    }
+
+    // finalize MPI
     MPI_Finalize();
     
     exit(EXIT_SUCCESS);
