@@ -263,9 +263,9 @@ int main (int argc, char *argv[])
 
         MPI_Barrier(client_comm);
 
-        std::cout << "[LOCAL_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
-                  << ", local_key=" << my_local_key
-                  << ": is getting " << num_tasks/2 << " mxm-tasks out for executing..." << std::endl;
+        // std::cout << "[LOCAL_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
+        //           << ", local_key=" << my_local_key
+        //           << ": is getting " << num_tasks << " mxm-tasks out for executing..." << std::endl;
 
 // #if PARALLEL_OMP==1
 //     #pragma omp parallel num_threads(NTHREADS)
@@ -286,7 +286,7 @@ int main (int argc, char *argv[])
 
         std::cout << "[REMOTE_POP] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
                   << ", remote_key=" << my_remote_key
-                  << ": is getting " << num_tasks/2 << " mxm-tasks out for executing..." << std::endl;
+                  << ": is getting " << num_tasks << " mxm-tasks out for executing..." << std::endl;
         for (int i = 0; i < num_tasks; i++){
             MatTask_Type tmp_pop_T;
             auto pop_result = global_queue->Pop(my_remote_key);
