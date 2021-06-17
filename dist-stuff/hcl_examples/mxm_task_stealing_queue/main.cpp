@@ -275,7 +275,7 @@ int main (int argc, char *argv[])
         // pop 50% on it remote server
         // for (int i = 0; i < num_tasks/2; i++){
         //     MatTask_Type tmp_pop_T;
-        //     auto pop_result = global_queue->Pop(my_local_key);
+        //     auto pop_result = global_queue->Pop(my_remote_key);
         //     tmp_pop_T = pop_result.second;
         // }
         // std::cout << "[POP] R" << my_rank << " is done on its remote server..." << std::endl;
