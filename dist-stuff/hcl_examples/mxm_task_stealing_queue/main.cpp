@@ -123,6 +123,8 @@ int main (int argc, char *argv[])
 
     // ser num of servers for each rank
     int num_servers = comm_size / ranks_per_server;
+    if (my_rank >= 2)
+        server_on_node = false;
 
     // get IB IP addresses
     MPI_Comm server_comm;

@@ -8,7 +8,8 @@
 #     They are IB-IP-addresses of Rome1 and Rome2. HCL will get them to create RPC-servers and clients for communication)
 
 # Run command
-mpirun -n 4 -ppn 2 --host rome1,rome2 ./main 2 1 1000 16
+# mpirun -n 4 -ppn 2 --host rome1,rome2 ./main 2 1 1000 16
+mpirun -n 4 -ppn 2 --host rome1,rome2 ./main 4 1 1000 16
 
 # (This means that we run 4 ranks in total, 2 ranks/node,
 #   1 server/node, and 2 ranks/server,
