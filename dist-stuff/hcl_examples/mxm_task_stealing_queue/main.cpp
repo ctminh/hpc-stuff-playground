@@ -233,7 +233,7 @@ int main (int argc, char *argv[])
 
         // use the local key to push tasks on each server side
         uint16_t my_local_key = my_server % num_servers;
-        uint16_t my_remote_key = 1 - my_local_key; // a quick hack, because of running only on 2 nodes
+        // uint16_t my_remote_key = 1 - my_local_key; // a quick hack, because of running only on 2 nodes
         std::cout << "[PUSH] R" << my_rank << ", NUM_OMP_THREADS=" << NTHREADS
                   << ", local_key=" << my_local_key
                   << ": is creating " << num_tasks << " mxm-tasks..." << std::endl;
@@ -264,21 +264,21 @@ int main (int argc, char *argv[])
         #pragma omp for
 #endif
         // pop 50% on its own server
-        for (int i = 0; i < num_tasks/2; i++) {
+        for (int i = 0; i < num_tasks; i++) {
             MatTask_Type tmp_pop_T;
             auto pop_result = global_queue->Pop(my_local_key);
             tmp_pop_T = pop_result.second;
         }
 
-        std::cout << "[POP] R" << my_rank << " is done on its local server..." << std::endl;
+        std::cout << "[POP] R" << my_rank << " is done on the case of 1-server..." << std::endl;
 
         // pop 50% on it remote server
-        for (int i = 0; i < num_tasks/2; i++){
-            MatTask_Type tmp_pop_T;
-            auto pop_result = global_queue->Pop(my_remote_key);
-            tmp_pop_T = pop_result.second;
-        }
-        std::cout << "[POP] R" << my_rank << " is done on its remote server..." << std::endl;
+        // for (int i = 0; i < num_tasks/2; i++){
+        //     MatTask_Type tmp_pop_T;
+        //     auto pop_result = global_queue->Pop(my_local_key);
+        //     tmp_pop_T = pop_result.second;
+        // }
+        // std::cout << "[POP] R" << my_rank << " is done on its remote server..." << std::endl;
 
 #if PARALLEL_OMP==1
     }
