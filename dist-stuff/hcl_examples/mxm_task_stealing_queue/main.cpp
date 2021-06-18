@@ -260,16 +260,16 @@ int main (int argc, char *argv[])
         #pragma omp for
 #endif
         // pop 50% on its own server
-        for (int i = 0; i < num_tasks/2; i++) {
-            std::cout << "[POP] R" << my_rank << " top task with local_key=" << my_local_key << std::endl;
-            MatTask_Type tmp_pop_T;
-            auto pop_result = global_queue->Pop(my_local_key);
-            tmp_pop_T = pop_result.second;
-        }
+        // for (int i = 0; i < num_tasks/2; i++) {
+        //     std::cout << "[POP] R" << my_rank << " top task with local_key=" << my_local_key << std::endl;
+        //     MatTask_Type tmp_pop_T;
+        //     auto pop_result = global_queue->Pop(my_local_key);
+        //     tmp_pop_T = pop_result.second;
+        // }
 
         // pop 50% on it remote server
-        for (int i = 0; i < num_tasks/2; i++){
-            std::cout << "[POP] R" << my_rank << " top task with remote_key=" << my_local_key << std::endl;
+        for (int i = 0; i < num_tasks; i++){
+            std::cout << "[POP] R" << my_rank << " top task with remote_key=" << my_remote_key << std::endl;
             MatTask_Type tmp_pop_T;
             auto pop_result = global_queue->Pop(my_remote_key);
             tmp_pop_T = pop_result.second;
