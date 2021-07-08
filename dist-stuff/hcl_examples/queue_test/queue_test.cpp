@@ -13,7 +13,7 @@
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
 
-const int MAT_SIZE = 256;
+const int MAT_SIZE = 128;
 
 /* Try a complex type as the elements in hcl-queue */
 struct DoubleType {
