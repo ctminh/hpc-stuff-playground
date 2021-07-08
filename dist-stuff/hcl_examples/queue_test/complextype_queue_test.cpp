@@ -12,7 +12,7 @@
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
 
-const int KEY_SIZE=512;
+const int KEY_SIZE=32;
 
 struct KeyType {
     std::array<int, KEY_SIZE*KEY_SIZE> a;
