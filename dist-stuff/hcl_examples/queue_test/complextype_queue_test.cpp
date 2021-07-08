@@ -15,50 +15,61 @@
 const int KEY_SIZE=1000;
 
 struct KeyType {
-    std::array<int,KEY_SIZE> a;
+    std::array<double, KEY_SIZE> a;
+    std::array<double, KEY_SIZE> b;
 
-    KeyType() : a() {}
-
-    KeyType(std::array<int,KEY_SIZE> a_) : a(a_) {}
+    // constructors
+    KeyType() : a(), b() {}
+    KeyType(std::array<double, KEY_SIZE> a_, std::array<double, KEY_SIZE> b_) : a(a_), b(b_) {}
     KeyType(int val) {
-        for(int i=0;i<a.size();++i){
-            a[i]=val;
+        for(int i=0; i<a.size(); ++i){
+            a[i] = double(val);
+            b[i] = double(val);
         }
     }
 #ifdef HCL_ENABLE_RPCLIB
-    MSGPACK_DEFINE (a);
+    MSGPACK_DEFINE (a, b);
 #endif
 
     /* equal operator for comparing two Matrix. */
     bool operator==(const KeyType &o) const {
         if(o.a.size() != a.size()) return false;
-        for(int i=0;i<a.size();++i){
+        if(o.b.size() != b.size()) return false;
+        for(int i=0; i<a.size(); ++i){
             if(o.a[i] != a[i]) return false;
+            if(o.b[i] != b[i]) return false;
         }
         return true;
     }
 
     KeyType &operator=(const KeyType &other) {
         a = other.a;
+        b = other.b;
         return *this;
     }
 
     bool operator<(const KeyType &o) const {
         if(o.a.size() < a.size()) return false;
         if(o.a.size() > a.size()) return true;
-        for(int i=0;i<a.size();++i){
+        if(o.b.size() < b.size()) return false;
+        if(o.b.size() > b.size()) return true;
+        for(int i=0; i<a.size(); ++i){
             if(o.a[i] < a[i]) return false;
             if(o.a[i] > a[i]) return true;
+            if(o.b[i] < b[i]) return false;
+            if(o.b[i] > b[i]) return true;
         }
         return false;
     }
 
     bool operator>(const KeyType &o) const {
-        return !(a < o.a);
+        // return !(a < o.a)
+        return !(*this < o);
     }
 
     bool Contains(const KeyType &o) const {
-        return a == o.a;
+        // return a == o.a;
+        return *this == o;
     }
 
 };
@@ -67,6 +78,7 @@ struct KeyType {
 template<typename A>
 void serialize(A &ar, KeyType &a) {
     ar & a.a;
+    ar & a.b;
 }
 #endif
 

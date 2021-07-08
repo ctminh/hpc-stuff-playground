@@ -82,12 +82,12 @@ struct DoubleType {
 
     bool operator>(const DoubleType &o) const {
         // return !(*this < o);
-        return !(*this < o.A);
+        return !(A < o.A);
     }
 
     bool Contains(const DoubleType &o) const {
         // return *this == o;
-        return *this == o.A;
+        return A == o.A;
     }
 
 };
