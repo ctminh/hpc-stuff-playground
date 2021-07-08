@@ -15,17 +15,17 @@
 const int KEY_SIZE=512;
 
 struct KeyType {
-    std::array<double, KEY_SIZE*KEY_SIZE> a;
+    std::array<int, KEY_SIZE*KEY_SIZE> a;
     // std::array<double, KEY_SIZE*KEY_SIZE> b;
 
     // constructors
     KeyType() : a() {}
     // KeyType() : a(), b() {}
-    KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_) : a(a_) {}
+    KeyType(std::array<int, KEY_SIZE*KEY_SIZE> a_) : a(a_) {}
     // KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_, std::array<double, KEY_SIZE*KEY_SIZE> b_) : a(a_), b(b_) {}
     KeyType(int val) {
         for(int i=0; i<a.size(); ++i){
-            a[i] = double(val);
+            a[i] = val;
             // b[i] = double(val);
         }
     }
