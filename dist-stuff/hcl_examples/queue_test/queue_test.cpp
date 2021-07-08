@@ -47,7 +47,7 @@ struct DoubleType {
         if (o.A.size() != A.size()) return false;
         // if (o.B.size() != B.size()) return false;
         // if (o.C.size() != C.size()) return false;
-        for (int i = 0; i < MAT_SIZE; ++i) {
+        for (int i = 0; i < A.size(); ++i) {
             if (o.A[i] != A[i]) return false;
             // if (o.B[i] != B[i]) return false;
             // if (o.C[i] != C[i]) return false;
@@ -69,7 +69,7 @@ struct DoubleType {
         // if (o.B.size() > B.size()) return true;
         // if (o.C.size() < C.size()) return false;
         // if (o.C.size() > C.size()) return true;
-        for (int i = 0; i < MAT_SIZE; ++i) {
+        for (int i = 0; i < A.size(); ++i) {
             if (o.A[i] < A[i]) return false;
             if (o.A[i] > A[i]) return true;
             // if (o.B[i] < B[i]) return false;
