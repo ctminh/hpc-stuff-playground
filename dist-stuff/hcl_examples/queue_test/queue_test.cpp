@@ -163,7 +163,7 @@ int main (int argc,char* argv[])
     auto mem_size = MAT_SIZE * MAT_SIZE * (comm_size + 1) * num_request;
     HCL_CONF->MEMORY_ALLOCATED = mem_size;
     printf("Rank Config %d %d %d %d %d %lu, size_elem=%ld, my_vals=%d\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS,
-                HCL_CONF->SERVER_ON_NODE, HCL_CONF->MEMORY_ALLOCATED, size_of_elem, my_vals);
+                HCL_CONF->SERVER_ON_NODE, HCL_CONF->MEMORY_ALLOCATED, size_of_elem, my_vals.size());
 
     hcl::queue<DoubleType> *queue;
     if (is_server) {
