@@ -52,9 +52,9 @@ struct DoubleType {
         if (o.A.size() < A.size()) return false;
         if (o.A.size() > A.size()) return true;
         if (o.B.size() < B.size()) return false;
-        if (o.B.size() < B.size()) return false;
+        if (o.B.size() > B.size()) return true;
         if (o.C.size() < C.size()) return false;
-        if (o.C.size() < C.size()) return false;
+        if (o.C.size() > C.size()) return true;
         for (int i = 0; i < MAT_SIZE; ++i) {
             if (o.A[i] < A[i]) return false;
             if (o.A[i] > A[i]) return true;
@@ -74,17 +74,17 @@ struct DoubleType {
         return *this == o;
     }
 
-    // serialization
+};
+
+// serialization
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
     template<typename A>
     void serialize(A &ar, DoubleType &a) {
-    ar & a.A;
-    ar & a.B;
-    ar & a.C;
-}
+        ar & a.A;
+        ar & a.B;
+        ar & a.C;
+    }
 #endif
-
-};
 
 namespace std {
     template<>
