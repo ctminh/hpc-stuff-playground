@@ -70,7 +70,7 @@ struct DoubleType {
         return !(*this < o);
     }
 
-    bool contains(const DoubleType &o) const {
+    bool Contains(const DoubleType &o) const {
         return *this == o;
     }
 
