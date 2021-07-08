@@ -28,7 +28,7 @@ struct DoubleType {
 
     // constructor 2
     // DoubleType(int val) : A(MAT_SIZE * MAT_SIZE, val), B(MAT_SIZE * MAT_SIZE, val), C(MAT_SIZE * MAT_SIZE, val) {}
-    DoubleType(int val) { A.fill(val), B.fill(val), C.fill(0.0) }
+    DoubleType(int val) { A.fill(val); B.fill(val); C.fill(0.0); }
 
     /* Equal operator for comparing two Matrix */
     bool operator==(const DoubleType &o) const {
@@ -165,7 +165,7 @@ int main (int argc,char* argv[])
 
     auto mem_size = MAT_SIZE*MAT_SIZE * (comm_size + 1)*num_request;
     HCL_CONF->MEMORY_ALLOCATED = mem_size;
-    printf("Rank Config %d %d %d %d %d %lu, size_elem=%ld, my_vals=%d\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS,
+    printf("Rank Config %d %d %d %d %d %lu, size_elem=%ld, my_vals=%ld\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS,
                 HCL_CONF->SERVER_ON_NODE, HCL_CONF->MEMORY_ALLOCATED, size_of_elem, my_vals.size());
 
     hcl::queue<DoubleType> *queue;
