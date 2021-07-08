@@ -146,11 +146,12 @@ int main (int argc,char* argv[])
     std::string extra_info = proc_name.substr(split_loc+1, string::npos);
     proc_name = node_name + "-40g." + extra_info; */
 
-    size_t size_of_elem = sizeof(int);
-    const int array_size=TEST_REQUEST_SIZE;
-    if (size_of_request != array_size) {
-        printf("Please set TEST_REQUEST_SIZE in include/hcl/common/constants.h instead. Testing with %d\n", array_size);
-    }
+    size_t size_of_elem = sizeof(double);
+    const int array_size = 3*MAT_SIZE*MAT_SIZE;
+    // const int array_size = TEST_REQUEST_SIZE;
+    // if (size_of_request != array_size) {
+    //     printf("Please set TEST_REQUEST_SIZE in include/hcl/common/constants.h instead. Testing with %d\n", array_size);
+    // }
     std::array<int,array_size> my_vals=std::array<int,array_size>();
 
     
@@ -160,7 +161,7 @@ int main (int argc,char* argv[])
     HCL_CONF->SERVER_ON_NODE = server_on_node || is_server;
     HCL_CONF->SERVER_LIST_PATH = "./server_list";
 
-    auto mem_size = MAT_SIZE * MAT_SIZE * (comm_size + 1) * num_request;
+    auto mem_size = MAT_SIZE*MAT_SIZE * (comm_size + 1)*num_request;
     HCL_CONF->MEMORY_ALLOCATED = mem_size;
     printf("Rank Config %d %d %d %d %d %lu, size_elem=%ld, my_vals=%d\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS,
                 HCL_CONF->SERVER_ON_NODE, HCL_CONF->MEMORY_ALLOCATED, size_of_elem, my_vals.size());
