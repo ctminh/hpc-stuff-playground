@@ -15,18 +15,20 @@
 
 const int MAT_SIZE = 256;
 
-/* Try a simple struct with a single double element */
+/* Try a complex type as the elements in hcl-queue */
 struct DoubleType {
 
-    std::vector<double> A;
-    std::vector<double> B;
-    std::vector<double> C;
+    std::array<double, MAT_SIZE*MAT_SIZE> A;
+    std::array<double, MAT_SIZE*MAT_SIZE> B;
+    std::array<double, MAT_SIZE*MAT_SIZE> C;
 
     // constructor 1
-    DoubleType() : A(), B(), C() {}
+    // DoubleType() : A(), B(), C() {}
+    DoubleType() : A.fill(1.0), B.fill(2.0), C.fill(0.0) {}
 
     // constructor 2
-    DoubleType(int val) : A(MAT_SIZE * MAT_SIZE, val), B(MAT_SIZE * MAT_SIZE, val), C(MAT_SIZE * MAT_SIZE, val) {}
+    // DoubleType(int val) : A(MAT_SIZE * MAT_SIZE, val), B(MAT_SIZE * MAT_SIZE, val), C(MAT_SIZE * MAT_SIZE, val) {}
+    DoubleType(int val) : A.fill(val), B.fill(val), C.fill(0.0) {}
 
     /* Equal operator for comparing two Matrix */
     bool operator==(const DoubleType &o) const {
