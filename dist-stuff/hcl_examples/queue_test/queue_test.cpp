@@ -13,69 +13,75 @@
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
 
-struct KeyType{
-
-    double a;
-    
-    // constructor 1
-    KeyType(): a(0) { }
-    // constructor 2
-    KeyType(double val): a(val) { }
-
-#ifdef HCL_ENABLE_RPCLIB
-    MSGPACK_DEFINE(a);
-#endif
-
-    /* equal operator for comparing two Matrix. */
-    bool operator==(const KeyType &o) const {
-        return a == o.a;
-    }
-    KeyType& operator=( const KeyType& other ) {
-        a = other.a;
-        return *this;
-    }
-    bool operator<(const KeyType &o) const {
-        return a < o.a;
-    }
-    bool operator>(const KeyType &o) const {
-        return a > o.a;
-    }
-    bool Contains(const KeyType &o) const {
-        return a==o.a;
-    }
-
-#if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
-    template<typename A>
-    void serialize(A &ar) {
-        ar & a;
-    }
-#endif
-
-};
+const int MAT_SIZE = 512;
 
 /* Try a simple struct with a single double element */
 struct DoubleType {
 
-    double a;
+    std::vector<double> A;
+    std::vector<double> B;
+    std::vector<double> C;
 
     // constructor 1
-    DoubleType(): a(1.0) { }
+    DoubleType() : A(), B(), C() {}
 
     // constructor 2
-    DoubleType(double val): a(val) { }
+    DoubleType(int val) : A(MAT_SIZE * MAT_SIZE, val), B(MAT_SIZE * MAT_SIZE, val), C(MAT_SIZE * MAT_SIZE, val) {}
 
-    // define operator for the hash
-    DoubleType& operator=( const DoubleType& other ) {
-        a = other.a;
+    /* Equal operator for comparing two Matrix */
+    bool operator==(const DoubleType &o) const {
+        if (o.A.size() != A.size()) return false;
+        if (o.B.size() != B.size()) return false;
+        if (o.C.size() != C.size()) return false;
+        for (int i = 0; i < MAT_SIZE; ++i) {
+            if (o.A[i] != A[i]) return false;
+            if (o.B[i] != B[i]) return false;
+            if (o.C[i] != C[i]) return false;
+        }
+        return true;
+    }
+
+    DoubleType &operator=(const DoubleType &other) {
+        A = other.A;
+        B = other.B;
+        C = other.C;
         return *this;
+    }
+
+    bool operator<(const DoubleType &o) const {
+        if (o.A.size() < A.size()) return false;
+        if (o.A.size() > A.size()) return true;
+        if (o.B.size() < B.size()) return false;
+        if (o.B.size() < B.size()) return false;
+        if (o.C.size() < C.size()) return false;
+        if (o.C.size() < C.size()) return false;
+        for (int i = 0; i < MAT_SIZE; ++i) {
+            if (o.A[i] < A[i]) return false;
+            if (o.A[i] > A[i]) return true;
+            if (o.B[i] < B[i]) return false;
+            if (o.B[i] > B[i]) return true;
+            if (o.C[i] < C[i]) return false;
+            if (o.C[i] > C[i]) return true;
+        }
+        return false;
+    }
+
+    bool operator>(const DoubleType &o) const {
+        return !(*this < o);
+    }
+
+    bool contains(const DoubleType &o) const {
+        return *this == o;
     }
 
     // serialization
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
     template<typename A>
-    void serialize(A &ar) {
-        ar & a;
-    }
+    void serialize(A &ar, DoubleType &a) {
+    ar & a.A;
+    ar & a.B;
+    ar & a.C;
+}
 #endif
 
 };
@@ -84,7 +90,11 @@ namespace std {
     template<>
     struct hash<DoubleType> {
         size_t operator()(const DoubleType &k) const {
-            return k.a;
+            size_t hash_val = hash<int>()(k.A[0]);
+            for (int i = 1; i < k.A.size(); ++i) {
+                hash_val ^= hash<int>()(k.A[0]);
+            }
+            return hash_val;
         }
     };
 }
@@ -137,14 +147,10 @@ int main (int argc,char* argv[])
     proc_name = node_name + "-40g." + extra_info; */
 
     size_t size_of_elem = sizeof(int);
-
-    printf("rank %d, is_server %d, my_server %d, num_servers %d\n",my_rank,is_server,my_server,num_servers);
     const int array_size=TEST_REQUEST_SIZE;
-
     if (size_of_request != array_size) {
         printf("Please set TEST_REQUEST_SIZE in include/hcl/common/constants.h instead. Testing with %d\n", array_size);
     }
-
     std::array<int,array_size> my_vals=std::array<int,array_size>();
 
     
@@ -153,6 +159,11 @@ int main (int argc,char* argv[])
     HCL_CONF->NUM_SERVERS = num_servers;
     HCL_CONF->SERVER_ON_NODE = server_on_node || is_server;
     HCL_CONF->SERVER_LIST_PATH = "./server_list";
+
+    auto mem_size = MAT_SIZE * MAT_SIZE * (comm_size + 1) * num_request;
+    HCL_CONF->MEMORY_ALLOCATED = mem_size;
+    printf("Rank Config %d %d %d %d %d %lu\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS,
+                HCL_CONF->SERVER_ON_NODE, HCL_CONF->MEMORY_ALLOCATED);
 
     hcl::queue<DoubleType> *queue;
     if (is_server) {

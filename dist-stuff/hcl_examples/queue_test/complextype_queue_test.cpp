@@ -219,8 +219,7 @@ int main(int argc, char *argv[]) {
         }
 
         double local_get_queue_throughput =
-                num_request / local_get_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 /
-                1024;
+                num_request / local_get_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 / 1024;
 
         double local_put_tp_result, local_get_tp_result;
         if (client_comm_size > 1) {
