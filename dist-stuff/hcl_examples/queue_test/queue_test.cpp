@@ -19,71 +19,75 @@ const int MAT_SIZE = 128;
 struct DoubleType {
 
     std::array<double, MAT_SIZE*MAT_SIZE> A;
-    std::array<double, MAT_SIZE*MAT_SIZE> B;
-    std::array<double, MAT_SIZE*MAT_SIZE> C;
+    // std::array<double, MAT_SIZE*MAT_SIZE> B;
+    // std::array<double, MAT_SIZE*MAT_SIZE> C;
 
     // constructor 1
-    DoubleType() : A(), B(), C() {}
+    DoubleType() : A() {}
+    // DoubleType() : A(), B(), C() {}
     // DoubleType() { A.fill(1.0); B.fill(2.0); C.fill(0.0); }
 
     // constructor 2
     // DoubleType(int val) : A(MAT_SIZE * MAT_SIZE, val), B(MAT_SIZE * MAT_SIZE, val), C(MAT_SIZE * MAT_SIZE, val) {}
-    DoubleType(std::array<double, MAT_SIZE*MAT_SIZE> a_, std::array<double, MAT_SIZE*MAT_SIZE> b_, std::array<double, MAT_SIZE*MAT_SIZE> c_) :
-        A(a_), B(b_), C(c_) {}
+    DoubleType(std::array<double, MAT_SIZE*MAT_SIZE> a_) : A(a_) {}
+    // DoubleType(std::array<double, MAT_SIZE*MAT_SIZE> a_, std::array<double, MAT_SIZE*MAT_SIZE> b_, std::array<double, MAT_SIZE*MAT_SIZE> c_) :
+    //     A(a_), B(b_), C(c_) {}
 
     // constructor 3
     DoubleType(int val) {
         for (int i = 0; i < A.size(); i++){
             A[i] = double(val);
-            B[i] = double(val);
-            C[i] = 0.0;
+            // B[i] = double(val);
+            // C[i] = 0.0;
         }
     }
 
     /* Equal operator for comparing two Matrix */
     bool operator==(const DoubleType &o) const {
         if (o.A.size() != A.size()) return false;
-        if (o.B.size() != B.size()) return false;
-        if (o.C.size() != C.size()) return false;
+        // if (o.B.size() != B.size()) return false;
+        // if (o.C.size() != C.size()) return false;
         for (int i = 0; i < MAT_SIZE; ++i) {
             if (o.A[i] != A[i]) return false;
-            if (o.B[i] != B[i]) return false;
-            if (o.C[i] != C[i]) return false;
+            // if (o.B[i] != B[i]) return false;
+            // if (o.C[i] != C[i]) return false;
         }
         return true;
     }
 
     DoubleType &operator=(const DoubleType &other) {
         A = other.A;
-        B = other.B;
-        C = other.C;
+        // B = other.B;
+        // C = other.C;
         return *this;
     }
 
     bool operator<(const DoubleType &o) const {
         if (o.A.size() < A.size()) return false;
         if (o.A.size() > A.size()) return true;
-        if (o.B.size() < B.size()) return false;
-        if (o.B.size() > B.size()) return true;
-        if (o.C.size() < C.size()) return false;
-        if (o.C.size() > C.size()) return true;
+        // if (o.B.size() < B.size()) return false;
+        // if (o.B.size() > B.size()) return true;
+        // if (o.C.size() < C.size()) return false;
+        // if (o.C.size() > C.size()) return true;
         for (int i = 0; i < MAT_SIZE; ++i) {
             if (o.A[i] < A[i]) return false;
             if (o.A[i] > A[i]) return true;
-            if (o.B[i] < B[i]) return false;
-            if (o.B[i] > B[i]) return true;
-            if (o.C[i] < C[i]) return false;
-            if (o.C[i] > C[i]) return true;
+            // if (o.B[i] < B[i]) return false;
+            // if (o.B[i] > B[i]) return true;
+            // if (o.C[i] < C[i]) return false;
+            // if (o.C[i] > C[i]) return true;
         }
         return false;
     }
 
     bool operator>(const DoubleType &o) const {
-        return !(*this < o);
+        // return !(*this < o);
+        return !(*this < o.A);
     }
 
     bool Contains(const DoubleType &o) const {
-        return *this == o;
+        // return *this == o;
+        return *this == o.A;
     }
 
 };
@@ -93,8 +97,8 @@ struct DoubleType {
     template<typename A>
     void serialize(A &ar, DoubleType &a) {
         ar & a.A;
-        ar & a.B;
-        ar & a.C;
+        // ar & a.B;
+        // ar & a.C;
     }
 #endif
 
