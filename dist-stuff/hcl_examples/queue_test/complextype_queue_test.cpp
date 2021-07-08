@@ -12,15 +12,15 @@
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
 
-const int KEY_SIZE=1000;
+const int KEY_SIZE=512;
 
 struct KeyType {
-    std::array<double, KEY_SIZE> a;
-    std::array<double, KEY_SIZE> b;
+    std::array<double, KEY_SIZE*KEY_SIZE> a;
+    std::array<double, KEY_SIZE*KEY_SIZE> b;
 
     // constructors
     KeyType() : a(), b() {}
-    KeyType(std::array<double, KEY_SIZE> a_, std::array<double, KEY_SIZE> b_) : a(a_), b(b_) {}
+    KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_, std::array<double, KEY_SIZE*KEY_SIZE> b_) : a(a_), b(b_) {}
     KeyType(int val) {
         for(int i=0; i<a.size(); ++i){
             a[i] = double(val);
@@ -193,18 +193,27 @@ int main (int argc,char* argv[])
     int my_server=my_rank / ranks_per_server;
     int num_servers=comm_size/ranks_per_server;
 
-    typedef int SimpleType;
-    typedef std::vector<SimpleType> MyType;
-    auto num_elements = size_of_request / sizeof(SimpleType);
-    auto my_vals = MyType(num_elements, my_rank);
-    size_t size_of_elem = sizeof(SimpleType);
+    // typedef int SimpleType;
+    // typedef std::vector<SimpleType> MyType;
+    // auto num_elements = size_of_request / sizeof(SimpleType);
+    // auto my_vals = MyType(num_elements, my_rank);
+    // size_t size_of_elem = sizeof(SimpleType);
 
+    size_t size_of_elem = sizeof(double);
+    const int array_size = 2 * KEY_SIZE*KEY_SIZE;
+    std::array<int,array_size> my_vals = std::array<int,array_size>();
 
     HCL_CONF->IS_SERVER = is_server;
     HCL_CONF->MY_SERVER = my_server;
     HCL_CONF->NUM_SERVERS = num_servers;
     HCL_CONF->SERVER_ON_NODE = server_on_node || is_server;
     HCL_CONF->SERVER_LIST_PATH = server_lists;
+
+    auto mem_size = KEY_SIZE*KEY_SIZE * (comm_size + 1) * num_request;
+    // HCL_CONF->MEMORY_ALLOCATED = mem_size;
+
+    printf("Rank Config %d %d %d %d %d %lu, size_elem=%ld, my_vals=%ld\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS,
+                HCL_CONF->SERVER_ON_NODE, mem_size, size_of_elem, my_vals.size());
 
     hcl::queue<KeyType> *queue;
     if (is_server) {
