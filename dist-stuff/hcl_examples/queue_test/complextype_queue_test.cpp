@@ -16,63 +16,63 @@ const int KEY_SIZE=128;
 
 struct KeyType {
     std::array<double, KEY_SIZE*KEY_SIZE> a;
-    // std::array<double, KEY_SIZE*KEY_SIZE> b;
+    std::array<double, KEY_SIZE*KEY_SIZE> b;
 
     // constructors
-    KeyType() : a() {}
-    // KeyType() : a(), b() {}
-    KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_) : a(a_) {}
-    // KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_, std::array<double, KEY_SIZE*KEY_SIZE> b_) : a(a_), b(b_) {}
+    // KeyType() : a() {}
+    KeyType() : a(), b() {}
+    // KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_) : a(a_) {}
+    KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_, std::array<double, KEY_SIZE*KEY_SIZE> b_) : a(a_), b(b_) {}
     KeyType(int val) {
         for(int i=0; i<a.size(); ++i){
             a[i] = double(val);
-            // b[i] = double(val);
+            b[i] = double(val);
         }
     }
 #ifdef HCL_ENABLE_RPCLIB
-    MSGPACK_DEFINE (a);
-    // MSGPACK_DEFINE (a, b);
+    // MSGPACK_DEFINE (a);
+    MSGPACK_DEFINE (a, b);
 #endif
 
     /* equal operator for comparing two Matrix. */
     bool operator==(const KeyType &o) const {
         if(o.a.size() != a.size()) return false;
-        // if(o.b.size() != b.size()) return false;
+        if(o.b.size() != b.size()) return false;
         for(int i=0; i<a.size(); ++i){
             if(o.a[i] != a[i]) return false;
-            // if(o.b[i] != b[i]) return false;
+            if(o.b[i] != b[i]) return false;
         }
         return true;
     }
 
     KeyType &operator=(const KeyType &other) {
         a = other.a;
-        // b = other.b;
+        b = other.b;
         return *this;
     }
 
     bool operator<(const KeyType &o) const {
         if(o.a.size() < a.size()) return false;
         if(o.a.size() > a.size()) return true;
-        // if(o.b.size() < b.size()) return false;
-        // if(o.b.size() > b.size()) return true;
+        if(o.b.size() < b.size()) return false;
+        if(o.b.size() > b.size()) return true;
         for(int i=0; i<a.size(); ++i){
             if(o.a[i] < a[i]) return false;
             if(o.a[i] > a[i]) return true;
-            // if(o.b[i] < b[i]) return false;
-            // if(o.b[i] > b[i]) return true;
+            if(o.b[i] < b[i]) return false;
+            if(o.b[i] > b[i]) return true;
         }
         return false;
     }
 
     bool operator>(const KeyType &o) const {
-        return !(a < o.a);
-        // return !(*this < o);
+        // return !(a < o.a);
+        return !(*this < o);
     }
 
     bool Contains(const KeyType &o) const {
-        return a == o.a;
-        // return *this == o;
+        // return a == o.a;
+        return *this == o;
     }
 
 };
@@ -81,67 +81,11 @@ struct KeyType {
 template<typename A>
 void serialize(A &ar, KeyType &a) {
     ar & a.a;
-    // ar & a.b;
+    ar & a.b;
 }
 #endif
 
-struct ValueType {
-    std::vector<int> a;
 
-    ValueType() : a() {}
-
-    ValueType(std::vector<int> a_) : a(a_) {}
-    ValueType(size_t num_elements, int val):a(num_elements,val) {
-    }
-
-#ifdef HCL_ENABLE_RPCLIB
-    MSGPACK_DEFINE (a);
-#endif
-
-    /* equal operator for comparing two Matrix. */
-    bool operator==(const ValueType &o) const {
-        if(o.a.size() != a.size()) return false;
-        for(int i=0;i<a.size();++i){
-            if(o.a[i] != a[i]) return false;
-        }
-        return true;
-    }
-
-    ValueType &operator=(const ValueType &other) {
-        a = other.a;
-        return *this;
-    }
-
-    bool operator<(const ValueType &o) const {
-        if(o.a.size() < a.size()) return false;
-        if(o.a.size() > a.size()) return true;
-        for(int i=0;i<a.size();++i){
-            if(o.a[i] < a[i]) return false;
-            if(o.a[i] > a[i]) return true;
-        }
-        return false;
-    }
-
-    bool operator>(const ValueType &o) const {
-        return !(a < o.a);
-    }
-
-    bool Contains(const ValueType &o) const {
-        return a == o.a;
-    }
-
-    size_t size(){
-        return a.size();
-    }
-
-};
-
-#if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
-template<typename A>
-void serialize(A &ar, ValueType &a) {
-    ar & a.a;
-}
-#endif
 namespace std {
     template<>
     struct hash<KeyType> {
@@ -203,7 +147,7 @@ int main (int argc,char* argv[])
     // size_t size_of_elem = sizeof(SimpleType);
 
     size_t size_of_elem = sizeof(double);
-    const int array_size = 1 * KEY_SIZE*KEY_SIZE;
+    const int array_size = 2 * KEY_SIZE*KEY_SIZE;
     std::array<int, array_size> my_vals = std::array<int,array_size>();
 
     HCL_CONF->IS_SERVER = is_server;
