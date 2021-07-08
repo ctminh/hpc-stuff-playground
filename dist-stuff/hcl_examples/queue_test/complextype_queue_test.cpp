@@ -12,20 +12,20 @@
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
 
-const int KEY_SIZE=256;
+const int KEY_SIZE=128;
 
 struct KeyType {
-    std::array<int, KEY_SIZE*KEY_SIZE> a;
+    std::array<double, KEY_SIZE*KEY_SIZE> a;
     // std::array<double, KEY_SIZE*KEY_SIZE> b;
 
     // constructors
     KeyType() : a() {}
     // KeyType() : a(), b() {}
-    KeyType(std::array<int, KEY_SIZE*KEY_SIZE> a_) : a(a_) {}
+    KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_) : a(a_) {}
     // KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_, std::array<double, KEY_SIZE*KEY_SIZE> b_) : a(a_), b(b_) {}
     KeyType(int val) {
         for(int i=0; i<a.size(); ++i){
-            a[i] = val;
+            a[i] = double(val);
             // b[i] = double(val);
         }
     }
@@ -147,8 +147,8 @@ namespace std {
     struct hash<KeyType> {
         size_t operator()(const KeyType &k) const {
             size_t hash_val = hash<int>()(k.a[0]);
-            for(int i=1;i<k.a.size();++i){
-                hash_val ^= hash<int>()(k.a[0]);
+            for(int i=1; i<k.a.size(); ++i){
+                hash_val ^= hash<int>()((int)k.a[0]);
             }
             return hash_val;
         }
