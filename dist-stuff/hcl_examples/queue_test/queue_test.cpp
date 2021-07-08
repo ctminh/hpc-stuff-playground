@@ -28,7 +28,7 @@ struct DoubleType {
 
     // constructor 2
     // DoubleType(int val) : A(MAT_SIZE * MAT_SIZE, val), B(MAT_SIZE * MAT_SIZE, val), C(MAT_SIZE * MAT_SIZE, val) {}
-    DoubleType(int val) : A.fill(val), B.fill(val), C.fill(0.0) {}
+    DoubleType(int val) { A.fill(val), B.fill(val), C.fill(0.0) }
 
     /* Equal operator for comparing two Matrix */
     bool operator==(const DoubleType &o) const {
