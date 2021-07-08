@@ -25,27 +25,27 @@
 #include <hcl/common/data_structures.h>
 #include <hcl/queue/queue.h>
 
-const int KEY_SIZE = 512;
+const int MAT_SIZE = 512;
 
-struct KeyType {
+struct VectorMatrix {
     std::vector<double> A;
     std::vector<double> B;
     std::vector<double> C;
 
-    KeyType() : A(), B(), C() {}
+    VectorMatrix() : A(), B(), C() {}
 
-    KeyType(int val) : A(KEY_SIZE * KEY_SIZE, val), B(KEY_SIZE * KEY_SIZE, val), C(KEY_SIZE * KEY_SIZE, val) {}
+    VectorMatrix(int val) : A(MAT_SIZE * MAT_SIZE, val), B(MAT_SIZE * MAT_SIZE, val), C(MAT_SIZE * MAT_SIZE, val) {}
 
 #ifdef HCL_ENABLE_RPCLIB
     MSGPACK_DEFINE (A,B,C);
 #endif
 
-    /* equal operator for comparing two Matrix. */
-    bool operator==(const KeyType &o) const {
+    /* Equal operator for comparing two Matrix */
+    bool operator==(const VectorMatrix &o) const {
         if (o.A.size() != A.size()) return false;
         if (o.B.size() != B.size()) return false;
         if (o.C.size() != C.size()) return false;
-        for (int i = 0; i < KEY_SIZE; ++i) {
+        for (int i = 0; i < MAT_SIZE; ++i) {
             if (o.A[i] != A[i]) return false;
             if (o.B[i] != B[i]) return false;
             if (o.C[i] != C[i]) return false;
@@ -53,21 +53,21 @@ struct KeyType {
         return true;
     }
 
-    KeyType &operator=(const KeyType &other) {
+    VectorMatrix &operator=(const VectorMatrix &other) {
         A = other.A;
         B = other.B;
         C = other.C;
         return *this;
     }
 
-    bool operator<(const KeyType &o) const {
+    bool operator<(const VectorMatrix &o) const {
         if (o.A.size() < A.size()) return false;
         if (o.A.size() > A.size()) return true;
         if (o.B.size() < B.size()) return false;
         if (o.B.size() < B.size()) return false;
         if (o.C.size() < C.size()) return false;
         if (o.C.size() < C.size()) return false;
-        for (int i = 0; i < KEY_SIZE; ++i) {
+        for (int i = 0; i < MAT_SIZE; ++i) {
             if (o.A[i] < A[i]) return false;
             if (o.A[i] > A[i]) return true;
             if (o.B[i] < B[i]) return false;
@@ -78,11 +78,11 @@ struct KeyType {
         return false;
     }
 
-    bool operator>(const KeyType &o) const {
+    bool operator>(const VectorMatrix &o) const {
         return !(*this < o);
     }
 
-    bool Contains(const KeyType &o) const {
+    bool contains(const VectorMatrix &o) const {
         return *this == o;
     }
 
@@ -91,7 +91,7 @@ struct KeyType {
 #if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
 
 template<typename A>
-void serialize(A &ar, KeyType &a) {
+void serialize(A &ar, VectorMatrix &a) {
     ar & a.A;
     ar & a.B;
     ar & a.C;
@@ -99,70 +99,11 @@ void serialize(A &ar, KeyType &a) {
 
 #endif
 
-struct ValueType {
-    std::vector<int> a;
 
-    ValueType() : a() {}
-
-    ValueType(std::vector<int> a_) : a(a_) {}
-
-    ValueType(size_t num_elements, int val) : a(num_elements, val) {
-    }
-
-#ifdef HCL_ENABLE_RPCLIB
-    MSGPACK_DEFINE (a);
-#endif
-
-    /* equal operator for comparing two Matrix. */
-    bool operator==(const ValueType &o) const {
-        if (o.a.size() != a.size()) return false;
-        for (int i = 0; i < a.size(); ++i) {
-            if (o.a[i] != a[i]) return false;
-        }
-        return true;
-    }
-
-    ValueType &operator=(const ValueType &other) {
-        a = other.a;
-        return *this;
-    }
-
-    bool operator<(const ValueType &o) const {
-        if (o.a.size() < a.size()) return false;
-        if (o.a.size() > a.size()) return true;
-        for (int i = 0; i < a.size(); ++i) {
-            if (o.a[i] < a[i]) return false;
-            if (o.a[i] > a[i]) return true;
-        }
-        return false;
-    }
-
-    bool operator>(const ValueType &o) const {
-        return !(a < o.a);
-    }
-
-    bool Contains(const ValueType &o) const {
-        return a == o.a;
-    }
-
-    size_t size() {
-        return a.size();
-    }
-
-};
-
-#if defined(HCL_ENABLE_THALLIUM_TCP) || defined(HCL_ENABLE_THALLIUM_ROCE)
-
-template<typename A>
-void serialize(A &ar, ValueType &a) {
-    ar & a.a;
-}
-
-#endif
 namespace std {
     template<>
-    struct hash<KeyType> {
-        size_t operator()(const KeyType &k) const {
+    struct hash<VectorMatrix> {
+        size_t operator()(const VectorMatrix &k) const {
             size_t hash_val = hash<int>()(k.A[0]);
             for (int i = 1; i < k.A.size(); ++i) {
                 hash_val ^= hash<int>()(k.A[0]);
@@ -224,10 +165,6 @@ int main(int argc, char *argv[]) {
     HCL_CONF->NUM_SERVERS = num_servers;
     int ranks_per_node = 2;
     int num_nodes = comm_size / ranks_per_node;
-    // if (is_server)
-    //     HCL_CONF->SERVER_ON_NODE = true;
-    // else
-    //     HCL_CONF->SERVER_ON_NODE = false;
 
     HCL_CONF->SERVER_LIST_PATH = server_lists;
     auto mem_size = KEY_SIZE * KEY_SIZE * (comm_size + 1) * num_request;
@@ -250,53 +187,8 @@ int main(int argc, char *argv[]) {
     MPI_Comm_split(MPI_COMM_WORLD, !is_server, my_rank, &client_comm);
     int client_comm_size;
     MPI_Comm_size(client_comm, &client_comm_size);
-    // if(is_server){
-    //     std::function<int(int)> func=[](int x){ std::cout<<x<<std::endl;return x; };
-    //     int a;
-    //     std::function<std::pair<bool,int>(KeyType&,std::array<int, array_size>&,std::string,int)> putFunc(std::bind(&hcl::queue<KeyType,std::array<int,
-    //                                                                                                                 array_size>>::LocalPutWithCallback<int,int>,queue,std::placeholders::_1, std::placeholders::_2,std::placeholders::_3, std::placeholders::_4));
-    //     queue->Bind("CB_Put", func, "APut",putFunc);
-    // }
-    // MPI_Barrier(MPI_COMM_WORLD);
+    
     if (!is_server) {
-    //     Timer llocal_queue_timer = Timer();
-    //     std::hash<KeyType> keyHash;
-    //     /*Local std::queue test*/
-    //     for (int i = 0; i < num_request; i++) {
-    //         size_t val = my_server;
-    //         size_t key_hash = keyHash(KeyType(val)) % num_servers;
-    //         llocal_queue_timer.resumeTime();
-    //         if (key_hash == my_server && is_server) {}
-    //         lqueue.push(KeyType(val));
-    //         llocal_queue_timer.pauseTime();
-    //     }
-
-    //     double llocal_queue_throughput =
-    //             num_request / llocal_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 / 1024;
-
-    //     Timer llocal_get_queue_timer = Timer();
-    //     #pragma omp parallel num_threads(2)
-    //     {
-    //         #pragma omp for
-    //         for (int i = 0; i < num_request; i++) {
-    //             size_t val = my_server;
-    //             size_t key_hash = keyHash(KeyType(val)) % num_servers;
-    //             llocal_get_queue_timer.resumeTime();
-    //             if (key_hash == my_server && is_server) {}
-    //             auto result = lqueue.front();
-    //             lqueue.pop();
-    //             llocal_get_queue_timer.pauseTime();
-    //         }
-    //     }
-    //     double llocal_get_queue_throughput =
-    //             num_request / llocal_get_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 /
-    //             1024;
-
-    //     if (my_rank == 0) {
-    //         printf("llocal_queue_throughput put: %f\n", llocal_queue_throughput);
-    //         printf("llocal_queue_throughput get: %f\n", llocal_get_queue_throughput);
-    //     }
-    //     MPI_Barrier(client_comm);
 
         // declare key-hasing
         std::hash<KeyType> keyHash;
@@ -304,16 +196,12 @@ int main(int argc, char *argv[]) {
         Timer local_queue_timer = Timer();
         uint16_t my_server_key = my_server % num_servers;
         /*Local queue test*/
-        #pragma omp parallel num_threads(2)
-        {
-            #pragma omp for
-            for (int i = 0; i < num_request; i++) {
-                size_t val = my_server;
-                auto key = KeyType(val);
-                local_queue_timer.resumeTime();
-                queue->Push(key, my_server_key);
-                local_queue_timer.pauseTime();
-            }
+        for (int i = 0; i < num_request; i++) {
+            size_t val = my_server;
+            auto key = KeyType(val);
+            local_queue_timer.resumeTime();
+            queue->Push(key, my_server_key);
+            local_queue_timer.pauseTime();
         }
         double local_queue_throughput =
                 num_request / local_queue_timer.getElapsedTime() * 1000 * KEY_SIZE * KEY_SIZE * 3 * sizeof(double) / 1024 / 1024;
@@ -357,16 +245,12 @@ int main(int argc, char *argv[]) {
         Timer remote_queue_timer = Timer();
         /*Remote queue test*/
         uint16_t my_server_remote_key = (my_server + 1) % num_servers;
-        #pragma omp parallel num_threads(2)
-        {
-            #pragma omp for
-            for (int i = 0; i < num_request; i++) {
-                size_t val = my_server + 1;
-                auto key = KeyType(val);
-                remote_queue_timer.resumeTime();
-                queue->Push(key, my_server_remote_key);
-                remote_queue_timer.pauseTime();
-            }
+        for (int i = 0; i < num_request; i++) {
+            size_t val = my_server + 1;
+            auto key = KeyType(val);
+            remote_queue_timer.resumeTime();
+            queue->Push(key, my_server_remote_key);
+            remote_queue_timer.pauseTime();
         }
         
         double remote_queue_throughput =

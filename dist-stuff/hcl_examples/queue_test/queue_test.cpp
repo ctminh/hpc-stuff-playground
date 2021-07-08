@@ -14,6 +14,7 @@
 #include <hcl/queue/queue.h>
 
 struct KeyType{
+
     double a;
     
     // constructor 1
@@ -52,21 +53,14 @@ struct KeyType{
 
 };
 
-// namespace std {
-//     template<>
-//     struct hash<KeyType> {
-//         size_t operator()(const KeyType &k) const {
-//             return k.a;
-//         }
-//     };
-// }
-
 /* Try a simple struct with a single double element */
 struct DoubleType {
+
     double a;
 
     // constructor 1
     DoubleType(): a(1.0) { }
+
     // constructor 2
     DoubleType(double val): a(val) { }
 
@@ -145,7 +139,6 @@ int main (int argc,char* argv[])
     size_t size_of_elem = sizeof(int);
 
     printf("rank %d, is_server %d, my_server %d, num_servers %d\n",my_rank,is_server,my_server,num_servers);
-
     const int array_size=TEST_REQUEST_SIZE;
 
     if (size_of_request != array_size) {
@@ -180,20 +173,12 @@ int main (int argc,char* argv[])
     MPI_Barrier(MPI_COMM_WORLD);
     if (!is_server) {
         Timer llocal_queue_timer=Timer();
-        // std::hash<KeyType> keyHash;
         std::hash<DoubleType> keyHash;
 
         /*Local std::queue test*/
         for(int i=0;i<num_request;i++){
-            // size_t val=my_server;
             double val = my_server;
             llocal_queue_timer.resumeTime();
-            // size_t key_hash = keyHash(DoubleType(val))%num_servers;
-            // if (i == 0){
-            //     bool check_keyhash = (key_hash == my_server && is_server);
-            //     printf("[DBG-LOCALQUEUE-PUSH] R%d: check_keyhash = %d\n", my_rank, check_keyhash);
-            // }
-            // if (key_hash == my_server && is_server){}
             lqueue.push(DoubleType(val));
             llocal_queue_timer.pauseTime();
         }
@@ -202,15 +187,8 @@ int main (int argc,char* argv[])
 
         Timer llocal_get_queue_timer=Timer();
         for(int i=0;i<num_request;i++){
-            // size_t val=my_server;
             double val = my_server;
             llocal_get_queue_timer.resumeTime();
-            // size_t key_hash = keyHash(DoubleType(val))%num_servers;
-            // if (i == 0){
-            //     bool check_keyhash = (key_hash == my_server && is_server);
-            //     printf("[DBG-LOCALQUEUE-POP] R%d: check_keyhash = %d\n", my_rank, check_keyhash);
-            // }
-            // if (key_hash == my_server && is_server){}
             auto result = lqueue.front();
             lqueue.pop();
             llocal_get_queue_timer.pauseTime();
@@ -227,9 +205,8 @@ int main (int argc,char* argv[])
         uint16_t my_server_key = my_server % num_servers;
         printf("[DBG-REMOTEQUEUE-LOCAL-OPS] R%d: my_server_key = %d\n", my_rank, my_server_key);
 
-        /*Local queue test*/
+        /* Local queue test */
         for(int i=0;i<num_request;i++){
-            // size_t val=my_server;
             double val = my_server;
             auto key=DoubleType(val);
             local_queue_timer.resumeTime();
@@ -239,18 +216,10 @@ int main (int argc,char* argv[])
         double local_queue_throughput=num_request/local_queue_timer.getElapsedTime()*1000*size_of_elem*my_vals.size()/1024/1024;
 
         Timer local_get_queue_timer=Timer();
-        /*Local queue test*/
         for(int i=0;i<num_request;i++){
-            // size_t val=my_server;
             double val = my_server;
             auto key=DoubleType(val);
             local_get_queue_timer.resumeTime();
-            // size_t key_hash = keyHash(DoubleType(val))%num_servers;
-            // if (i == 0){
-            //     bool check_keyhash = (key_hash == my_server && is_server);
-            //     printf("[DBG-REMOTEQUEUE-LOCALPOP] R%d: check_keyhash = %d\n", my_rank, check_keyhash);
-            // }
-            // if (key_hash == my_server && is_server){}
             auto result = queue->Pop(my_server_key);
             local_get_queue_timer.pauseTime();
         }
@@ -278,12 +247,11 @@ int main (int argc,char* argv[])
 
         MPI_Barrier(client_comm);
 
+        /* Remote queue test */
         Timer remote_queue_timer=Timer();
-        /*Remote queue test*/
         uint16_t my_server_remote_key = (my_server + 1) % num_servers;
         uint16_t my_server_local_key = my_server % num_servers;;
         for(int i=0;i<num_request;i++){
-            // size_t val = my_server+1;
             double val = my_server+1;
             auto key=DoubleType(val);
             remote_queue_timer.resumeTime();
@@ -295,18 +263,10 @@ int main (int argc,char* argv[])
         MPI_Barrier(client_comm);
 
         Timer remote_get_queue_timer=Timer();
-        /*Remote queue test*/
         for(int i=0;i<num_request;i++){
-            // size_t val = my_server+1;
             double val = my_server+1;
             auto key=DoubleType(val);
             remote_get_queue_timer.resumeTime();
-            // size_t key_hash = keyHash(DoubleType(val))%num_servers;
-            // if (i == 0){
-            //     bool check_keyhash = (key_hash == my_server && is_server);
-            //     printf("[DBG-REMOTEQUEUE-REMOTEPOP] R%d: check_keyhash = %d\n", my_rank, check_keyhash);
-            // }
-            // if (key_hash == my_server && is_server){}
             queue->Pop(my_server_remote_key);
             remote_get_queue_timer.pauseTime();
         }
