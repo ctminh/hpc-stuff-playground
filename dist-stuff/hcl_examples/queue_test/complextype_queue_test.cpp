@@ -66,7 +66,7 @@ struct KeyType {
     }
 
     bool operator>(const KeyType &o) const {
-        return !(a < o.a)
+        return !(a < o.a);
         // return !(*this < o);
     }
 
