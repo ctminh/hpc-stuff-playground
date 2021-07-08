@@ -16,60 +16,63 @@ const int KEY_SIZE=512;
 
 struct KeyType {
     std::array<double, KEY_SIZE*KEY_SIZE> a;
-    std::array<double, KEY_SIZE*KEY_SIZE> b;
+    // std::array<double, KEY_SIZE*KEY_SIZE> b;
 
     // constructors
-    KeyType() : a(), b() {}
-    KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_, std::array<double, KEY_SIZE*KEY_SIZE> b_) : a(a_), b(b_) {}
+    KeyType() : a() {}
+    // KeyType() : a(), b() {}
+    KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_) : a(a_) {}
+    // KeyType(std::array<double, KEY_SIZE*KEY_SIZE> a_, std::array<double, KEY_SIZE*KEY_SIZE> b_) : a(a_), b(b_) {}
     KeyType(int val) {
         for(int i=0; i<a.size(); ++i){
             a[i] = double(val);
-            b[i] = double(val);
+            // b[i] = double(val);
         }
     }
 #ifdef HCL_ENABLE_RPCLIB
-    MSGPACK_DEFINE (a, b);
+    MSGPACK_DEFINE (a);
+    // MSGPACK_DEFINE (a, b);
 #endif
 
     /* equal operator for comparing two Matrix. */
     bool operator==(const KeyType &o) const {
         if(o.a.size() != a.size()) return false;
-        if(o.b.size() != b.size()) return false;
+        // if(o.b.size() != b.size()) return false;
         for(int i=0; i<a.size(); ++i){
             if(o.a[i] != a[i]) return false;
-            if(o.b[i] != b[i]) return false;
+            // if(o.b[i] != b[i]) return false;
         }
         return true;
     }
 
     KeyType &operator=(const KeyType &other) {
         a = other.a;
-        b = other.b;
+        // b = other.b;
         return *this;
     }
 
     bool operator<(const KeyType &o) const {
         if(o.a.size() < a.size()) return false;
         if(o.a.size() > a.size()) return true;
-        if(o.b.size() < b.size()) return false;
-        if(o.b.size() > b.size()) return true;
+        // if(o.b.size() < b.size()) return false;
+        // if(o.b.size() > b.size()) return true;
         for(int i=0; i<a.size(); ++i){
             if(o.a[i] < a[i]) return false;
             if(o.a[i] > a[i]) return true;
-            if(o.b[i] < b[i]) return false;
-            if(o.b[i] > b[i]) return true;
+            // if(o.b[i] < b[i]) return false;
+            // if(o.b[i] > b[i]) return true;
         }
         return false;
     }
 
     bool operator>(const KeyType &o) const {
-        // return !(a < o.a)
-        return !(*this < o);
+        return !(a < o.a)
+        // return !(*this < o);
     }
 
     bool Contains(const KeyType &o) const {
-        // return a == o.a;
-        return *this == o;
+        return a == o.a;
+        // return *this == o;
     }
 
 };
@@ -78,7 +81,7 @@ struct KeyType {
 template<typename A>
 void serialize(A &ar, KeyType &a) {
     ar & a.a;
-    ar & a.b;
+    // ar & a.b;
 }
 #endif
 
@@ -200,8 +203,8 @@ int main (int argc,char* argv[])
     // size_t size_of_elem = sizeof(SimpleType);
 
     size_t size_of_elem = sizeof(double);
-    const int array_size = 2 * KEY_SIZE*KEY_SIZE;
-    std::array<int,array_size> my_vals = std::array<int,array_size>();
+    const int array_size = 1 * KEY_SIZE*KEY_SIZE;
+    std::array<int, array_size> my_vals = std::array<int,array_size>();
 
     HCL_CONF->IS_SERVER = is_server;
     HCL_CONF->MY_SERVER = my_server;
@@ -213,7 +216,7 @@ int main (int argc,char* argv[])
     // HCL_CONF->MEMORY_ALLOCATED = mem_size;
 
     printf("Rank Config %d %d %d %d %d %lu, size_elem=%ld, my_vals=%ld\n", my_rank, HCL_CONF->IS_SERVER, HCL_CONF->MY_SERVER, HCL_CONF->NUM_SERVERS,
-                HCL_CONF->SERVER_ON_NODE, mem_size, size_of_elem, my_vals.size());
+                HCL_CONF->SERVER_ON_NODE, mem_size, size_of_elem, array_size);
 
     hcl::queue<KeyType> *queue;
     if (is_server) {
