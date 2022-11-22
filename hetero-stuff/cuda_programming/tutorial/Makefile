@@ -16,12 +16,6 @@ all: example1
 ifeq ($(NODE),thx_nvcc) # Thx-NVCC
 	CXX_FLAGS=-lm
 	CXX=nvcc
-# else ifeq ($(NODE),thx_llvm) # Thx-LLVM
-# 	CXX_FLAGS=-lm -std=c++11 -Wall -Wextra -O3 -g -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target=nvptx64 -march=sm_70
-# 	CXX=clang++
-# else ifeq ($(NODE),thx_gcc) # Thx-GCC
-# 	CXX_FLAGS=-fno-lto -lm -std=c++11 -Wall -Wextra -fopenmp -foffload=nvptx-none
-# 	CXX=g++
 else
 	CXX=g++
 	CXX_FLAGS=-std=c++11 -g
