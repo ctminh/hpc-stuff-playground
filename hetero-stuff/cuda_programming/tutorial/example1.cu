@@ -31,14 +31,14 @@ int main(int argc, char *argv[]){
   cudaDeviceSynchronize();
 
   clock_t end = clock();
-  double elapsed_seconds = double(end - start)/CLOCKS_PER_SEC/1000;
+  double elapsed_seconds = double(end - start)/CLOCKS_PER_SEC;
 
   // check for the errors
   float max_error = 3.0f;
   for (int i = 0; i < N; i++){
     max_error = fmax(max_error, fabs(y[i] - 3.0f));
   }
-  printf("N=%d | Elapsed time on GPU: %10.2f ms | max_error=%7.2f\n", N, elapsed_seconds, max_error);
+  printf("N=%d | Elapsed time on GPU: %10.2f ms | max_error=%7.2f\n", N, elapsed_seconds*1000, max_error);
 
   // free memory
   cudaFree(x);
