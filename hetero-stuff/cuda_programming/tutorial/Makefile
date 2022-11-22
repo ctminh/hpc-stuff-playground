@@ -16,7 +16,6 @@ all: example1
 ifeq ($(NODE),thx_nvcc) # Thx-NVCC
 	CXX_FLAGS=-lm
 	CXX=nvcc
-	all: example1_cuda
 # else ifeq ($(NODE),thx_llvm) # Thx-LLVM
 # 	CXX_FLAGS=-lm -std=c++11 -Wall -Wextra -O3 -g -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target=nvptx64 -march=sm_70
 # 	CXX=clang++
@@ -35,7 +34,7 @@ example1: example1.cpp
 	${CXX} ${CXX_FLAGS} $< -o $@
 
 example1_cuda: example1.cu
-	${CXX} ${CXX_FLAGS} $< -o $@
+	${CXX} ${CXX_FLAGS} example1.cu -o $@
 
 clean:
 	rm -f example1
