@@ -11,9 +11,12 @@
 #   module load cuda/11.1.1
 #   module load gcc_nvptx_offloading/10.2.0
 
+all: example1
+
 ifeq ($(NODE),thx_nvcc) # Thx-NVCC
 	CXX_FLAGS=-lm -std=c++17
 	CXX=nvc++
+	all: example1_cuda
 # else ifeq ($(NODE),thx_llvm) # Thx-LLVM
 # 	CXX_FLAGS=-lm -std=c++17 -Wall -Wextra -O3 -g -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target=nvptx64 -march=sm_70
 # 	CXX=clang++
@@ -27,8 +30,6 @@ endif
 
 # How to compile
 #   NODE=<system_compiler> make
-
-all: example1 example1_cuda
 
 example1: example1.cpp
 	${CXX} ${CXX_FLAGS} $< -o $@
