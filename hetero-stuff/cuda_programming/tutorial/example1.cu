@@ -15,7 +15,7 @@ void add(int n, float *x, float *y){
 
 // main function
 int main(int argc, char *argv[]){
-  int N = 1 << 23; // ~134M elements
+  int N = 1 << 10; // ~134M elements
   int blocks = 1;
   int threads = 1;
 
