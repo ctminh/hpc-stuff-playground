@@ -14,7 +14,7 @@
 all: example1
 
 ifeq ($(NODE),thx_nvcc) # Thx-NVCC
-	CXX_FLAGS=-lm -std=c++11
+	CXX_FLAGS=-lm
 	CXX=nvcc
 	all: example1_cuda
 # else ifeq ($(NODE),thx_llvm) # Thx-LLVM
