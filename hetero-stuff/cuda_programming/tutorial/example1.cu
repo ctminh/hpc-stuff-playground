@@ -7,8 +7,10 @@ __global__
 void add(int n, float *x, float *y){
   int index = threadIdx.x;
   int stride = blockDim.x;
-  for (int i = index; i < n; i += stride)
+  for (int i = index; i < n; i += stride){
+    printf("blockIdx.x=%d, threadIdx.x=%d\n", blockIdx.x, threadIdx.x);
     y[i] = x[i] + y[i];
+  }
 }
 
 // main function
