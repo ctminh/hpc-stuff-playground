@@ -28,9 +28,12 @@ endif
 # How to compile
 #   NODE=<system_compiler> make
 
-all: example1
+all: example1 example1_cuda
 
 example1: example1.cpp
+	${CXX} ${CXX_FLAGS} $< -o $@
+
+example1_cuda: example1.cu
 	${CXX} ${CXX_FLAGS} $< -o $@
 
 clean:
