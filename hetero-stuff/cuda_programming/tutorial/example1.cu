@@ -5,17 +5,17 @@
 // kernel function to add the elements of two arrays
 __global__
 void add(int n, float *x, float *y){
-  int index = threadIdx.x;
-  int stride = blockDim.x;
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  int stride = blockDim.x * gridDim.x;
   for (int i = index; i < n; i += stride){
-    printf("arrayIdx=%d | blockIdx.x=%d, threadIdx.x=%d\n", i, blockIdx.x, threadIdx.x);
+    printf("arrayIdx=%d | blockIdx.x=%d, threadIdx.x=%d | gridDim.x=%d\n", i, blockIdx.x, threadIdx.x, gridDim.x);
     y[i] = x[i] + y[i];
   }
 }
 
 // main function
 int main(int argc, char *argv[]){
-  int N = 1 << 10; // ~134M elements
+  int N = 1 << 8; // ~134M elements
   int blocks = 1;
   int threads = 1;
 
