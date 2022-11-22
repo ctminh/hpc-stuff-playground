@@ -1,4 +1,4 @@
-#include <iostream>
+#include <time.h>
 #include <math.h>
 
 // kernel function to add the elements of two arrays
@@ -24,20 +24,20 @@ int main(int argc, char *argv[]){
   }
 
   // set timer and run the kernal on GPU side
-  auto start = std::chrono::system_clock::now();
+  clock_t start = clock();
 
   add<<<1,1>>>(N, x, y);
   cudaDeviceSynchronize();
 
-  auto end = std::chrono::system_clock::now();
-  double elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+  clock_t end = clock();
+  double elapsed_seconds = double(end - start)/CLOCKS_PER_SEC/1000;
 
   // check for the errors
   float max_error = 3.0f;
   for (int i = 0; i < N; i++){
     max_error = fmax(max_error, fabs(y[i] - 3.0f));
   }
-  std::cout << "N=" << N << " | Elapsed time on GPU: " << elapsed_seconds << " ms | max_error=" << max_error << std::endl;
+  printf("N=%d | Elapsed time on GPU: %10.2f ms | max_error=%7.2f\n", N, elapsed_seconds, max_error);
 
   // free memory
   cudaFree(x);
